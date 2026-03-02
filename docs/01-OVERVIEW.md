@@ -41,7 +41,7 @@ FOMO is a ticket marketplace platform that connects event organizers (vendors), 
 
 The platform consists of:
 - **Frontend**: Angular-based responsive web application
-- **Backend**: Hono RESTful API service
+- **Backend**: NestJS RESTful API service
 - **Database**: PostgreSQL with Drizzle ORM
 
 ## User Roles
