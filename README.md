@@ -6,6 +6,7 @@ A comprehensive ticket marketplace platform connecting event organizers (vendors
 * [Leonardo Albudane](https://github.com/Rox0z)
 * [Diogo Estriga](https://github.com/diogo0909)
 * [Mariana Afonso](a61845@ualg.pt)
+* [Dinis Monteiro](a78985@ualg.pt)
 
 ## 📋 Documentation
 
