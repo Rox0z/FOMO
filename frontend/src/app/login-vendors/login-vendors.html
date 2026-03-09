@@ -1,0 +1,83 @@
+<div class="login-wrapper">
+  <div class="bg-gradient"></div>
+  <div class="bg-noise"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="login-card">
+    <div class="card-inner">
+
+      <div class="logo-wrap">
+        <svg viewBox="0 0 251.53 51.27" xmlns="http://www.w3.org/2000/svg" class="fomo-logo">
+          <path d="M251.53,19.2V0h-22.73v2.5h-1V0h-50.27v51.27h50.27v-2.5h1v2.5h22.73v-19.2c-3.56,0-6.44-2.88-6.44-6.43s2.88-6.44,6.44-6.44ZM213.65,36.62h-21.97V14.65h21.97v21.97ZM228.8,46.67h-1v-5.26h1v5.26ZM228.8,39.31h-1v-5.26h1v5.26ZM228.8,31.95h-1v-5.26h1v5.26ZM228.8,24.59h-1v-5.26h1v5.26ZM228.8,17.22h-1v-5.25h1v5.25ZM228.8,9.86h-1v-5.25h1v5.25Z"/>
+          <path d="M125.26,0h-50.27v51.27h50.27V0ZM89.14,36.62V14.65h21.97v21.97h-21.97Z"/>
+          <path d="M74,14.65V0H23.73v2.5h-1V0H0v19.2c3.55,0,6.43,2.88,6.43,6.44s-2.88,6.43-6.43,6.43v19.2h22.73v-2.5h1v2.5h14.14v-18.31h36.13v-14.65h-36.13v-3.66h36.13ZM23.73,46.67h-1v-5.26h1v5.26ZM23.73,39.31h-1v-5.26h1v5.26ZM23.73,31.95h-1v-5.26h1v5.26ZM23.73,24.59h-1v-5.26h1v5.26ZM23.73,17.22h-1v-5.25h1v5.25ZM23.73,9.86h-1v-5.25h1v5.25Z"/>
+          <polygon points="176.53 51.27 176.53 0 126.26 0 126.26 51.27 140.41 51.27 140.41 14.65 144.07 14.65 144.07 51.27 158.72 51.27 158.72 14.65 162.38 14.65 162.38 51.27 176.53 51.27"/>
+        </svg>
+        <p class="subtitle">Vendor Access</p>
+      </div>
+
+      <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+
+        <div class="form-group">
+          <div class="input-wrap">
+            <input
+              id="email"
+              type="email"
+              class="field-input"
+              placeholder=" "
+              [(ngModel)]="email"
+              name="email"
+              required
+            />
+            <label class="field-label" for="email">Email</label>
+            <span class="input-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="input-wrap">
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              class="field-input"
+              placeholder=" "
+              [(ngModel)]="password"
+              name="password"
+              required
+            />
+            <label class="field-label" for="password">Password</label>
+            <span class="input-icon toggle-password" (click)="togglePassword()">
+              <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.79 21.79 0 0 1 5.06-6.94"/>
+                <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.79 21.79 0 0 1-2.16 3.19"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-entrar">
+          Entrar
+        </button>
+
+      </form>
+
+      <p class="register-text">
+        Primeira vez na FOMO?
+        <a routerLink="/register" class="register-link" (click)="onRegister()">Criar conta</a>
+      </p>
+
+    </div>
+  </div>
+</div>
