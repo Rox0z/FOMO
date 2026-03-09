@@ -1,0 +1,146 @@
+<div class="page">
+
+  <div class="bg-gradient"></div>
+  <div class="bg-noise"></div>
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="login-wrapper">
+
+    <div class="login-card">
+
+      <!-- Logo -->
+      <div class="brand">
+        <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 251.53 51.27">
+          <g>
+            <path d="M251.53,19.2V0h-22.73v2.5h-1V0h-50.27v51.27h50.27v-2.5h1v2.5h22.73v-19.2c-3.56,0-6.44-2.88-6.44-6.43s2.88-6.44,6.44-6.44ZM213.65,36.62h-21.97V14.65h21.97v21.97ZM228.8,46.67h-1v-5.26h1v5.26ZM228.8,39.31h-1v-5.26h1v5.26ZM228.8,31.95h-1v-5.26h1v5.26ZM228.8,24.59h-1v-5.26h1v5.26ZM228.8,17.22h-1v-5.25h1v5.25ZM228.8,9.86h-1v-5.25h1v5.25Z"/>
+            <path d="M125.26,0h-50.27v51.27h50.27V0ZM89.14,36.62V14.65h21.97v21.97h-21.97Z"/>
+            <path d="M74,14.65V0H23.73v2.5h-1V0H0v19.2c3.55,0,6.43,2.88,6.43,6.44s-2.88,6.43-6.43,6.43v19.2h22.73v-2.5h1v2.5h14.14v-18.31h36.13v-14.65h-36.13v-3.66h36.13ZM23.73,46.67h-1v-5.26h1v5.26ZM23.73,39.31h-1v-5.26h1v5.26ZM23.73,31.95h-1v-5.26h1v5.26ZM23.73,24.59h-1v-5.26h1v5.26ZM23.73,17.22h-1v-5.25h1v5.25ZM23.73,9.86h-1v-5.25h1v5.25Z"/>
+            <polygon points="176.53 51.27 176.53 0 126.26 0 126.26 51.27 140.41 51.27 140.41 14.65 144.07 14.65 144.07 51.27 158.72 51.27 158.72 14.65 162.38 14.65 162.38 51.27 176.53 51.27"/>
+          </g>
+        </svg>
+        <p>Vendor Register</p>
+      </div>
+
+     <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
+
+        <!-- Nome -->
+        <div class="input-group">
+          <input
+            type="text"
+            name="name"
+            [(ngModel)]="name"
+            required
+            placeholder=" "
+          />
+          <label>Nome</label>
+        </div>
+
+        <!-- Email -->
+        <div class="input-group">
+          <input
+            type="email"
+            name="email"
+            [(ngModel)]="email"
+            required
+            placeholder=" "
+          />
+        <label>Email</label>
+        </div>
+
+        <!-- Telemóvel -->
+        <div class="phone-group">
+
+          <div class="phone-select-wrapper">
+            <select name="countryCode"
+                    [(ngModel)]="countryCode"
+                    required>
+              <option value="" disabled></option>
+              <option value="+351">Portugal (+351)</option>
+              <option value="+44">UK (+44)</option>
+              <option value="+1">USA (+1)</option>
+              <option value="+34">Spain (+34)</option>
+            </select>
+          </div>
+
+          <div class="phone-input-wrapper">
+            <input
+              type="tel"
+              name="phone"
+              [(ngModel)]="phone"
+              required
+              placeholder=" "
+            />
+            <label>Telemóvel</label>
+          </div>
+
+        </div>
+
+        <!-- Password -->
+        <div class="input-group password-group">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="password"
+            required
+            placeholder=" "
+          />
+          <label>Password</label>
+          <span class="toggle-password" (click)="togglePassword()">
+            <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+
+            <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.79 21.79 0 0 1 5.06-6.94"/>
+                <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.79 21.79 0 0 1-2.16 3.19"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </span>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="input-group password-group">
+          <input
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            name="confirmPassword"
+            [(ngModel)]="confirmPassword"
+            required
+            placeholder=" "
+          />
+          <label>Confirmar Password</label>
+          <span class="toggle-password" (click)="toggleConfirmPassword()">
+            <svg *ngIf="!showConfirmPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+            </svg>
+
+            <svg *ngIf="showConfirmPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.79 21.79 0 0 1 5.06-6.94"/>
+                <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.79 21.79 0 0 1-2.16 3.19"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </span>
+        </div>
+
+        <!-- Botão -->
+        <button type="submit" [disabled]="registerForm.invalid">
+          Criar Conta
+        </button>
+
+        <!-- Link para login -->
+        <p class="signup-text">
+          Já tens conta?
+          <a routerLink="/login-vendors" class="register-link" (click)="onLoginr()">Entrar</a>
+        </p>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>
