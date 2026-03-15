@@ -2,8 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { runDrizzleMigrations } from './db/run-migrations';
 
 async function bootstrap() {
+  // Run Drizzle migrations before starting the app
+  await runDrizzleMigrations();
+
   const app = await NestFactory.create(AppModule);
 
   // Enable CORS
