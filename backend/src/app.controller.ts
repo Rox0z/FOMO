@@ -24,6 +24,7 @@ export class AppController {
       await db.execute(sql`SELECT 1`)
       return { status: 'ok' };
     } catch (e) {
+      console.trace(e)
       return { status: 'error' };
     }
   }
