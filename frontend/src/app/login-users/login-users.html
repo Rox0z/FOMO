@@ -67,7 +67,13 @@
           </div>
         </div>
 
-        <button type="submit" class="btn-entrar">Entrar</button>
+        <div *ngIf="errorMessage" class="error-message">
+          {{ errorMessage }}
+        </div>
+
+        <button type="submit" class="btn-entrar" [disabled]="isLoading">
+          {{ isLoading ? 'A carregar...' : 'Entrar' }}
+        </button>
 
       </form>
 

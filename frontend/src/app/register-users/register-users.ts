@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-register',
@@ -22,31 +23,64 @@ export class RegisterUsers {
   isLoading: boolean = false;
   errorMessage: string = '';
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+  ) {}
 
   togglePassword() { this.showPassword = !this.showPassword; }
   toggleConfirmPassword() { this.showConfirmPassword = !this.showConfirmPassword; }
 
-  async onSubmit() {
+  onSubmit() {
     this.errorMessage = '';
+
+    // Validate all fields
+    if (!this.name || !this.email || !this.phone || !this.password || !this.confirmPassword) {
+      this.errorMessage = 'Preencha todos os campos!';
+      return;
+    }
 
     if (this.password !== this.confirmPassword) {
       this.errorMessage = 'As passwords não coincidem.';
       return;
     }
 
-    this.isLoading = true;
-    try {
-      // TODO: substituir pela chamada real ao serviço de registo
-      await new Promise(resolve => setTimeout(resolve, 1200));
-      this.router.navigate(['/login']);
-    } catch (err) {
-      this.errorMessage = 'Erro ao criar conta. Tenta novamente.';
-    } finally {
-      this.isLoading = false;
+    if (this.password.length < 8) {
+      this.errorMessage = 'A password deve ter no mínimo 8 caracteres.';
+      return;
     }
+
+    this.isLoading = true;
+    const registrationData = {
+      name: this.name,
+      email: this.email,
+      phone: this.phone,
+      countryCode: this.countryCode,
+      password: this.password,
+      userType: 'user',
+    };
+
+    this.authService.register(registrationData).subscribe(
+      (response) => {
+        console.log('Registration successful:', response);
+        this.isLoading = false;
+        this.router.navigate(['/dashboard']);
+      },
+      (error) => {
+        this.isLoading = false;
+        console.error('Registration error:', error);
+        if (error.status === 409) {
+          this.errorMessage = 'Email já registado.';
+        } else if (error.error?.message) {
+          this.errorMessage = error.error.message;
+        } else {
+          this.errorMessage = 'Erro ao criar conta. Tenta novamente.';
+        }
+      },
+    );
   }
-   onLogin() {
+
+  onLogin() {
     this.router.navigate(['/login-users']);
   }
 }
