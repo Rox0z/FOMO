@@ -1,6 +1,5 @@
 @echo off
 REM FOMO - Start both Frontend and Backend
-REM This script starts both the backend (NestJS) and frontend (Angular) servers
 
 echo.
 echo 🚀 Starting FOMO - Backend and Frontend
@@ -14,31 +13,45 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM Get the directory where this script is located
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
+REM ========================
 REM Start Backend
-echo 📦 Starting Backend (NestJS) on port 3000...
+REM ========================
+echo 📦 Starting Backend (NestJS)...
+
 cd backend
-call npm install >nul 2>&1
-start /b cmd /c npm run start
+call npm install
+
+echo 🛠️ Running Drizzle migrations...
+call npx drizzle-kit migrate
+
+echo ▶️ Starting backend server...
+start cmd /k npm run start:dev
+
 cd ..
 
-REM Wait a moment for backend to initialize
+REM Wait a moment
 timeout /t 3 /nobreak >nul
 
+REM ========================
 REM Start Frontend
-echo 📱 Starting Frontend (Angular) on port 4200...
+REM ========================
+echo 📱 Starting Frontend (Angular)...
+
 cd frontend
-call npm install >nul 2>&1
-start /b cmd /c npm run start
+call npm install
+
+start cmd /k npm run start
+
 cd ..
 
 echo.
 echo ✓ Backend running on http://localhost:3000
 echo ✓ Frontend running on http://localhost:4200
-echo ✓ To stop the services, close the command windows or press Ctrl+C in each
+echo.
+echo ⚠️ Close the opened terminals to stop services
 echo.
 
 pause
