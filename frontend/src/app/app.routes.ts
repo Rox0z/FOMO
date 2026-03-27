@@ -4,6 +4,8 @@ import { LoginUsers } from './login-users/login-users';
 import { RegisterVendors } from './register-vendors/register-vendors';
 import { RegisterUsers } from './register-users/register-users';
 
+import { HomeComponent } from './home/home'; //import { Home } from './home/home';
+
 export const routes: Routes = [
   {
     path: 'login-vendors',
@@ -20,5 +22,9 @@ export const routes: Routes = [
   {
     path: 'register-users',
     component: RegisterUsers
+  },
+  {
+    path: 'home',
+    component: HomeComponent
   }
 ];
