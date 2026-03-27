@@ -1,0 +1,256 @@
+<div class="page-shell">
+  <nav class="navbar">
+    <div class="nav-brand">
+      <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo" />
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="#discover">Discover</a></li>
+      <li><a href="#events">Events</a></li>
+      <li><a href="#community">Community</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <button class="btn-nav-outline">Sign in</button>
+      <button class="btn-nav-primary">Get tickets</button>
+    </div>
+  </nav>
+
+  <section class="hero" id="discover">
+    <div class="hero-bg-gradient"></div>
+
+    <div class="hero-logo-bg">
+      <img src="/fomo-icon.svg" alt="FOMO icon" />
+    </div>
+
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        never miss the next one
+      </div>
+
+      <h1 class="hero-title">
+        The fastest way to discover and buy tickets for the <span>best events</span>.
+      </h1>
+
+      <p class="hero-subtitle">
+        FOMO helps you find trending nights, premium drops and last-minute access before tickets disappear.
+      </p>
+
+      <div class="hero-cta">
+        <button class="btn-primary">Explore events</button>
+        <button class="btn-secondary">How it works</button>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-num">120+</span>
+          <span class="stat-label">events listed</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">18k</span>
+          <span class="stat-label">active users</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">4.9</span>
+          <span class="stat-label">avg rating</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="ticker-wrap">
+    <div class="ticker">
+      <ng-container *ngFor="let item of tickerItems">
+        <div class="ticker-item">{{ item }} <span class="ticker-sep">•</span></div>
+      </ng-container>
+      <ng-container *ngFor="let item of tickerItems">
+        <div class="ticker-item">{{ item }} <span class="ticker-sep">•</span></div>
+      </ng-container>
+    </div>
+  </div>
+
+  <section class="filter-section">
+    <div class="filter-container">
+      <div class="section-top">
+        <div>
+          <h2 class="section-title">Find your scene</h2>
+          <p class="section-subtitle">Search by vibe, city or event name.</p>
+        </div>
+      </div>
+
+      <div class="search-bar">
+        <span class="search-icon">⌕</span>
+        <input
+          type="text"
+          placeholder="Search events, cities, vibes..."
+          (input)="onSearch($event)"
+        />
+      </div>
+
+      <div class="category-grid">
+        <button
+          *ngFor="let category of categories"
+          class="category-btn"
+          [class.active]="activeCategory === category"
+          (click)="setCategory(category)"
+        >
+          {{ category }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="events-section" id="events">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Trending on FOMO</h2>
+        <p class="section-subtitle">
+          Fast-moving events, premium drops and the nights you do not want to miss.
+        </p>
+      </div>
+
+      <a class="see-all" href="#">See all</a>
+    </div>
+
+    <div class="events-grid" *ngIf="filteredEvents.length > 0; else noResults">
+      <div class="featured-wrap" *ngIf="featuredEvent as featured">
+        <div class="featured-img">
+          <img [src]="featured.image" [alt]="featured.title" />
+          <span class="stock-badge" [ngClass]="getStockClass(featured.stock)">
+            {{ getStockLabel(featured.stock) }}
+          </span>
+        </div>
+
+        <div class="featured-body">
+          <div>
+            <div class="card-category">{{ featured.category }}</div>
+            <h3 class="card-title card-title--lg">{{ featured.title }}</h3>
+            <p class="card-artist">{{ featured.subtitle }}</p>
+
+            <div class="card-details">
+              <div class="detail-item">📍 {{ featured.location }}</div>
+              <div class="detail-item">📅 {{ featured.date }}</div>
+              <div class="detail-item">🎵 {{ featured.tags.join(' • ') }}</div>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <div class="price-section">
+              <span class="price-label">starting at</span>
+              <span class="price">{{ featured.price }}</span>
+            </div>
+            <button class="btn-buy">Reserve now</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="event-card" *ngFor="let event of regularEvents">
+        <div class="card-image-wrapper">
+          <img [src]="event.image" [alt]="event.title" />
+          <span class="stock-badge" [ngClass]="getStockClass(event.stock)">
+            {{ getStockLabel(event.stock) }}
+          </span>
+        </div>
+
+        <div class="card-content">
+          <div>
+            <div class="card-category">{{ event.category }}</div>
+            <h3 class="card-title">{{ event.title }}</h3>
+            <p class="card-artist">{{ event.subtitle }}</p>
+          </div>
+
+          <div class="card-details">
+            <div class="detail-item">📍 {{ event.location }}</div>
+            <div class="detail-item">📅 {{ event.date }}</div>
+            <div class="detail-item">🎵 {{ event.tags.join(' • ') }}</div>
+          </div>
+
+          <div class="card-footer">
+            <div class="price-section">
+              <span class="price-label">starting at</span>
+              <span
+                class="price"
+                [class.price-free]="event.price === 'Free'"
+                [class.price-sold]="event.stock === 'sold'"
+              >
+                {{ event.stock === 'sold' ? 'No tickets' : event.price }}
+              </span>
+            </div>
+
+            <button *ngIf="event.stock !== 'sold'" class="btn-buy">Get ticket</button>
+            <button *ngIf="event.stock === 'sold'" class="btn-soldout">Sold out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noResults>
+      <div class="no-results">
+        <h3>No events found</h3>
+        <p>Try another category or search term.</p>
+      </div>
+    </ng-template>
+  </section>
+
+  <section class="newsletter" id="community">
+    <div class="newsletter-inner">
+      <div class="newsletter-logo">
+        <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo brand-logo--light" />
+      </div>
+
+      <h2 class="newsletter-title">Be first when the next drop goes live</h2>
+      <p class="newsletter-subtitle">
+        Join FOMO for early access, exclusive releases and real-time ticket alerts.
+      </p>
+
+      <div class="newsletter-form">
+        <input class="newsletter-input" type="email" placeholder="Enter your email" />
+        <button class="btn-newsletter">Join waitlist</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo brand-logo--light" />
+        <p>
+          FOMO is built for people who want the best events before they sell out.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="#">Events</a></li>
+          <li><a href="#">Cities</a></li>
+          <li><a href="#">Creators</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#">Tickets</a></li>
+          <li><a href="#">Alerts</a></li>
+          <li><a href="#">Membership</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Social</h4>
+        <ul>
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">TikTok</a></li>
+          <li><a href="#">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 FOMO. All rights reserved.</span>
+      <span>Ticketing platform • premium event discovery</span>
+    </div>
+  </footer>
+</div>
