@@ -6,8 +6,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
+import { sql } from 'drizzle-orm';
 import { eq } from 'drizzle-orm';
-import { users } from '../db/schema';
+import { users } from '../db/schema/users';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -16,45 +17,32 @@ import { User } from './entities/user.entity';
 export class UsersService {
   constructor(@Inject('DRIZZLE') private db: any) {}
 
-  async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
-    try {
-      // Check if email already exists
-      const existingUser = await this.db.query.users.findFirst({
-        where: eq(users.email, createUserDto.email),
-      });
+  async create(dto: CreateUserDto): Promise<Omit<User, 'password'>> {
+    const existingUser = await this.db.query.users.findFirst({
+      where: eq(users.email, dto.email),
+    });
 
-      if (existingUser) {
-        throw new ConflictException('Email already registered');
-      }
-
-      // Hash password
-      const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-
-      // Determine user type and active status
-      const userType = createUserDto.userType || 'user';
-      const isActive = userType === 'vendor' ? false : true; // Vendors start inactive, users start active
-
-      // Insert user
-      const newUser = await this.db
-        .insert(users)
-        .values({
-          ...createUserDto,
-          password: hashedPassword,
-          userType,
-          active: isActive,
-          superuser: false, // New registrations are never superusers
-        })
-        .returning();
-
-      // Remove password from response
-      const { password, ...userWithoutPassword } = newUser[0];
-      return userWithoutPassword as Omit<User, 'password'>;
-    } catch (error) {
-      if (error instanceof ConflictException) {
-        throw error;
-      }
-      throw new BadRequestException('Failed to create user');
+    if (existingUser) {
+      throw new ConflictException('Email already registered');
     }
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+    const newUser = await this.db
+      .insert(users)
+      .values({
+        email: dto.email,
+        password: hashedPassword,
+        name: dto.name,
+        phone: dto.phone,
+        countryCode: dto.countryCode,
+        role: 'user',
+        active: true,
+      })
+      .returning();
+
+    const { password, ...user } = newUser[0];
+    return user;
   }
 
   async findAll(): Promise<Omit<User, 'password'>[]> {
@@ -71,19 +59,17 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword as Omit<User, 'password'>;
+    const { password, ...safe } = user;
+    return safe;
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const user = await this.db.query.users.findFirst({
+    return await this.db.query.users.findFirst({
       where: eq(users.email, email),
     });
-    return user || null;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<Omit<User, 'password'>> {
-    // Check if user exists
+  async update(id: number, dto: UpdateUserDto): Promise<Omit<User, 'password'>> {
     const existingUser = await this.db.query.users.findFirst({
       where: eq(users.id, id),
     });
@@ -92,10 +78,9 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    // Check if email is already taken by another user
-    if (updateUserDto.email && updateUserDto.email !== existingUser.email) {
+    if (dto.email && dto.email !== existingUser.email) {
       const emailTaken = await this.db.query.users.findFirst({
-        where: eq(users.email, updateUserDto.email),
+        where: eq(users.email, dto.email),
       });
 
       if (emailTaken) {
@@ -103,48 +88,79 @@ export class UsersService {
       }
     }
 
-    // Hash password if provided
-    const updateData = { ...updateUserDto };
-    if (updateData.password) {
-      updateData.password = await bcrypt.hash(updateData.password, 10);
+    const updateData: any = {};
+
+    if (dto.email) updateData.email = dto.email;
+    if (dto.name) updateData.name = dto.name;
+    if (dto.phone) updateData.phone = dto.phone;
+    if (dto.countryCode) updateData.countryCode = dto.countryCode;
+
+    if (dto.password) {
+      updateData.password = await bcrypt.hash(dto.password, 10);
     }
 
-    // Update user
-    const updatedUser = await this.db
+    const updated = await this.db
       .update(users)
       .set(updateData)
       .where(eq(users.id, id))
       .returning();
 
-    // Remove password from response
-    const { password, ...userWithoutPassword } = updatedUser[0];
-    return userWithoutPassword as Omit<User, 'password'>;
+    const { password, ...user } = updated[0];
+    return user;
   }
 
   async remove(id: number): Promise<{ message: string }> {
-    const existingUser = await this.db.query.users.findFirst({
-      where: eq(users.id, id),
-    });
+    const result = await this.db
+      .delete(users)
+      .where(eq(users.id, id))
+      .returning();
 
-    if (!existingUser) {
+    if (!result.length) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    await this.db.delete(users).where(eq(users.id, id));
-    return { message: `User with ID ${id} has been deleted` };
+    return { message: `User ${id} deleted` };
   }
 
   async validateCredentials(email: string, password: string): Promise<User | null> {
     const user = await this.findByEmail(email);
-    if (!user || !user.password) {
-      return null;
-    }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return null;
-    }
+    if (!user || !user.password) return null;
+    if (!user.active) return null;
+
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return null;
 
     return user;
+  }
+
+  async count(): Promise<number> {
+  const result = await this.db
+    .select({ count: sql<number>`count(*)` })
+    .from(users);
+
+  return Number(result[0].count);
+  }
+
+  async setActive(
+  id: number,
+  active: boolean,
+  ): Promise<Omit<User, 'password'>> {
+    const user = await this.db.query.users.findFirst({
+      where: eq(users.id, id),
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    const updated = await this.db
+      .update(users)
+      .set({ active })
+      .where(eq(users.id, id))
+      .returning();
+
+    const { password, ...safe } = updated[0];
+    return safe;
   }
 }

@@ -6,8 +6,8 @@ import { db } from './drizzle';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { VendorsModule } from './vendors/vendors.module';
-import { DatabaseInitializerService } from './db/database-initializer.service';
 import { EventsModule } from './events/events.module';
+import { AdminModule } from './admin/admin.module';
 
 const drizzleProvider = {
   provide: 'DRIZZLE',
@@ -16,9 +16,9 @@ const drizzleProvider = {
 
 @Global()
 @Module({
-  imports: [UsersModule, AuthModule, VendorsModule, EventsModule],
+  imports: [UsersModule, AuthModule, VendorsModule, EventsModule, AdminModule],
   controllers: [AppController],
-  providers: [AppService, drizzleProvider, DatabaseInitializerService],
+  providers: [AppService, drizzleProvider],
   exports: [drizzleProvider],
 })
   export class AppModule {}

@@ -10,7 +10,6 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
-
   @ApiProperty({ example: "example@mail.com" })
   @IsEmail({}, { message: 'Email must be a valid email address' })
   email: string;
@@ -38,9 +37,4 @@ export class CreateUserDto {
   @IsString()
   @MaxLength(5, { message: 'Country code must not exceed 5 characters' })
   countryCode?: string;
-
-  @ApiProperty({ example: "user" })
-  @IsOptional()
-  @IsIn(['user', 'vendor'], { message: 'User type must be either "user" or "vendor"' })
-  userType?: 'user' | 'vendor';
 }

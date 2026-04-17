@@ -3,7 +3,7 @@ import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtGuard } from '../auth/jwt.guard';
+import { JwtGuard } from '../auth/jwt/jwt.guard';
 
 describe('UsersController', () => {
   let controller: UsersController;

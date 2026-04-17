@@ -3,8 +3,9 @@ import { LoginVendors } from './login-vendors/login-vendors';
 import { LoginUsers } from './login-users/login-users';
 import { RegisterVendors } from './register-vendors/register-vendors';
 import { RegisterUsers } from './register-users/register-users';
-
-import { HomeComponent } from './home/home'; //import { Home } from './home/home';
+import { HomeComponent } from './home/home';
+import { AdminPannel } from './admin-pannel/admin-pannel';
+import { LoginAdmin } from './login-admin/login-admin';
 
 export const routes: Routes = [
   {
@@ -26,5 +27,13 @@ export const routes: Routes = [
   {
     path: 'home',
     component: HomeComponent
+  },
+  {
+    path: 'admin-pannel',
+    component: AdminPannel
+  },
+  {
+    path: 'login-admin',
+    component: LoginAdmin
   }
 ];
