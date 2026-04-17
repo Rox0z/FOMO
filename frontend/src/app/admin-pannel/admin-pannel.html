@@ -1,0 +1,93 @@
+<div class="admin-wrapper">
+
+  <!-- BACKGROUND FX -->
+  <div class="bg-gradient"></div>
+  <div class="bg-noise"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- CARD -->
+  <div class="admin-card">
+
+    <div class="card-inner">
+
+      <div class="header">
+        <h1>Admin Panel</h1>
+        <p class="subtitle">Gestão de sistema</p>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button [class.active]="activeTab === 'users'" (click)="setTab('users')">
+          Users
+        </button>
+
+        <button [class.active]="activeTab === 'vendors'" (click)="setTab('vendors')">
+          Vendors
+        </button>
+
+        <button [class.active]="activeTab === 'events'" (click)="setTab('events')">
+          Eventos
+        </button>
+      </div>
+
+      <!-- USERS -->
+      <div class="table-wrap" *ngIf="activeTab === 'users'">
+        <table>
+          <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Status</th>
+          </tr>
+
+          <tr *ngFor="let user of users">
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td><span class="badge">{{ user.status }}</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- VENDORS -->
+      <div class="table-wrap" *ngIf="activeTab === 'vendors'">
+        <table>
+          <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+
+          <tr *ngFor="let vendor of vendors">
+            <td>{{ vendor.name }}</td>
+            <td>{{ vendor.email }}</td>
+            <td><span class="badge">{{ vendor.status }}</span></td>
+            <td>
+              <button class="btn approve" (click)="approveVendor(vendor)">Aprovar</button>
+              <button class="btn reject" (click)="rejectVendor(vendor)">Rejeitar</button>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- EVENTS -->
+      <div class="table-wrap" *ngIf="activeTab === 'events'">
+        <table>
+          <tr>
+            <th>Nome</th>
+            <th>Data</th>
+            <th>Organizador</th>
+          </tr>
+
+          <tr *ngFor="let event of events">
+            <td>{{ event.name }}</td>
+            <td>{{ event.date }}</td>
+            <td>{{ event.organizer }}</td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -9,8 +9,8 @@ import {
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from '../users/dto/login.dto';
 import { AuthService } from './auth.service';
-import { CurrentUser } from './current-user.decorator';
-import { JwtGuard } from './jwt.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { JwtGuard } from './jwt/jwt.guard';
 
 @Controller('auth')
 export class AuthController {

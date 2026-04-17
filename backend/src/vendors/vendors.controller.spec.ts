@@ -3,7 +3,7 @@ import { VendorsController } from './vendors.controller';
 import { VendorsService } from './vendors.service';
 import { ConflictException } from '@nestjs/common';
 import { CreateVendorDto } from './dto/create-vendor.dto';
-import { JwtGuard } from '../auth/jwt.guard';
+import { JwtGuard } from '../auth/jwt/jwt.guard';
 
 describe('VendorsController', () => {
   let controller: VendorsController;

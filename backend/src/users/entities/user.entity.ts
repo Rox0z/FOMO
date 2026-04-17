@@ -5,7 +5,7 @@ export class User {
   name: string;
   phone?: string;
   countryCode?: string;
-  userType: 'user' | 'vendor';
+  role: 'user' | 'vendor' | 'admin';
   superuser: boolean;
   active: boolean;
   createdAt: Date;
