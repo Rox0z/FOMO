@@ -1,7 +1,7 @@
 :host {
   display: block;
-  font-family: Georgia, 'Times New Roman', Times, serif;
-
+ 
+    font-family: 'Inter', sans-serif;
   --primary-color: #000000;
   --secondary-color: #ffffff;
   --accent-color: #7c3aed;
@@ -53,6 +53,12 @@
   position: sticky;
   top: 0;
   z-index: 100;
+}
+.nav-link-btn {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-brand {

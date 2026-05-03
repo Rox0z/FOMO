@@ -289,7 +289,13 @@
 }
 
 .register-link:hover { text-decoration:underline; }
-
+.logo-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 /* MOBILE */
 
 @media (max-width:480px){
