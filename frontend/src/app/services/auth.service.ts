@@ -1,70 +1,78 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { tap, map } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 
 const API_URL = 'http://localhost:3000';
-
-interface AuthResponse {
-  user: {
-    id: number;
-    email: string;
-    name: string;
-    phone?: string;
-    countryCode?: string;
-    userType: 'user' | 'vendor';
-    createdAt: string;
-    updatedAt: string;
-  };
-  token: string;
-}
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private currentUserSubject = new BehaviorSubject<any>(null);
+  // Inicializamos o BehaviorSubject com os dados do localStorage (se existirem)
+  // Isto evita que a UI pisque como "não logada" enquanto o pedido 'me' é feito
+  private currentUserSubject = new BehaviorSubject<any>(this.getUserFromStorage());
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient) {
-    this.loadCurrentUser();
+    // Só tentamos validar o utilizador no arranque se existir um token
+    if (this.getToken()) {
+      this.loadCurrentUser();
+    }
   }
 
-  register(userData: any): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${API_URL}/auth/register`, userData)
-      .pipe(
-        tap((response) => {
-          this.storeToken(response.token);
-          this.currentUserSubject.next(response.user);
-        }),
-      );
+  private getUserFromStorage() {
+    const user = localStorage.getItem('user_info');
+    return user ? JSON.parse(user) : null;
   }
 
-  login(email: string, password: string): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${API_URL}/auth/login`, { email, password })
-      .pipe(
-        tap((response) => {
-          this.storeToken(response.token);
-          this.currentUserSubject.next(response.user);
-        }),
-      );
+  // --- MÉTODOS DE AUTENTICAÇÃO ---
+
+  login(email: string, password: string): Observable<any> {
+    return this.http.post<any>(`${API_URL}/auth/login`, { email, password }).pipe(
+      tap(res => {
+        this.storeToken(res.token);
+        this.storeUser(res.user);
+        this.currentUserSubject.next(res.user);
+      })
+    );
   }
 
-  registerVendor(vendorData: any): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${API_URL}/vendors`, vendorData)
-      .pipe(
-        tap((response) => {
-          this.storeToken(response.token);
-          this.currentUserSubject.next(response.user);
-        }),
-      );
+  register(userData: any): Observable<any> {
+    return this.http.post<any>(`${API_URL}/auth/register`, userData).pipe(
+      tap(res => {
+        this.storeToken(res.token);
+        this.storeUser(res.user);
+        this.currentUserSubject.next(res.user);
+      })
+    );
+  }
+
+  registerVendor(vendorData: any): Observable<any> {
+    return this.http.post<any>(`${API_URL}/vendors`, vendorData).pipe(
+      tap(res => {
+        this.storeToken(res.token);
+        this.storeUser(res.user);
+        this.currentUserSubject.next(res.user);
+      })
+    );
+  }
+
+  // --- GESTÃO DE ESTADO E STORAGE ---
+
+  private storeUser(user: any): void {
+    localStorage.setItem('user_info', JSON.stringify(user));
+    if (user.role) {
+      localStorage.setItem('user_role', user.role);
+    }
+  }
+
+  private storeToken(token: string): void {
+    localStorage.setItem('auth_token', token);
   }
 
   logout(): void {
-    localStorage.removeItem('auth_token');
+    localStorage.clear();
     this.currentUserSubject.next(null);
   }
 
@@ -72,33 +80,47 @@ export class AuthService {
     return localStorage.getItem('auth_token');
   }
 
-  isAuthenticated(): boolean {
-    return !!this.getToken();
+  // --- MÉTODOS DE PERFIL (Sem headers manuais, confiando no Interceptor) ---
+
+  /**
+   * Obtém os dados do utilizador atual. 
+   * Útil para componentes que precisam de forçar um refresh manual.
+   */
+  getUserProfile(): Observable<any> {
+    return this.http.get<any>(`${API_URL}/users/me`);
   }
 
-  getCurrentUser(): Observable<any> {
-    if (this.currentUserSubject.value) {
-      return new Observable((observer) => {
-        observer.next(this.currentUserSubject.value);
-        observer.complete();
-      });
-    }
-    return this.http.get<any>(`${API_URL}/auth/profile`);
-  }
-
-  private storeToken(token: string): void {
-    localStorage.setItem('auth_token', token);
-  }
-
+  /**
+   * Valida o token no arranque e atualiza o estado global.
+   * Se o token for inválido (401), limpa a sessão.
+   */
   private loadCurrentUser(): void {
-    const token = this.getToken();
-    if (token) {
-      this.getCurrentUser().subscribe(
-        (user) => this.currentUserSubject.next(user),
-        () => {
+    this.http.get<any>(`${API_URL}/users/me`).subscribe({
+      next: (user) => {
+        this.currentUserSubject.next(user);
+        this.storeUser(user);
+      },
+      error: (err) => {
+        // Apenas fazemos logout automático se o erro for 401 (Não Autorizado)
+        if (err.status === 401) {
+          console.warn('Sessão inválida ou expirada. A efetuar logout...');
           this.logout();
-        },
-      );
-    }
+        }
+      }
+    });
+  }
+  updateProfile(updatedData: any) {
+    return this.http.patch<any>(`${API_URL}/users/me`, updatedData).pipe(
+      tap(updatedUser => {
+        // 1. Atualiza o objeto no LocalStorage (para o refresh funcionar à 1ª)
+        const token = localStorage.getItem('auth_token');
+        // Se guardas o user e token juntos, ajusta aqui. 
+        // Geralmente:
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        // 2. Notifica a app inteira que o user mudou
+        this.currentUserSubject.next(updatedUser);
+      })
+    );
   }
 }

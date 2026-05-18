@@ -184,3 +184,29 @@ td {
   background: #dc3545;
   color: white;
 }
+
+.header {
+  display: flex;
+  justify-content: space-between; /* Afasta o título do botão */
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.btn-logout {
+  background: rgba(255, 47, 136, 0.1);
+  color: #ff2f88;
+  border: 1px solid rgba(255, 47, 136, 0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+  background: #ff2f88;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 47, 136, 0.3);
+}

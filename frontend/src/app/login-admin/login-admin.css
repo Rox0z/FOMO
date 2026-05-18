@@ -79,6 +79,25 @@
   66% { transform:translate(-20px,15px) scale(.97); }
 }
 
+.error {
+  background: rgba(255, 47, 136, 0.1); /* Um fundo avermelhado suave */
+  color: #ff2f88;                      /* Cor rosa/vermelha viva */
+  padding: 0.8rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 47, 136, 0.2);
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  animation: shake 0.4s ease-in-out; /* Um pequeno abanão para chamar a atenção */
+}
+
+/* Opcional: Efeito de abanar quando o erro aparece */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
 /* CARD */
 .login-card {
   position: relative;
