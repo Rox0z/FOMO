@@ -1,6 +1,15 @@
 import { CommonModule } from '@angular/common';
+<<<<<<< Updated upstream
 import { Component } from '@angular/core';
+<<<<<<< Updated upstream
 import { RouterModule } from '@angular/router';
+=======
+=======
+import { Component, OnInit } from '@angular/core';
+import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service'; // Caminho atualizado para a tua nova pasta
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
 interface EventItem {
   id: number;
@@ -23,7 +32,12 @@ interface EventItem {
   templateUrl: './home.html',
   styleUrls: ['./home.css']
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
+  // --- VARIÁVEIS DE PERFIL ---
+  user: any = null;
+  isMenuOpen = false;
+
+  // --- VARIÁVEIS DE INTERFACE ---
   categories: string[] = [
     'All',
     'House',
@@ -49,6 +63,7 @@ export class HomeComponent {
     'real-time access'
   ];
 
+  // --- LISTA DE EVENTOS ---
   events: EventItem[] = [
     {
       id: 1,
@@ -125,6 +140,27 @@ export class HomeComponent {
     }
   ];
 
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    // Escuta o estado do utilizador em tempo real
+    this.authService.currentUser$.subscribe(userData => {
+      this.user = userData;
+    });
+  }
+
+  // --- MÉTODOS DE AUTENTICAÇÃO ---
+  onLogout(): void {
+    this.authService.logout();
+    this.isMenuOpen = false;
+    this.user = null;
+    this.router.navigate(['/home']);
+  }
+
+  // --- MÉTODOS DE FILTRAGEM ---
   setCategory(category: string): void {
     this.activeCategory = category;
   }
@@ -152,6 +188,7 @@ export class HomeComponent {
     });
   }
 
+  // --- MÉTODOS AUXILIARES DE INTERFACE ---
   get featuredEvent(): EventItem | undefined {
     return this.filteredEvents.find(event => event.featured) ?? this.filteredEvents[0];
   }
@@ -179,4 +216,8 @@ export class HomeComponent {
       default: return '';
     }
   }
+
+  toggleMenu() {
+  this.isMenuOpen = !this.isMenuOpen;
+}
 }

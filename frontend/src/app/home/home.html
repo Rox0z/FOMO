@@ -11,9 +11,38 @@
     </ul>
 
     <div class="nav-right">
+<<<<<<< Updated upstream
       <a routerLink="/login-users" class="btn-nav-outline nav-link-btn">Sign in</a>
       <a routerLink="/login-vendors" class="btn-nav-primary nav-link-btn">Promoter</a>
+=======
+<<<<<<< Updated upstream
+      <button class="btn-nav-outline">Sign in</button>
+      <button class="btn-nav-primary">Get tickets</button>
+=======
+  <ng-container *ngIf="!user">
+    <a routerLink="/login-users" class="btn-nav-outline nav-link-btn">Sign in</a>
+    <a routerLink="/login-vendors" class="btn-nav-primary nav-link-btn">Promoter</a>
+  </ng-container>
+
+  <div *ngIf="user" class="user-menu-container">
+    <div class="profile-compact-trigger" (click)="toggleMenu()">
+      <div class="user-icon-circle">
+        {{ user.name[0] }}
+      </div>
+      <span class="user-display-name">{{ user.name }}</span>
+      <span class="chevron-mini">▾</span>
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     </div>
+
+    <ul class="dropdown-flat" *ngIf="isMenuOpen">
+      <li><a routerLink="/user/profile">O meu perfil</a></li>
+      <li><a routerLink="/user/my-tickets">Meus bilhetes</a></li>
+      <li class="divider"></li>
+      <li><button (click)="onLogout()">Sair</button></li>
+    </ul>
+  </div>
+</div>
   </nav>
 
   <section class="hero" id="discover">

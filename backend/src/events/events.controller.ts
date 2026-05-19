@@ -18,7 +18,10 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+
+@ApiBearerAuth('access-token')
 @Controller('events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
@@ -44,7 +47,7 @@ export class EventsController {
   // -------------------------
   @Post()
   @UseGuards(JwtGuard, RolesGuard)
-  @RolesDecorator(Roles.VENDOR)
+  @RolesDecorator(Roles.VENDOR, Roles.ADMIN)
   create(
     @Body() dto: CreateEventDto,
     @CurrentUser() user: any,

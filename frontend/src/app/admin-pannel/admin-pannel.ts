@@ -1,39 +1,111 @@
+<<<<<<< Updated upstream
 import { Component } from '@angular/core';
+<<<<<<< Updated upstream
 import { CommonModule } from '@angular/common';
+=======
+=======
+import { Component, OnInit , ChangeDetectorRef} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 
 @Component({
   selector: 'app-admin-pannel',
   standalone: true,
+<<<<<<< Updated upstream
   imports: [CommonModule], 
+=======
+<<<<<<< Updated upstream
+=======
+  imports: [CommonModule],
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
   templateUrl: './admin-pannel.html',
   styleUrls: ['./admin-pannel.css'],
 })
-export class AdminPannel {
+export class AdminPannel implements OnInit {
 
-  activeTab: string = 'users';
+  activeTab = 'users';
+
+  loading = false;
+  error = '';
+
+  users: any[] = [];
+  vendors: any[] = [];
+  events: any[] = [];
+
+  private apiUrl = 'http://localhost:3000/admin';
+
+  constructor(
+    private http: HttpClient, 
+    private router: Router, 
+    private cdRef: ChangeDetectorRef,
+    private authService: AuthService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadOverview();
+  }
+
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login-admin']);
+  }
 
   setTab(tab: string) {
     this.activeTab = tab;
   }
 
-  // dados mock (depois ligas ao backend)
-  users = [
-    { name: 'Ana Silva', email: 'ana@email.com', status: 'Ativo' }
-  ];
+  loadOverview() {
+    this.loading = true;
+    this.error = '';
 
-  vendors = [
-    { name: 'EventPro', email: 'vendor@email.com', status: 'Pending' }
-  ];
-
-  events = [
-    { name: 'Concerto X', date: '2026-05-01', organizer: 'EventPro' }
-  ];
-
-  approveVendor(vendor: any) {
-    vendor.status = 'Approved';
+    this.http.get<any>(`${this.apiUrl}/overview`).subscribe({
+      next: (res) => {
+        this.users = res.users || [];
+        this.vendors = res.vendors || [];
+        this.events = res.events || [];
+        this.loading = false;
+        this.cdRef.detectChanges();
+      },
+      error: () => {
+        this.error = 'Erro ao carregar painel.';
+        this.loading = false;
+      }
+    });
   }
 
-  rejectVendor(vendor: any) {
-    vendor.status = 'Rejected';
+  approveVendor(vendor: any) {
+    this.http.patch(`${this.apiUrl}/vendors/${vendor.id}/approve`, {}).subscribe({
+      next: () => {
+        // ATUALIZAÇÃO LOCAL: Muda o estado no objeto que já está na lista
+        vendor.active = true; 
+        this.cdRef.detectChanges();
+      },
+      error: () => this.error = 'Erro ao aprovar vendor.'
+    });
+  }
+
+  banUser(user: any) {
+    this.http.patch(`${this.apiUrl}/users/${user.id}/ban`, {}).subscribe({
+      next: () => {
+        user.active = false;
+        this.cdRef.detectChanges();
+      },
+      error: () => this.error = 'Erro ao banir utilizador.'
+    });
+  }
+
+  unbanUser(user: any) {
+    this.http.patch(`${this.apiUrl}/users/${user.id}/unban`, {}).subscribe({
+      next: () => {
+        user.active = true;
+        this.cdRef.detectChanges();
+      },
+      error: () => this.error = 'Erro ao desbanir utilizador.'
+    });
   }
 }

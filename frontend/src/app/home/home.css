@@ -1055,3 +1055,78 @@ a:focus {
     grid-template-columns: 1fr;
   }
 }
+
+.user-menu-container {
+  position: relative;
+}
+
+.profile-compact-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.user-icon-circle {
+  width: 28px;  /* Pequeno e discreto */
+  height: 28px;
+  background: var(--accent-color);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.user-display-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.chevron-mini {
+  font-size: 10px;
+  color: #999;
+}
+
+/* 3. Dropdown simples e limpo */
+.dropdown-flat {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  min-width: 160px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  list-style: none;
+  padding: 8px 0;
+  z-index: 2000;
+}
+
+.dropdown-flat li a, 
+.dropdown-flat li button {
+  padding: 10px 16px;
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-size: 13px;
+  color: #444;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-flat li:hover {
+  background: #f9f9f9;
+}
+
+.divider {
+  height: 1px;
+  background: #eee;
+  margin: 4px 0;
+}
