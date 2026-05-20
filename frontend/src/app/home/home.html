@@ -11,28 +11,8 @@
     </ul>
 
     <div class="nav-right">
-<<<<<<< Updated upstream
       <a routerLink="/login-users" class="btn-nav-outline nav-link-btn">Sign in</a>
       <a routerLink="/login-vendors" class="btn-nav-primary nav-link-btn">Promoter</a>
-=======
-<<<<<<< Updated upstream
-      <button class="btn-nav-outline">Sign in</button>
-      <button class="btn-nav-primary">Get tickets</button>
-=======
-  <ng-container *ngIf="!user">
-    <a routerLink="/login-users" class="btn-nav-outline nav-link-btn">Sign in</a>
-    <a routerLink="/login-vendors" class="btn-nav-primary nav-link-btn">Promoter</a>
-  </ng-container>
-
-  <div *ngIf="user" class="user-menu-container">
-    <div class="profile-compact-trigger" (click)="toggleMenu()">
-      <div class="user-icon-circle">
-        {{ user.name[0] }}
-      </div>
-      <span class="user-display-name">{{ user.name }}</span>
-      <span class="chevron-mini">▾</span>
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     </div>
 
     <ul class="dropdown-flat" *ngIf="isMenuOpen">
@@ -41,11 +21,7 @@
       <li class="divider"></li>
       <li><button (click)="onLogout()">Sair</button></li>
     </ul>
-  </div>
-</div>
-  </nav>
-
-  <section class="hero" id="discover">
+  </nav> <section class="hero" id="discover">
     <div class="hero-bg-gradient"></div>
 
     <div class="hero-logo-bg">
@@ -282,4 +258,6 @@
       <span>Ticketing platform </span>
     </div>
   </footer>
-</div>
+</div> ```
+
+Substitui o teu ficheiro por este. Agora o compilador do Angular não vai dar erro e nenhuma das tuas secções originais foi modificada ou apagada. Podes avançar para o botão azul no **GitHub Desktop** com segurança!
