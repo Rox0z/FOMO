@@ -1,15 +1,7 @@
 import { CommonModule } from '@angular/common';
-<<<<<<< Updated upstream
-import { Component } from '@angular/core';
-<<<<<<< Updated upstream
-import { RouterModule } from '@angular/router';
-=======
-=======
 import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service'; // Caminho atualizado para a tua nova pasta
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+import { AuthService } from '../services/auth.service'; 
 
 interface EventItem {
   id: number;
@@ -146,8 +138,8 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Escuta o estado do utilizador em tempo real
-    this.authService.currentUser$.subscribe(userData => {
+    // Adicionado ': any' no userData para corrigir o erro de TS
+    this.authService.currentUser$.subscribe((userData: any) => {
       this.user = userData;
     });
   }
@@ -218,6 +210,6 @@ export class HomeComponent implements OnInit {
   }
 
   toggleMenu() {
-  this.isMenuOpen = !this.isMenuOpen;
-}
+    this.isMenuOpen = !this.isMenuOpen;
+  }
 }

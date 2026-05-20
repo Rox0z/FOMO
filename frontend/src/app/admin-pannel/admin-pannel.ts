@@ -1,28 +1,13 @@
-<<<<<<< Updated upstream
-import { Component } from '@angular/core';
-<<<<<<< Updated upstream
-import { CommonModule } from '@angular/common';
-=======
-=======
-import { Component, OnInit , ChangeDetectorRef} from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 
 @Component({
   selector: 'app-admin-pannel',
   standalone: true,
-<<<<<<< Updated upstream
-  imports: [CommonModule], 
-=======
-<<<<<<< Updated upstream
-=======
   imports: [CommonModule],
->>>>>>> Stashed changes
->>>>>>> Stashed changes
   templateUrl: './admin-pannel.html',
   styleUrls: ['./admin-pannel.css'],
 })
@@ -64,7 +49,8 @@ export class AdminPannel implements OnInit {
     this.error = '';
 
     this.http.get<any>(`${this.apiUrl}/overview`).subscribe({
-      next: (res) => {
+      // Adicionado ': any' no res para evitar o erro de TS (implicit any)
+      next: (res: any) => {
         this.users = res.users || [];
         this.vendors = res.vendors || [];
         this.events = res.events || [];
