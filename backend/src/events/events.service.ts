@@ -5,11 +5,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { events } from '../db/schema/events';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { Event } from './entities/event.entity';
+import { vendorProfiles } from 'src/db/schema/vendorProfiles';
+import { tickets } from 'src/db/schema/tickets';
 
 @Injectable()
 export class EventsService {
@@ -33,6 +35,27 @@ export class EventsService {
     } catch (error) {
       throw new BadRequestException('Failed to create event');
     }
+  }
+
+  async findAllWithDetails() {
+    return this.db
+      .select({
+        id: events.id,
+        name: events.name,
+        description: events.description,
+        location: events.location,
+        date: events.date,
+        status: events.status,
+        createdAt: events.createdAt,
+        vendorName: vendorProfiles.businessName,
+        vendorId: events.vendorId,
+        ticketCount: sql<number>`coalesce(count(${tickets.id}), 0)::int`
+      })
+      .from(events)
+      // 🎯 CORREÇÃO: Junta usando o vendorId que aponta para o id do Perfil, e não o userId!
+      .leftJoin(vendorProfiles, eq(events.vendorId, vendorProfiles.id)) 
+      .leftJoin(tickets, eq(events.id, tickets.eventId))
+      .groupBy(events.id, vendorProfiles.id);
   }
 
   // -------------------------
@@ -109,5 +132,19 @@ export class EventsService {
   async count() {
     const result = await this.db.query.events.findMany();
     return result.length;
+  }
+
+  async setStatus(id: number, status: 'approved' | 'pending' | 'rejected') {
+    const updated = await this.db
+      .update(events)
+      .set({ status: status })
+      .where(eq(events.id, id))
+      .returning();
+
+    if (!updated.length) {
+      throw new NotFoundException(`Evento com ID ${id} não foi encontrado`);
+    }
+
+    return updated[0];
   }
 }

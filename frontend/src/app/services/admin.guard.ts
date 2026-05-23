@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,7 +20,7 @@ export class AdminGuard implements CanActivate {
     }
 
     // 3. Se falhar (não tem token ou não é admin), expulsa para o login de admin
-    console.warn('Acesso negado: Tentativa de entrada sem permissões de admin.');
+    localStorage.clear();
     this.router.navigate(['/login-admin']); 
     return false;
   }

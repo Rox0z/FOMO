@@ -5,9 +5,10 @@ import { AdminService } from './admin.service';
 import { UsersModule } from '../users/users.module';
 import { VendorsModule } from '../vendors/vendors.module';
 import { EventsModule } from '../events/events.module';
+import { LogsModule } from 'src/logs/logs.module';
 
 @Module({
-  imports: [UsersModule, VendorsModule, EventsModule],
+  imports: [UsersModule, VendorsModule, EventsModule, LogsModule],
   controllers: [AdminController],
   providers: [AdminService],
 })
