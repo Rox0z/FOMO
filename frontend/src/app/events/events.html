@@ -1,0 +1,84 @@
+<div class="events-page">
+  <nav class="topbar">
+    <a routerLink="/home" class="logo">FOMO</a>
+
+    <div class="nav-links">
+      <a routerLink="/home">Home</a>
+      <a routerLink="/about">How it works</a>
+      <a routerLink="/login-users" class="signin">Sign in</a>
+    </div>
+  </nav>
+
+  <section class="events-hero">
+    <p class="events-tag">Published events</p>
+    <h1>Find your next night out.</h1>
+    <p>
+      Browse approved events posted by promoters. Open an event to see details,
+      ticket info and entry rules.
+    </p>
+  </section>
+
+  <section class="events-grid">
+    <article class="event-card" *ngFor="let event of events" (click)="openEvent(event)">
+      <div class="image-wrap">
+        <img [src]="event.image" [alt]="event.title" />
+        <span class="badge">{{ event.category }}</span>
+      </div>
+
+      <div class="event-body">
+        <h2>{{ event.title }}</h2>
+        <p class="subtitle">{{ event.subtitle }}</p>
+
+        <div class="meta">
+          <span>📍 {{ event.location }}</span>
+          <span>📅 {{ event.date }} • {{ event.time }}</span>
+        </div>
+
+        <div class="event-footer">
+          <strong>{{ event.price }}</strong>
+          <button type="button">View details</button>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <div class="modal-backdrop" *ngIf="selectedEvent" (click)="closeEvent()">
+    <div class="event-modal" (click)="$event.stopPropagation()">
+      <button type="button" class="close-btn" (click)="closeEvent()">×</button>
+
+      <img [src]="selectedEvent.image" [alt]="selectedEvent.title" />
+
+      <div class="modal-content">
+        <span class="badge modal-badge">{{ selectedEvent.category }}</span>
+
+        <h2>{{ selectedEvent.title }}</h2>
+        <p class="subtitle">{{ selectedEvent.subtitle }}</p>
+
+        <div class="modal-info">
+          <p><strong>Location:</strong> {{ selectedEvent.location }}</p>
+          <p><strong>Date:</strong> {{ selectedEvent.date }}</p>
+          <p><strong>Time:</strong> {{ selectedEvent.time }}</p>
+          <p><strong>Price:</strong> {{ selectedEvent.price }}</p>
+          <p><strong>Tickets left:</strong> {{ selectedEvent.ticketsLeft }}</p>
+        </div>
+
+        <h3>Description</h3>
+        <p class="description">{{ selectedEvent.description }}</p>
+
+        <h3>Lineup / vibe</h3>
+        <ul>
+          <li *ngFor="let item of selectedEvent.lineup">{{ item }}</li>
+        </ul>
+
+        <h3>Entry rules</h3>
+        <ul>
+          <li *ngFor="let rule of selectedEvent.rules">{{ rule }}</li>
+        </ul>
+
+        <button type="button" class="buy-btn">
+          Get ticket
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

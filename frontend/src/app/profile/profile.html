@@ -1,0 +1,145 @@
+<nav class="navbar">
+  <div class="nav-brand">
+    <a routerLink="/">
+      <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo" />
+    </a>
+  </div>
+
+  <div class="nav-right">
+    <a routerLink="/" class="nav-link-back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m15 18-6-6 6-6"/>
+      </svg>
+      <span>Home</span>
+    </a>
+  </div>
+</nav>
+
+<div class="profile-page-wrapper min-h-screen flex items-center justify-center p-6">
+  
+  <div class="max-w-5xl w-full space-y-8 animate-fade" *ngIf="!isLoading && user">
+    
+    <header class="flex flex-col md:flex-row items-center gap-8 px-2">
+      <div class="relative w-32 h-32 group">
+        <div class="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-700 rounded-[32px] flex items-center justify-center text-4xl font-black shadow-xl transform group-hover:rotate-2 transition-transform duration-300 text-white">
+          {{ getInitials(user.name) }}
+        </div>
+        <div *ngIf="user.active" class="absolute -bottom-1 -right-1 bg-green-500 w-8 h-8 rounded-full border-4 border-[#0d061a] status-pulse"></div>
+      </div>
+      
+      <div class="text-center md:text-left space-y-1 text-white">
+        <div class="flex items-center gap-3 mb-2 justify-center md:justify-start">
+          <span class="px-3 py-1 bg-purple-500/20 text-purple-400 text-[10px] font-bold tracking-widest rounded-full uppercase">Conta Ativa</span>
+          <span class="px-3 py-1 bg-white/10 text-zinc-400 text-[10px] font-bold tracking-widest rounded-full uppercase">{{ user.role }}</span>
+        </div>
+        <h1 class="text-4xl font-black tracking-tight">{{ user.name }}</h1>
+        <p class="text-zinc-400 text-base font-medium">{{ user.email }}</p>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <div class="lg:col-span-8">
+        <section class="main-white-card p-10 text-zinc-900 h-full bg-white relative">
+          
+          <div class="flex justify-between items-center mb-10">
+            <div class="text-left">
+              <h2 class="text-xl font-black tracking-tight mb-1">
+                {{ isEditing ? 'Editar Perfil' : 'Informações Pessoais' }}
+              </h2>
+              <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Sincronização Ativa</p>
+            </div>
+            
+            <button *ngIf="!isEditing" (click)="toggleEdit()" 
+              class="px-6 py-2 bg-zinc-100 rounded-xl text-xs font-black text-zinc-600 hover:bg-purple-600 hover:text-white transition-all uppercase tracking-wider">
+              Editar
+            </button>
+          </div>
+
+          <div *ngIf="!isEditing" class="grid grid-cols-1 md:grid-cols-2 gap-y-10 gap-x-12 text-left animate-fade">
+            <div class="space-y-1.5">
+              <p class="text-[10px] font-black text-purple-600/60 uppercase tracking-widest">E-mail</p>
+              <p class="text-lg font-bold text-zinc-800">{{ user.email }}</p>
+            </div>
+            <div class="space-y-1.5">
+              <p class="text-[10px] font-black text-purple-600/60 uppercase tracking-widest">Nome Completo</p>
+              <p class="text-lg font-bold text-zinc-800">{{ user.name }}</p>
+            </div>
+            <div class="space-y-1.5">
+              <p class="text-[10px] font-black text-purple-600/60 uppercase tracking-widest">Telemóvel</p>
+              <p class="text-lg font-bold text-zinc-800">{{ user.countryCode }} {{ user.phone || '--- --- ---' }}</p>
+            </div>
+            <div class="space-y-1.5">
+              <p class="text-[10px] font-black text-purple-600/60 uppercase tracking-widest">País</p>
+              <p class="text-lg font-bold text-zinc-800">{{ getCountryName(user.countryCode) }}</p>
+            </div>
+          </div>
+
+          <form *ngIf="isEditing" [formGroup]="profileForm" class="space-y-8 animate-fade">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+              
+              <div class="space-y-2.5">
+                <label class="text-[11px] font-black text-zinc-500 uppercase tracking-widest">Nome Completo</label>
+                <input type="text" formControlName="name" 
+                  class="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-5 py-4 text-base font-bold text-zinc-800 focus:ring-2 focus:ring-purple-600/20 outline-none transition-all">
+              </div>
+
+              <div class="space-y-2.5 relative">
+                <label class="text-[11px] font-black text-zinc-500 uppercase tracking-widest">Indicativo</label>
+                
+                <div (click)="toggleDropdown($event)"
+                  class="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-5 py-4 text-base font-bold text-zinc-800 focus:ring-2 focus:ring-purple-600/20 cursor-pointer flex justify-between items-center transition-all select-none"
+                  [ngClass]="{'ring-2 ring-purple-600/20 border-purple-600': isDropdownOpen}">
+                  <span>{{ getSelectedCountryLabel() }}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-zinc-400 transition-transform duration-200" [class.rotate-180]="isDropdownOpen" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+
+                <div *ngIf="isDropdownOpen" 
+                  class="absolute top-[80px] left-0 w-full bg-white border border-zinc-100 rounded-xl shadow-xl shadow-purple-900/10 z-50 overflow-hidden animate-fade">
+                  <div *ngFor="let country of countryOptions" 
+                    (click)="selectCountry(country.value)"
+                    class="px-5 py-4 text-base font-bold text-zinc-600 hover:bg-purple-50 hover:text-purple-700 cursor-pointer transition-all border-b border-zinc-50 last:border-0">
+                    {{ country.label }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-2.5">
+                <label class="text-[11px] font-black text-zinc-500 uppercase tracking-widest">Telemóvel</label>
+                <input type="tel" formControlName="phone" 
+                  class="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-5 py-4 text-base font-bold text-zinc-800 focus:ring-2 focus:ring-purple-600/20 outline-none transition-all">
+              </div>
+            </div>
+
+            <div class="flex justify-end gap-4 pt-6 border-t border-zinc-100">
+              <button type="button" (mousedown)="toggleEdit()" 
+                class="px-8 py-3 rounded-xl text-sm font-bold text-zinc-500 hover:bg-zinc-100 transition-all">
+                Cancelar
+              </button>
+              <button type="button" (mousedown)="saveProfile()" [disabled]="profileForm.invalid"
+                class="px-8 py-3 bg-zinc-900 text-white rounded-xl text-sm font-bold hover:bg-purple-600 disabled:opacity-50 transition-all shadow-lg shadow-purple-900/20">
+                Guardar Alterações
+              </button>
+            </div>
+          </form>
+
+        </section>
+      </div>
+
+      <div class="lg:col-span-4 space-y-8">
+        <div class="main-white-card p-8 bg-white">
+          <h3 class="text-xl font-black tracking-tight text-left mb-6">Meus Bilhetes</h3>
+          <button routerLink="/user/my-tickets" class="w-full py-4 bg-zinc-900 text-white rounded-xl font-bold text-sm hover:bg-purple-600 transition-all">
+            Ver Todos
+          </button>
+        </div>
+        <button (click)="logout()" class="w-full py-4 px-6 rounded-xl bg-red-500/10 text-red-400 font-bold text-sm hover:bg-red-500 hover:text-white transition-all">
+          Terminar Sessão
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
