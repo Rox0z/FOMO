@@ -13,6 +13,8 @@ import { AdminGuard } from './services/admin.guard';
 import { UserGuard } from './services/user.guard';
 import { ProfileComponent } from './profile/profile';
 import { Tickets } from './tickets/tickets';
+import { Events } from './events/events';
+
 
 export const routes: Routes = [
   { path: 'login-vendors', component: LoginVendors },
@@ -20,6 +22,7 @@ export const routes: Routes = [
   { path: 'login-users', component: LoginUsers },
   { path: 'register-users', component: RegisterUsers },
   { path: 'home', component: HomeComponent },
+  { path: 'events', component: Events },
   { 
     path: 'user', 
     children: [

@@ -5,10 +5,9 @@
     </div>
 
     <ul class="nav-links">
-      <li><a href="#discover">Discover</a></li>
-      <li><a href="#events">Events</a></li>
-      <li><a href="#community">Community</a></li>
-    </ul>
+  <li><a routerLink="/home">Discover</a></li>
+  <li><a routerLink="/events">Events</a></li>
+</ul>
 
     <div class="nav-right">
       <a routerLink="/login-users" class="btn-nav-outline nav-link-btn">Sign in</a>
@@ -43,9 +42,14 @@
       </p>
 
       <div class="hero-cta">
-        <button class="btn-primary">Explore events</button>
-        <a routerLink="/about" class="btn-secondary">How it works</a>
-      </div>
+     <a routerLink="/events" class="btn-primary">
+      Explore events
+        </a>
+
+  <a routerLink="/about" class="btn-secondary">
+    How it works
+  </a>
+</div>
 
       <div class="hero-stats">
         <div class="stat">
@@ -115,7 +119,7 @@
         </p>
       </div>
 
-      <a class="see-all" href="#">See all</a>
+      <a routerLink="/events" class="see-all">See all</a>
     </div>
 
     <div class="events-grid" *ngIf="filteredEvents.length > 0; else noResults">
@@ -225,23 +229,8 @@
         </p>
       </div>
 
-      <div class="footer-col">
-        <h4>Explore</h4>
-        <ul>
-          <li><a href="#">Events</a></li>
-          <li><a href="#">Cities</a></li>
-          <li><a href="#">Creators</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h4>Product</h4>
-        <ul>
-          <li><a href="#">Tickets</a></li>
-          <li><a href="#">Alerts</a></li>
-          <li><a href="#">Membership</a></li>
-        </ul>
-      </div>
+   
+    
 
       <div class="footer-col">
         <h4>Social</h4>
@@ -260,4 +249,3 @@
   </footer>
 </div> ```
 
-Substitui o teu ficheiro por este. Agora o compilador do Angular não vai dar erro e nenhuma das tuas secções originais foi modificada ou apagada. Podes avançar para o botão azul no **GitHub Desktop** com segurança!
