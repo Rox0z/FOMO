@@ -14,5 +14,7 @@ export const events = pgTable('events', {
   location: varchar('location', { length: 255 }).notNull(),
   date: timestamp('date').notNull(),
 
+  status: varchar('status', { length: 50 }).notNull().default ('pending'), 
+
   createdAt: timestamp('created_at').defaultNow(),
 });

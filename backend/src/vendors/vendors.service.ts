@@ -3,7 +3,7 @@ import {
   Inject,
   NotFoundException,
 } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { users } from '../db/schema/users';
 import { vendorProfiles } from '../db/schema/vendorProfiles';
 import { UsersService } from '../users/users.service';
@@ -60,7 +60,23 @@ export class VendorsService {
   // ADMIN LIST
   // -------------------------
   async findAll() {
-    return this.db.query.vendorProfiles.findMany();
+    const result = await this.db
+      .select({
+        id: vendorProfiles.id,          
+        userId: vendorProfiles.userId,
+        businessName: vendorProfiles.businessName,             
+        status: vendorProfiles.status,             
+        createdAt: vendorProfiles.createdAt,    
+        name: users.name,  
+        email: users.email,                       
+        phone: users.phone,                       
+        country: users.countryCode,              
+        active: users.active                      
+      })
+      .from(vendorProfiles)
+      .innerJoin(users, eq(vendorProfiles.userId, users.id));
+
+    return result;
   }
 
   // -------------------------
@@ -114,36 +130,41 @@ export class VendorsService {
   // -------------------------
   // COUNT (ADMIN DASHBOARD)
   // -------------------------
-  async count() {
-    const result = await this.db.query.vendorProfiles.findMany();
-    return result.length;
+ async count(): Promise<{ total: number; approved: number; rejected: number; pending: number }> {
+    const [totalRes, approvedRes, rejectedRes, pendingRes] = await Promise.all([
+      this.db.select({ count: sql<number>`count(*)` }).from(vendorProfiles),
+      this.db.select({ count: sql<number>`count(*)` }).from(vendorProfiles).where(eq(vendorProfiles.status, 'approved')),
+      this.db.select({ count: sql<number>`count(*)` }).from(vendorProfiles).where(eq(vendorProfiles.status, 'rejected')),
+      this.db.select({ count: sql<number>`count(*)` }).from(vendorProfiles).where(and(eq(vendorProfiles.status, 'pending')))
+    ]);
+
+    return {
+      total: Number(totalRes[0]?.count || 0),
+      approved: Number(approvedRes[0]?.count || 0),
+      rejected: Number(rejectedRes[0]?.count || 0),
+      pending: Number(pendingRes[0]?.count || 0)
+    };
   }
-
-  async approve(userId: number) {
-    await this.db
+  // ---------------------------------------------------------
+  // SET STATUS (Focado estritamente na tabela de Vendors/Perfis)
+  // ---------------------------------------------------------
+  async setStatus(
+    vendorId: number, // 🎯 Recebe o ID do perfil enviado pelo curl/painel
+    status: 'approved' | 'pending' | 'rejected',
+  ): Promise<any> {
+    const updated = await this.db
       .update(vendorProfiles)
-      .set({ status: 'approved' })
-      .where((vp, { eq }) => eq(vp.userId, userId));
+      .set({ 
+        status: status,
+        updatedAt: new Date()
+      })
+      .where(eq(vendorProfiles.id, vendorId))
+      .returning();
 
-    await this.db
-      .update(users)
-      .set({ active: true })
-      .where(eq(users.id, userId));
+    if (!updated.length) {
+      throw new NotFoundException(`Vendor profile with ID ${vendorId} not found`);
+    }
 
-    return { message: 'Vendor approved' };
-  } 
-
-  async reject(userId: number) {
-    await this.db
-      .update(vendorProfiles)
-      .set({ status: 'rejected' })
-      .where((vp, { eq }) => eq(vp.userId, userId));
-
-    await this.db
-      .update(users)
-      .set({ active: false })
-      .where(eq(users.id, userId));
-
-    return { message: 'Vendor rejected' };
+    return updated[0]; // Retorna o perfil atualizado (que contém lá dentro a propriedade .userId)
   }
 }

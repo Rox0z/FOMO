@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
-import { sql } from 'drizzle-orm';
+import { and, sql } from 'drizzle-orm';
 import { eq } from 'drizzle-orm';
 import { users } from '../db/schema/users';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -45,9 +45,21 @@ export class UsersService {
     return user;
   }
 
-  async findAll(): Promise<Omit<User, 'password'>[]> {
-    const allUsers = await this.db.query.users.findMany();
-    return allUsers.map(({ password, ...user }) => user);
+  // 🎯 ATUALIZADO: Agora envia explicitamente os campos necessários para o modal do Admin
+  async findAll() {
+    return await this.db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        active: users.active,
+        createdAt: users.createdAt, 
+        country: users.countryCode, 
+        phone: users.phone,         
+      })
+      .from(users)
+      .where(eq(users.role, 'user'));
   }
 
   async findOne(id: number): Promise<Omit<User, 'password'>> {
@@ -134,12 +146,22 @@ export class UsersService {
     return user;
   }
 
-  async count(): Promise<number> {
-  const result = await this.db
-    .select({ count: sql<number>`count(*)` })
-    .from(users);
+  async count(): Promise<{ total: number; active: number }> {
+    const [totalRes, activeRes] = await Promise.all([
+      this.db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(eq(users.role, 'user')),
+      this.db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(and(eq(users.role, 'user'), eq(users.active, true)))
+    ]);
 
-  return Number(result[0].count);
+    return {
+      total: Number(totalRes[0]?.count || 0),
+      active: Number(activeRes[0]?.count || 0)
+    };
   }
 
   async setActive(
