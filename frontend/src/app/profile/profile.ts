@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { Router, RouterModule } from '@angular/router';
-
+import { ToastService } from '../services/toast.service';
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -17,7 +17,6 @@ export class ProfileComponent implements OnInit {
   isEditing = false;
   profileForm!: FormGroup;
 
-  toast = { show: false, message: '', type: 'success' };
 
   // --- LÓGICA DO DROPDOWN CUSTOMIZADO ---
   isDropdownOpen = false;
@@ -31,7 +30,8 @@ export class ProfileComponent implements OnInit {
   constructor(
     private authService: AuthService, 
     private router: Router,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -117,8 +117,7 @@ export class ProfileComponent implements OnInit {
   }
 
   showToast(message: string, type: 'success' | 'error'): void {
-    this.toast = { show: true, message, type };
-    setTimeout(() => this.toast.show = false, 3000);
+    this.toast.show(message, type);
   }
 
   getInitials(name: string): string {

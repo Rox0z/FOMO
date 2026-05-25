@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-tickets',
@@ -20,7 +21,8 @@ export class Tickets implements OnInit {
     private http: HttpClient, 
     private router: Router, 
     private authService: AuthService,
-    private cdr: ChangeDetectorRef // 👈 Injetamos o "Martelo" do Angular
+    private toast: ToastService,
+    private cdr: ChangeDetectorRef 
   ) {}
 
   ngOnInit(): void {
@@ -37,7 +39,7 @@ export class Tickets implements OnInit {
           this.cdr.detectChanges(); 
         },
         error: (err) => {
-          this.error = 'Erro ao carregar os teus bilhetes.';
+          this.toast.show('Erro ao carregar os teus bilhetes.');
           this.isLoading = false;
           this.cdr.detectChanges();
         }

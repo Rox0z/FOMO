@@ -4,7 +4,7 @@ import { AuthService } from '../services/auth.service';
 import { map, take } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
-export class AdminGuard implements CanActivate {
+export class LoggedInGuard implements CanActivate {
 
   constructor(
     private authService: AuthService,
@@ -15,9 +15,22 @@ export class AdminGuard implements CanActivate {
     return this.authService.currentUser$.pipe(
       take(1),
       map(user => {
-        if (user?.role === 'admin') return true;
+        if (!user) return true;
 
-        this.router.navigate(['/home']);
+        // redirect inteligente
+        switch (user.role) {
+          case 'admin':
+            this.router.navigate(['/admin-pannel']);
+            break;
+
+          case 'vendor':
+            this.router.navigate(['/vendor-dashboard']);
+            break;
+
+          default:
+            this.router.navigate(['/home']);
+        }
+
         return false;
       })
     );

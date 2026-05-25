@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import {ToastService} from '../services/toast.service';
 
 @Component({
   selector: 'app-register-vendors',
@@ -28,27 +29,27 @@ export class RegisterVendors {
   constructor(
     private router: Router,
     private authService: AuthService,
+    private toast: ToastService
   ) {}
 
   togglePassword() { this.showPassword = !this.showPassword; }
   toggleConfirmPassword() { this.showConfirmPassword = !this.showConfirmPassword; }
 
   onSubmit() {
-    this.errorMessage = '';
 
     // Validate all fields
     if (!this.name || !this.email || !this.phone || !this.password || !this.confirmPassword) {
-      this.errorMessage = 'Preencha todos os campos!';
+      this.toast.show('Preencha todos os campos!');
       return;
     }
 
     if (this.password !== this.confirmPassword) {
-      this.errorMessage = 'As passwords não coincidem.';
+      this.toast.show('As passwords não coincidem.');
       return;
     }
 
     if (this.password.length < 8) {
-      this.errorMessage = 'A password deve ter no mínimo 8 caracteres.';
+      this.toast.show('A password deve ter no mínimo 8 caracteres.');
       return;
     }
 
@@ -74,11 +75,11 @@ export class RegisterVendors {
         this.isLoading = false;
         console.error('Registration error:', error);
         if (error.status === 409) {
-          this.errorMessage = 'Email já registado.';
+          this.toast.show('Email já registado.');
         } else if (error.error?.message) {
-          this.errorMessage = error.error.message;
+          this.toast.show(error.error.message);
         } else {
-          this.errorMessage = 'Erro ao criar conta. Tenta novamente.';
+          this.toast.show('Erro ao criar conta. Tenta novamente.');
         }
       },
     );

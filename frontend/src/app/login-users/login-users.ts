@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service'; // CAMINHO ATUALIZADO!
+import { AuthService } from '../services/auth.service';
+import {ToastService} from '../services/toast.service';
 
 @Component({
   selector: 'app-login-users',
@@ -21,6 +22,7 @@ export class LoginUsers {
   constructor(
     private router: Router,
     private authService: AuthService,
+    private toast: ToastService
   ) {}
 
   togglePassword() {
@@ -31,7 +33,7 @@ export class LoginUsers {
     this.errorMessage = '';
 
     if (!this.email || !this.password) {
-      this.errorMessage = 'Preencha todos os campos!';
+      this.toast.show('Preencha todos os campos!', 'error');
       return;
     }
 
@@ -41,27 +43,24 @@ export class LoginUsers {
     this.authService.login(this.email, this.password).subscribe({
       next: (response: any) => {
         console.log('Login successful:', response);
-        
-        // 1. Guardamos os dados no localStorage para persistência (caso o serviço não o faça)
-        localStorage.setItem('user_info', JSON.stringify(response.user));
-        
         this.isLoading = false;
-        
         // 2. REDIRECIONAMENTO: Agora mandamos para a Home em vez do Dashboard
         this.router.navigate(['/home']);
-        
         // Limpamos os campos
         this.email = '';
         this.password = '';
       },
       error: (error: any) => {
         this.isLoading = false;
-        console.error('Login error:', error);
         
+        if (error.message === 'USER_BLOCKED') {
+          this.toast.show('Conta com acesso bloqueado.', 'error');
+        }
+
         if (error.status === 401) {
-          this.errorMessage = 'Email ou password inválidos.';
+          this.toast.show('Email ou password inválidos.', 'error');
         } else {
-          this.errorMessage = 'Erro ao fazer login. Tenta novamente.';
+          this.toast.show('Erro ao fazer login. Tenta novamente.', 'error');
         }
       }
     });
