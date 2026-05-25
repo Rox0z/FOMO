@@ -10,6 +10,7 @@ import { EventsModule } from './events/events.module';
 import { AdminModule } from './admin/admin.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { OrdersModule } from './orders/orders.module';
+import { EventEditsModule } from './event-edits/event-edits.module';
 
 const drizzleProvider = {
   provide: 'DRIZZLE',
@@ -18,7 +19,7 @@ const drizzleProvider = {
 
 @Global()
 @Module({
-  imports: [UsersModule, AuthModule, VendorsModule, EventsModule, AdminModule, TicketsModule, OrdersModule],
+  imports: [UsersModule, AuthModule, VendorsModule, EventsModule, AdminModule, TicketsModule, OrdersModule, EventEditsModule],
   controllers: [AppController],
   providers: [AppService, drizzleProvider],
   exports: [drizzleProvider],

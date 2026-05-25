@@ -90,6 +90,10 @@ export class AuthService {
     return this.http.get<any>(`${API_URL}/users/me`);
   }
 
+  getVendorProfile() {
+  return this.http.get(`${API_URL}/vendors/me`);
+}
+
   /**
    * Valida o token no arranque e atualiza o estado global.
    * Se o token for inválido (401), limpa a sessão.

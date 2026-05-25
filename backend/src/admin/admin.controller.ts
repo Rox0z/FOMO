@@ -5,18 +5,18 @@ import { RolesGuard } from '../common/guards/role.guard';
 import { Roles } from '../common/enums/roles.enum';
 import { RolesDecorator } from '../common/decorators/roles.decorator';
 import { AdminService } from './admin.service';
+import { EventsService } from '../events/events.service';
+import { EventEditsService } from '../event-edits/event-edits.service';
 
 @Controller('admin')
 @UseGuards(JwtGuard, RolesGuard)
 @ApiBearerAuth('access-token')
 @RolesDecorator(Roles.ADMIN)
 export class AdminController {
-  constructor(private adminService: AdminService) {}
-
-  @Get('stats')
-  getStats() {
-    return this.adminService.stats();
-  }
+  constructor(
+    private adminService: AdminService,
+    private eventsEditService: EventEditsService
+  ) {}
 
   @Get('overview')
   getOverview() {
@@ -51,5 +51,15 @@ export class AdminController {
   @Patch('events/:id/reject')
   async rejectEvent(@Param('id') id: string) {
     return this.adminService.rejectEvent(Number(id));
+  }
+
+  @Patch('events/edits/:editId/approve')
+  approveEventEdit(@Param('editId') editId: string) {
+    return this.eventsEditService.approveEditRequest(+editId);
+  }
+  
+  @Patch('events/edits/:editId/reject')
+  rejectEventEdit(@Param('editId') editId: string) {
+    return this.eventsEditService.rejectEditRequest(+editId);
   }
 }

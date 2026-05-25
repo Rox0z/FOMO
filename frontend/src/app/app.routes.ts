@@ -13,6 +13,7 @@ import { AdminGuard } from './services/admin.guard';
 import { UserGuard } from './services/user.guard';
 import { ProfileComponent } from './profile/profile';
 import { Tickets } from './tickets/tickets';
+import { VendorGuard } from './services/vendor.guard';
 
 export const routes: Routes = [
   { path: 'login-vendors', component: LoginVendors },
@@ -27,7 +28,12 @@ export const routes: Routes = [
       { path: 'my-tickets', component: Tickets, canActivate: [UserGuard] }
     ]
   },
-  { path: 'vendor-dashboard', component: VendorsDashboard },
+  { path: 'vendor',
+    children: [
+      { path: 'dashboard',component: VendorsDashboard, canActivate: [VendorGuard] },
+      { path: 'profile', component: ProfileComponent, canActivate: [VendorGuard] }
+    ]
+  },
   { path: 'about', component: About },
   { path: 'admin-pannel', component: AdminPannel, canActivate: [AdminGuard] },
   { path: 'login-admin', component: LoginAdmin },

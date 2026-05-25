@@ -6,9 +6,10 @@ import { UsersModule } from '../users/users.module';
 import { VendorsModule } from '../vendors/vendors.module';
 import { EventsModule } from '../events/events.module';
 import { LogsModule } from 'src/logs/logs.module';
+import { EventEditsModule } from 'src/event-edits/event-edits.module';
 
 @Module({
-  imports: [UsersModule, VendorsModule, EventsModule, LogsModule],
+  imports: [UsersModule, VendorsModule, EventsModule, LogsModule, EventEditsModule],
   controllers: [AdminController],
   providers: [AdminService],
 })

@@ -1,26 +1,44 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsDateString, IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsString, IsNumber, Min, IsOptional } from 'class-validator';
 
 export class UpdateEventDto {
-
-  @ApiPropertyOptional({ example: "Tech Conference" })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   name?: string;
 
-  @ApiPropertyOptional({ example: "Annual technology conference" })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ example: "2026-06-20T10:00:00Z" })
-  @IsOptional()
-  @IsDateString()
-  date?: string;
-
-  @ApiPropertyOptional({ example: "Lisbon" })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   location?: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  date?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  time?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  @Min(0)
+  price?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  @Min(1)
+  maxCapacity?: number;
 }

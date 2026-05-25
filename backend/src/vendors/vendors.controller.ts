@@ -17,6 +17,7 @@ import { CreateVendorDto } from './dto/create-vendor.dto';
 import { VendorsService } from './vendors.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { UpdateVendorProfileDto } from './dto/update-vendor.dto';
 
 @Controller('vendors')
 @ApiBearerAuth('access-token')
@@ -41,6 +42,16 @@ export class VendorsController {
     return this.vendorsService.findAll();
   }
 
+    // -------------------------
+  // VENDOR - GET OWN PROFILE
+  // -------------------------
+  @Get('me')
+  @UseGuards(JwtGuard, RolesGuard)
+  @RolesDecorator(Roles.VENDOR)
+  async me(@CurrentUser() user: any) {
+    return this.vendorsService.findByUserId(Number(user.id));
+  }
+
   // -------------------------
   // ADMIN - GET VENDOR BY ID
   // -------------------------
@@ -48,17 +59,7 @@ export class VendorsController {
   @UseGuards(JwtGuard, RolesGuard)
   @RolesDecorator(Roles.ADMIN)
   findOne(@Param('id') id: string) {
-    return this.vendorsService.findOne(+id);
-  }
-
-  // -------------------------
-  // VENDOR - GET OWN PROFILE
-  // -------------------------
-  @Get('me')
-  @UseGuards(JwtGuard, RolesGuard)
-  @RolesDecorator(Roles.VENDOR)
-  me(@CurrentUser() user: any) {
-    return this.vendorsService.findByUserId(user.id);
+    return this.vendorsService.findByUserId(+id);
   }
 
   // -------------------------
@@ -69,7 +70,7 @@ export class VendorsController {
   @RolesDecorator(Roles.VENDOR)
   updateMe(
     @CurrentUser() user: any,
-    @Body() dto: CreateVendorDto,
+    @Body() dto: UpdateVendorProfileDto,
   ) {
     return this.vendorsService.updateByUserId(user.id, dto);
   }
