@@ -1,0 +1,164 @@
+<div class="page-shell">
+  <nav class="navbar">
+    <div class="nav-brand">
+      <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo" />
+    </div>
+
+    <ul class="nav-links">
+      <li><a routerLink="/home" fragment="discover">Discover</a></li>
+      <li><a routerLink="/home" fragment="events">Events</a></li>
+      <li><a routerLink="/home" fragment="community">Community</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <a routerLink="/login-users" class="btn-nav-outline nav-link-btn" *ngIf="!user">Sign in</a>
+      <a routerLink="/login-vendors" class="btn-nav-primary nav-link-btn" *ngIf="!user">Promoter</a>
+      
+      <div class="profile-dropdown" *ngIf="user" (click)="toggleMenu()">
+        <span class="user-display-name">👋 {{ user.name || 'User' }}</span>
+      </div>
+    </div>
+
+    <ul class="dropdown-flat" *ngIf="isMenuOpen && user">
+      <li><a routerLink="/user/profile">O meu perfil</a></li>
+      <li><a routerLink="/user/my-tickets">Meus bilhetes</a></li>
+      <li class="divider"></li>
+      <li><button (click)="onLogout()">Sair</button></li>
+    </ul>
+  </nav>
+
+  <div class="detail-main-wrapper">
+    <div class="glow-orb orb-top-left"></div>
+    <div class="glow-orb orb-middle-right"></div>
+    <div class="glow-orb orb-bottom-left"></div>
+
+    <header class="detail-navigation">
+      <a routerLink="/home" class="btn-back-link">
+        <span class="arrow">&larr;</span> Back to events
+      </a>
+      <button class="btn-share-action" (click)="shareEvent()">
+        Share Event
+      </button>
+    </header>
+
+    <div *ngIf="loading" class="state-container">
+      <div class="spinner"></div>
+      <p>Loading event details...</p>
+    </div>
+
+    <div *ngIf="error" class="state-container error-state">
+      <p>{{ error }}</p>
+      <a routerLink="/home" class="btn-primary-home-match">Explore other events</a>
+    </div>
+
+    <main *ngIf="!loading && !error && event" class="detail-main-layout">
+      
+      <section class="main-info-column">
+        <div class="detail-banner-wrapper">
+          <img 
+            [src]="event.bannerUrl || fallbackBanner" 
+            [alt]="event.name" 
+            (error)="onImageError($event)"
+            class="detail-banner-img"
+          />
+          <span class="stock-badge" [ngClass]="getStockClass(event)">
+            {{ getStockLabel(event) }}
+          </span>
+        </div>
+
+        <div class="detail-meta-header">
+          <span class="detail-category">FOMO Exclusive Drop</span>
+          <h1 class="detail-main-title">{{ event.name }}</h1>
+        </div>
+
+        <div class="detail-quick-meta-grid">
+          <div class="quick-meta-card">
+            <span class="meta-title">Location</span>
+            <span class="meta-data">{{ event.location }}</span>
+          </div>
+          
+          <div class="quick-meta-card">
+            <span class="meta-title">Date & Time</span>
+            <span class="meta-data">{{ event.date | date:'EEEE, MMM dd • HH:mm' }}</span>
+          </div>
+        </div>
+
+        <div class="detail-content-block">
+          <h3 class="block-title">About this event</h3>
+          <p class="block-text">{{ event.description }}</p>
+        </div>
+
+        <div class="detail-content-block organizer-section">
+          <h3 class="block-title">Hosted by</h3>
+          <div class="organizer-profile-card">
+            <div class="organizer-avatar-circle">
+              {{ (event.businessName || 'Promoter')[0] | uppercase }}
+            </div>
+            <div class="organizer-info-meta">
+              <h4>{{ event.businessName || 'FOMO Official Promoter' }}</h4>
+              <span class="verified-host-badge">Verified Host</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-content-block guidelines-box">
+          <h3 class="block-title">Important event rules</h3>
+          <ul class="guidelines-list">
+            <li>• Validated for guests over 18 years old.</li>
+            <li>• Subject to capacity limits and venue security guidelines.</li>
+            <li>• Keep your digital token accessible via app on presentation.</li>
+          </ul>
+        </div>
+      </section>
+
+      <aside class="sidebar-checkout-column">
+        <div class="checkout-sticky-card">
+          <span class="widget-eyebrow">Official Access</span>
+          
+          <div class="widget-price-row">
+            <span class="starting-label">Price per ticket</span>
+            <h2 class="widget-main-price">
+              {{ +event.ticketPrice === 0 ? 'Free' : ('€' + event.ticketPrice) }}
+            </h2>
+          </div>
+
+          <hr class="widget-divider" />
+
+          <div *ngIf="!isSoldOut" class="widget-action-area">
+            <div class="qty-selector-row">
+              <label for="ticketQtySelect">Quantity</label>
+              <div class="qty-custom-dropdown-wrap">
+                <select id="ticketQtySelect" [(ngModel)]="ticketQuantity" [disabled]="isSubmittingOrder" class="qty-native-select">
+                  <option *ngFor="let n of [1,2,3,4,5]" [value]="n">{{ n }} ticket{{ n > 1 ? 's' : '' }}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="total-summary-display">
+              <span class="summary-label">Total price</span>
+              <span class="summary-value-price">{{ totalPrice === 0 ? 'Free' : ('€' + totalPrice.toFixed(2)) }}</span>
+            </div>
+
+            <button (click)="confirmPurchase()" [disabled]="isSubmittingOrder" class="btn-primary-home-match">
+              {{ isSubmittingOrder ? 'Processing secure order...' : 'Get Ticket' }}
+            </button>
+            
+            <span class="checkout-secure-hint">Secure transaction processed by FOMO Core.</span>
+          </div>
+
+          <div *ngIf="isSoldOut" class="widget-soldout-state">
+            <p class="soldout-main-txt">Sold Out</p>
+            <p class="soldout-sub-txt">Tickets for this event are no longer available.</p>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer-detail-override">
+      <div class="footer-bottom">
+        <span>&copy; 2026 FOMO. All rights reserved.</span>
+        <span>Ticketing platform</span>
+      </div>
+    </footer>
+  </div>
+</div>

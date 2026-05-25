@@ -1,150 +1,90 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http'; // 🌟 Mantém apenas o HttpClient
+import { FormsModule } from '@angular/forms'; 
 import { AuthService } from '../services/auth.service'; 
+import { ToastService } from '../services/toast.service';
 
 interface EventItem {
   id: number;
-  title: string;
-  subtitle: string;
-  category: string;
+  vendorId: number;
+  name: string;
+  description: string;
   location: string;
   date: string;
-  price: string;
-  stock: 'high' | 'medium' | 'low' | 'sold';
-  image: string;
-  featured?: boolean;
-  tags: string[];
+  bannerUrl: string | null;
+  ticketPrice: string;
+  maxCapacity: number;
+  ticketsSold: number;
+  status: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule], // 🌟 HttpClientModule RETIRADO DAQUI para ativar o Interceptor!
   templateUrl: './home.html',
   styleUrls: ['./home.css']
 })
 export class HomeComponent implements OnInit {
+  // --- CONFIGURAÇÃO CENTRAL DA API ---
+  private readonly apiUrl = 'http://localhost:3000';
+
   // --- VARIÁVEIS DE PERFIL ---
   user: any = null;
   isMenuOpen = false;
 
   // --- VARIÁVEIS DE INTERFACE ---
-  categories: string[] = [
-    'All',
-    'House',
-    'Techno',
-    'Afro',
-    'Sunset',
-    'Student',
-    'Premium',
-    'Live',
-    'Beach',
-    'Rooftop'
-  ];
-
-  activeCategory = 'All';
+  vibes: string[] = ['All', 'House', 'Techno', 'Sunset', 'Student', 'Premium', 'Live', 'Beach', 'Rooftop'];
+  activeVibe = 'All';
   searchQuery = '';
+  tickerItems: string[] = ['last tickets live now', 'exclusive drops', 'faro nightlife', 'student parties'];
 
-  tickerItems: string[] = [
-    'last tickets live now',
-    'exclusive drops',
-    'faro nightlife',
-    'student parties',
-    'premium events',
-    'real-time access'
-  ];
+  // ESTADO MASTER LOCAL
+  events: EventItem[] = [];
 
-  // --- LISTA DE EVENTOS ---
-  events: EventItem[] = [
-    {
-      id: 1,
-      title: 'FOMO Rooftop Opening',
-      subtitle: 'The night everyone will talk about',
-      category: 'Premium',
-      location: 'Faro Skyline Club',
-      date: 'Fri, Apr 03 • 23:30',
-      price: '€18',
-      stock: 'high',
-      image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
-      featured: true,
-      tags: ['Rooftop', 'Exclusive', 'House']
-    },
-    {
-      id: 2,
-      title: 'Afterclass Rush',
-      subtitle: 'Student energy, premium look',
-      category: 'Student',
-      location: 'Dock 9, Faro',
-      date: 'Sat, Apr 04 • 22:00',
-      price: '€10',
-      stock: 'medium',
-      image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80',
-      tags: ['Afro', 'Club']
-    },
-    {
-      id: 3,
-      title: 'Purple District',
-      subtitle: 'Late night deep house selection',
-      category: 'House',
-      location: 'Lisbon Warehouse',
-      date: 'Sun, Apr 05 • 00:00',
-      price: '€22',
-      stock: 'high',
-      image: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=80',
-      tags: ['House', 'Deep House']
-    },
-    {
-      id: 4,
-      title: 'Atlantic Sunset Ritual',
-      subtitle: 'Golden hour to moonlight',
-      category: 'Sunset',
-      location: 'Praia de Faro',
-      date: 'Sun, Apr 05 • 18:30',
-      price: 'Free',
-      stock: 'low',
-      image: 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?auto=format&fit=crop&w=1200&q=80',
-      tags: ['Sunset', 'Beach']
-    },
-    {
-      id: 5,
-      title: 'Hard Rush 3AM',
-      subtitle: 'Raw energy only',
-      category: 'Techno',
-      location: 'Underground Room',
-      date: 'Fri, Apr 10 • 03:00',
-      price: '€16',
-      stock: 'sold',
-      image: 'https://images.unsplash.com/photo-1571266028243-8c6b9cdbf34b?auto=format&fit=crop&w=1200&q=80',
-      tags: ['Hard Techno', 'Industrial']
-    },
-    {
-      id: 6,
-      title: 'Velvet Live Showcase',
-      subtitle: 'Live set, premium crowd',
-      category: 'Live',
-      location: 'Secret Garden, Lisbon',
-      date: 'Thu, Apr 09 • 21:00',
-      price: '€25',
-      stock: 'high',
-      image: 'https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=80',
-      tags: ['Live', 'Premium']
-    }
-  ];
+  // Imagem de fallback caso o evento não tenha banner cadastrado ou dê erro
+  readonly fallbackBanner = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=1000'; 
+
+  // --- VARIÁVEIS DO POP-UP DE ENCOMENDA MÁGICA ---
+  isModalOpen = false;
+  selectedEvent: EventItem | null = null;
+  ticketQuantity = 1;
+  isSubmittingOrder = false;
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
-    // Adicionado ': any' no userData para corrigir o erro de TS
     this.authService.currentUser$.subscribe((userData: any) => {
       this.user = userData;
+      console.log('Utilizador na Home:', this.user);
+    });
+
+    this.fetchApprovedEvents();
+  }
+
+  fetchApprovedEvents(): void {
+    this.http.get<EventItem[]>(`${this.apiUrl}/events`).subscribe({
+      next: (data) => {
+        this.events = data;
+        console.log('Eventos carregados com sucesso:', this.events.length);
+        this.cdr.detectChanges(); 
+      },
+      error: (err) => {
+        console.error('Erro ao carregar eventos da API', err);
+      }
     });
   }
 
-  // --- MÉTODOS DE AUTENTICAÇÃO ---
   onLogout(): void {
     this.authService.logout();
     this.isMenuOpen = false;
@@ -152,64 +92,138 @@ export class HomeComponent implements OnInit {
     this.router.navigate(['/home']);
   }
 
-  // --- MÉTODOS DE FILTRAGEM ---
-  setCategory(category: string): void {
-    this.activeCategory = category;
-  }
-
   onSearch(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.searchQuery = input.value.toLowerCase().trim();
   }
 
+  setVibe(vibe: string): void {
+    this.activeVibe = vibe;
+  }
+
   get filteredEvents(): EventItem[] {
-    return this.events.filter((event) => {
-      const matchesCategory =
-        this.activeCategory === 'All' ||
-        event.category === this.activeCategory ||
-        event.tags.some(tag => tag.toLowerCase().includes(this.activeCategory.toLowerCase()));
+    const filtered = this.events.filter((event) => {
+      const name = event.name?.toLowerCase() || '';
+      const desc = event.description?.toLowerCase() || '';
+      const loc = event.location?.toLowerCase() || '';
+
+      const matchesVibe =
+        this.activeVibe === 'All' ||
+        name.includes(this.activeVibe.toLowerCase()) ||
+        desc.includes(this.activeVibe.toLowerCase()) ||
+        loc.includes(this.activeVibe.toLowerCase());
 
       const matchesSearch =
         !this.searchQuery ||
-        event.title.toLowerCase().includes(this.searchQuery) ||
-        event.subtitle.toLowerCase().includes(this.searchQuery) ||
-        event.location.toLowerCase().includes(this.searchQuery) ||
-        event.tags.some(tag => tag.toLowerCase().includes(this.searchQuery));
+        name.includes(this.searchQuery) ||
+        desc.includes(this.searchQuery) ||
+        loc.includes(this.searchQuery);
 
-      return matchesCategory && matchesSearch;
+      return matchesVibe && matchesSearch;
     });
+
+    if (this.activeVibe === 'All' && !this.searchQuery) {
+      return filtered.slice(0, 12);
+    }
+    return filtered;
   }
 
-  // --- MÉTODOS AUXILIARES DE INTERFACE ---
   get featuredEvent(): EventItem | undefined {
-    return this.filteredEvents.find(event => event.featured) ?? this.filteredEvents[0];
+    return this.filteredEvents[0];
   }
 
   get regularEvents(): EventItem[] {
     return this.filteredEvents.filter(event => event.id !== this.featuredEvent?.id);
   }
 
-  getStockLabel(stock: EventItem['stock']): string {
-    switch (stock) {
-      case 'high': return 'Available';
-      case 'medium': return 'Selling fast';
-      case 'low': return 'Last spots';
-      case 'sold': return 'Sold out';
+  getStockLabel(event: EventItem): string {
+    const available = event.maxCapacity - event.ticketsSold;
+    if (available <= 0) return 'Sold out';
+    if (available <= event.maxCapacity * 0.15) return 'Last spots';
+    if (available <= event.maxCapacity * 0.40) return 'Selling fast';
+    return 'Available';
+  }
+
+  getStockClass(event: EventItem): string {
+    const label = this.getStockLabel(event);
+    switch (label) {
+      case 'Available': return 'stock-high';
+      case 'Selling fast': return 'stock-medium';
+      case 'Last spots': return 'stock-low';
+      case 'Sold out': return 'stock-sold';
       default: return '';
     }
   }
 
-  getStockClass(stock: EventItem['stock']): string {
-    switch (stock) {
-      case 'high': return 'stock-high';
-      case 'medium': return 'stock-medium';
-      case 'low': return 'stock-low';
-      case 'sold': return 'stock-sold';
-      default: return '';
-    }
+  onImageError(event: Event): void {
+    const element = event.target as HTMLImageElement;
+    element.src = this.fallbackBanner;
   }
 
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
+  }
+
+  // --- GESTÃO DO POP-UP DE ENCOMENDA MÁGICA ---
+  openReservationModal(eventItem: EventItem, mouseEvent: MouseEvent): void {
+    console.log('Botão clicado! Tentando abrir modal para:', eventItem.name);
+    mouseEvent.stopPropagation(); 
+
+    this.selectedEvent = eventItem;
+    this.ticketQuantity = 1;
+    this.isModalOpen = true;
+    
+    this.cdr.detectChanges(); 
+  }
+
+  closeReservationModal(): void {
+    this.isModalOpen = false;
+    this.selectedEvent = null;
+    this.cdr.detectChanges();
+  }
+
+  get totalPrice(): number {
+    if (!this.selectedEvent) return 0;
+    return parseFloat(this.selectedEvent.ticketPrice) * this.ticketQuantity;
+  }
+
+  confirmReservation(): void {
+    if (!this.selectedEvent || this.isSubmittingOrder) return;
+
+    this.isSubmittingOrder = true;
+
+    const orderPayload = {
+      eventId: this.selectedEvent.id,
+      quantity: this.ticketQuantity
+    };
+
+    console.log('A enviar pedido de checkout (via Interceptor Global) para:', orderPayload);
+
+    // 🌟 Pedido HTTP 100% limpo! O Interceptor Global injeta o cabeçalho automaticamente
+    this.http.post(`${this.apiUrl}/orders/checkout`, orderPayload).subscribe({
+      next: (response: any) => {
+        this.toast.show('Reserva efetuada com sucesso! Os teus bilhetes já foram gerados.', 'success');
+        this.isSubmittingOrder = false;
+        
+        if (this.selectedEvent) {
+          this.selectedEvent.ticketsSold += this.ticketQuantity;
+        }
+        
+        this.closeReservationModal();
+        this.router.navigate(['/user/my-tickets']);
+      },
+      error: (err) => {
+        console.error('Erro detetado no checkout:', err);
+        
+        if (err.status === 401) {
+          this.toast.show('Sessão expirada ou inválida. Por favor, faz login novamente.', 'error');
+          this.router.navigate(['/login-users']);
+        } else {
+          this.toast.show('Não foi possível completar a reserva.', 'error');
+        }
+        
+        this.isSubmittingOrder = false;
+      }
+    });
   }
 }

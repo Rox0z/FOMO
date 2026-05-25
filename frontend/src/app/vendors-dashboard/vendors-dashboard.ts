@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
+import { ToastService } from '../services/toast.service';
 
 export interface VendorEvent {
   id: number;
@@ -61,7 +62,8 @@ export class VendorsDashboard implements OnInit {
   constructor(
     private http: HttpClient, 
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private toast: ToastService
   ) {}
 
   ngOnInit() {
@@ -91,6 +93,7 @@ export class VendorsDashboard implements OnInit {
       error: (err) => {
         console.error('Erro ao carregar o perfil do vendor:', err);
         this.vendorData = {'Erro ao Carregar': 'Tente novamente mais tarde.'};
+        this.toast.show('Erro ao carregar o perfil do vendor.');
       }
     });
   }
@@ -101,7 +104,10 @@ export class VendorsDashboard implements OnInit {
         this.globalStats = data;
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Erro ao carregar estatísticas:', err)
+      error: (err) => {
+        console.error('Erro ao carregar estatísticas:', err);
+        this.toast.show('Erro ao carregar estatísticas.');
+      }
     });
   }
 
@@ -111,7 +117,10 @@ export class VendorsDashboard implements OnInit {
         this.events = data;
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Erro ao carregar os eventos:', err)
+      error: (err) => {
+        console.error('Erro ao carregar os eventos:', err);
+        this.toast.show('Erro ao carregar os eventos.');
+      }
     });
   }
 
@@ -142,13 +151,13 @@ export class VendorsDashboard implements OnInit {
 
     this.http.post(`${this.apiUrl}/events`, formData, this.getAuthHeaders()).subscribe({
       next: () => {
-        alert('Evento submetido com sucesso!');
+        this.toast.show('Evento submetido com sucesso!');
         this.loadMyEvents();
         this.switchTab('events');
       },
       error: (err) => {
         console.error(err);
-        alert('Erro ao criar evento');
+        this.toast.show('Erro ao criar evento');
       }
     });
   }
@@ -176,7 +185,7 @@ export class VendorsDashboard implements OnInit {
     // Enviamos o formData no PUT em vez do updatedData
     this.http.put(`${this.apiUrl}/events/${this.selectedEvent.id}/request-edit`, formData, this.getAuthHeaders()).subscribe({
       next: () => {
-        alert('Alterações enviadas! O evento atual continuará live sem alterações até o Admin aprovar.');
+        this.toast.show('Alterações enviadas! O evento atual continuará live sem alterações até o Admin aprovar.');
         this.isEditing = false;
         this.selectedFile = null; // Limpa o ficheiro selecionado para a próxima ação
         this.loadMyEvents();
@@ -184,7 +193,7 @@ export class VendorsDashboard implements OnInit {
       },
       error: (err) => {
         console.error('Erro ao submeter alteração de evento:', err);
-        alert('Erro ao processar o seu pedido de alteração.');
+        this.toast.show('Erro ao processar o seu pedido de alteração.');
       }
     });
   }
@@ -192,12 +201,12 @@ export class VendorsDashboard implements OnInit {
   updateProfile(profileData: any): void {
     this.http.patch(`${this.apiUrl}/vendors/me`, profileData, this.getAuthHeaders()).subscribe({
       next: () => {
-        alert('Perfil atualizado com sucesso!');
+        this.toast.show('Perfil atualizado com sucesso!');
         this.loadProfile();
       },
       error: (err) => {
         console.error('Erro ao atualizar perfil:', err);
-        alert('Erro ao atualizar o perfil comercial.');
+        this.toast.show('Erro ao atualizar o perfil comercial.');
       }
     });
   }

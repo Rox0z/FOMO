@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-login-vendors',
@@ -20,7 +21,8 @@ export class LoginVendors {
 
   constructor(
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private toast: ToastService
   ) {}
 
   togglePassword(): void {
@@ -31,7 +33,7 @@ export class LoginVendors {
     this.errorMessage = '';
 
     if (!this.email || !this.password) {
-      this.errorMessage = 'Preencha todos os campos!';
+      this.toast.show('Preencha todos os campos!', 'error');
       return;
     }
 
@@ -54,27 +56,27 @@ export class LoginVendors {
                 this.router.navigate(['/vendor/dashboard']);
               } else {
                 this.isLoading = false;
-                this.errorMessage = 'A sua conta de vendedor ainda não foi aprovada pelo admin.';
+                this.toast.show('A sua conta de vendedor ainda não foi aprovada pelo admin.', 'error');
               }
             },
             error: (err) => {
               this.isLoading = false;
-              this.errorMessage = 'Erro ao verificar o estado da sua conta.';
+              this.toast.show('Erro ao verificar o estado da sua conta.', 'error');
             }
           });
 
         } else {
           this.isLoading = false;
-          this.errorMessage = 'Acesso negado. Apenas para vendedores.';
+          this.toast.show('Acesso negado. Apenas para vendedores.', 'error');
           localStorage.clear();
         }
       },
       (error) => {
         this.isLoading = false;
         if (error.status === 401) {
-          this.errorMessage = 'Email ou password inválidos.';
+          this.toast.show('Email ou password inválidos.', 'error');
         } else {
-          this.errorMessage = 'Erro ao fazer login. Tenta novamente.';
+          this.toast.show('Erro ao fazer login. Tenta novamente.', 'error');
         }
       }
     );

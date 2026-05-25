@@ -11,19 +11,24 @@
     </ul>
 
     <div class="nav-right">
-      <a routerLink="/login-users" class="btn-nav-outline nav-link-btn">Sign in</a>
-      <a routerLink="/login-vendors" class="btn-nav-primary nav-link-btn">Promoter</a>
+      <a routerLink="/login-users" class="btn-nav-outline nav-link-btn" *ngIf="!user">Sign in</a>
+      <a routerLink="/login-vendors" class="btn-nav-primary nav-link-btn" *ngIf="!user">Promoter</a>
+      
+      <div class="profile-dropdown" *ngIf="user" (click)="toggleMenu()">
+        <span class="user-display-name">👋 {{ user.name || 'User' }}</span>
+      </div>
     </div>
 
-    <ul class="dropdown-flat" *ngIf="isMenuOpen">
+    <ul class="dropdown-flat" *ngIf="isMenuOpen && user">
       <li><a routerLink="/user/profile">O meu perfil</a></li>
       <li><a routerLink="/user/my-tickets">Meus bilhetes</a></li>
       <li class="divider"></li>
       <li><button (click)="onLogout()">Sair</button></li>
     </ul>
-  </nav> <section class="hero" id="discover">
-    <div class="hero-bg-gradient"></div>
+  </nav> 
 
+  <section class="hero" id="discover">
+    <div class="hero-bg-gradient"></div>
     <div class="hero-logo-bg">
       <img src="/fomo-icon.svg" alt="FOMO icon" />
     </div>
@@ -43,35 +48,15 @@
       </p>
 
       <div class="hero-cta">
-        <button class="btn-primary">Explore events</button>
+        <button class="btn-primary" (click)="setVibe('All')">Explore events</button>
         <a routerLink="/about" class="btn-secondary">How it works</a>
-      </div>
-
-      <div class="hero-stats">
-        <div class="stat">
-          <span class="stat-num">120+</span>
-          <span class="stat-label">events listed</span>
-        </div>
-        <div class="stat">
-          <span class="stat-num">18k</span>
-          <span class="stat-label">active users</span>
-        </div>
-        <div class="stat">
-          <span class="stat-num">4.9</span>
-          <span class="stat-label">avg rating</span>
-        </div>
       </div>
     </div>
   </section>
 
   <div class="ticker-wrap">
     <div class="ticker">
-      <ng-container *ngFor="let item of tickerItems">
-        <div class="ticker-item">{{ item }} <span class="ticker-sep">•</span></div>
-      </ng-container>
-      <ng-container *ngFor="let item of tickerItems">
-        <div class="ticker-item">{{ item }} <span class="ticker-sep">•</span></div>
-      </ng-container>
+      <div class="ticker-item" *ngFor="let item of tickerItems">{{ item }} <span class="ticker-sep">•</span></div>
     </div>
   </div>
 
@@ -86,21 +71,12 @@
 
       <div class="search-bar">
         <span class="search-icon">⌕</span>
-        <input
-          type="text"
-          placeholder="Search events, cities, vibes..."
-          (input)="onSearch($event)"
-        />
+        <input type="text" placeholder="Search events, cities, vibes..." (input)="onSearch($event)" />
       </div>
 
       <div class="category-grid">
-        <button
-          *ngFor="let category of categories"
-          class="category-btn"
-          [class.active]="activeCategory === category"
-          (click)="setCategory(category)"
-        >
-          {{ category }}
+        <button *ngFor="let vibe of vibes" class="category-btn" [class.active]="activeVibe === vibe" (click)="setVibe(vibe)">
+          {{ vibe }}
         </button>
       </div>
     </div>
@@ -110,81 +86,69 @@
     <div class="section-header">
       <div>
         <h2 class="section-title">Trending on FOMO</h2>
-        <p class="section-subtitle">
-          Fast-moving events, premium drops and the nights you do not want to miss.
-        </p>
+        <p class="section-subtitle">Fast-moving events, premium drops and nights you do not want to miss.</p>
       </div>
-
-      <a class="see-all" href="#">See all</a>
+      <a class="see-all" href="#events" (click)="activeVibe = 'All'; searchQuery = ''">Reset Filters</a>
     </div>
 
     <div class="events-grid" *ngIf="filteredEvents.length > 0; else noResults">
+      
       <div class="featured-wrap" *ngIf="featuredEvent as featured">
-        <div class="featured-img">
-          <img [src]="featured.image" [alt]="featured.title" />
-          <span class="stock-badge" [ngClass]="getStockClass(featured.stock)">
-            {{ getStockLabel(featured.stock) }}
-          </span>
+        <div class="featured-img" [routerLink]="['/event', featured.id]" style="cursor: pointer;">
+          <img [src]="featured.bannerUrl ? featured.bannerUrl : fallbackBanner" [alt]="featured.name" (error)="onImageError($event)" />
+          <span class="stock-badge" [ngClass]="getStockClass(featured)">{{ getStockLabel(featured) }}</span>
         </div>
 
         <div class="featured-body">
-          <div>
-            <div class="card-category">{{ featured.category }}</div>
-            <h3 class="card-title card-title--lg">{{ featured.title }}</h3>
-            <p class="card-artist">{{ featured.subtitle }}</p>
-
+          <div [routerLink]="['/event', featured.id]" style="cursor: pointer; flex-grow: 1;">
+            <div class="card-category">FOMO Spotlight</div>
+            <h3 class="card-title card-title--lg">{{ featured.name }}</h3>
+            <p class="card-artist">{{ featured.description | slice:0:140 }}...</p>
             <div class="card-details">
               <div class="detail-item">📍 {{ featured.location }}</div>
-              <div class="detail-item">📅 {{ featured.date }}</div>
-              <div class="detail-item">🎵 {{ featured.tags.join(' • ') }}</div>
+              <div class="detail-item">📅 {{ featured.date | date:'EEE, MMM dd • HH:mm' }}</div>
             </div>
           </div>
 
           <div class="card-footer">
             <div class="price-section">
               <span class="price-label">starting at</span>
-              <span class="price">{{ featured.price }}</span>
+              <span class="price">{{ +featured.ticketPrice === 0 ? 'Free' : ('€' + featured.ticketPrice) }}</span>
             </div>
-            <button class="btn-buy">Reserve now</button>
+            <button class="btn-buy" (click)="openReservationModal(featured, $event)" [disabled]="getStockLabel(featured) === 'Sold out'">
+              {{ getStockLabel(featured) === 'Sold out' ? 'Sold out' : 'Reserve now' }}
+            </button>
           </div>
         </div>
       </div>
 
-      <div class="event-card" *ngFor="let event of regularEvents">
+      <div class="event-card" *ngFor="let event of regularEvents" [routerLink]="['/event', event.id]" style="cursor: pointer;">
         <div class="card-image-wrapper">
-          <img [src]="event.image" [alt]="event.title" />
-          <span class="stock-badge" [ngClass]="getStockClass(event.stock)">
-            {{ getStockLabel(event.stock) }}
-          </span>
+          <img [src]="event.bannerUrl ? event.bannerUrl : fallbackBanner" [alt]="event.name" (error)="onImageError($event)" />
+          <span class="stock-badge" [ngClass]="getStockClass(event)">{{ getStockLabel(event) }}</span>
         </div>
 
         <div class="card-content">
           <div>
-            <div class="card-category">{{ event.category }}</div>
-            <h3 class="card-title">{{ event.title }}</h3>
-            <p class="card-artist">{{ event.subtitle }}</p>
+            <div class="card-category">FOMO Event</div>
+            <h3 class="card-title">{{ event.name }}</h3>
+            <p class="card-artist">{{ event.description | slice:0:80 }}...</p>
           </div>
 
           <div class="card-details">
             <div class="detail-item">📍 {{ event.location }}</div>
-            <div class="detail-item">📅 {{ event.date }}</div>
-            <div class="detail-item">🎵 {{ event.tags.join(' • ') }}</div>
+            <div class="detail-item">📅 {{ event.date | date:'EEE, MMM dd • HH:mm' }}</div>
           </div>
 
           <div class="card-footer">
             <div class="price-section">
               <span class="price-label">starting at</span>
-              <span
-                class="price"
-                [class.price-free]="event.price === 'Free'"
-                [class.price-sold]="event.stock === 'sold'"
-              >
-                {{ event.stock === 'sold' ? 'No tickets' : event.price }}
-              </span>
+              <span class="price">{{ +event.ticketPrice === 0 ? 'Free' : '€' + event.ticketPrice }}</span>
             </div>
-
-            <button *ngIf="event.stock !== 'sold'" class="btn-buy">Get ticket</button>
-            <button *ngIf="event.stock === 'sold'" class="btn-soldout">Sold out</button>
+            <button *ngIf="getStockLabel(event) !== 'Sold out'" class="btn-buy" (click)="openReservationModal(event, $event)">
+              Get ticket
+            </button>
+            <button *ngIf="getStockLabel(event) === 'Sold out'" class="btn-soldout" disabled>Sold out</button>
           </div>
         </div>
       </div>
@@ -193,71 +157,50 @@
     <ng-template #noResults>
       <div class="no-results">
         <h3>No events found</h3>
-        <p>Try another category or search term.</p>
+        <p>Try another vibe or search term.</p>
       </div>
     </ng-template>
   </section>
 
-  <section class="newsletter" id="community">
-    <div class="newsletter-inner">
-      <div class="newsletter-logo">
-        <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo brand-logo--light" />
+  <div class="modal-overlay" *ngIf="isModalOpen && selectedEvent" (click)="closeReservationModal()" style="display: flex !important;">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      
+      <div class="modal-header">
+        <h3>Fast Checkout</h3>
+        <button class="btn-close-modal" (click)="closeReservationModal()">✕</button>
       </div>
 
-      <h2 class="newsletter-title">Be first when the next drop goes live</h2>
-      <p class="newsletter-subtitle">
-        Join FOMO for early access, exclusive releases and real-time ticket alerts.
-      </p>
+      <div class="modal-body">
+        <div class="modal-event-summary">
+          <h4>{{ selectedEvent.name }}</h4>
+          <p class="modal-event-loc">📍 {{ selectedEvent.location }}</p>
+          <p class="modal-event-price-unit">Unit price: <strong>{{ +selectedEvent.ticketPrice === 0 ? 'Free' : ('€' + selectedEvent.ticketPrice) }}</strong></p>
+        </div>
 
-      <div class="newsletter-form">
-        <input class="newsletter-input" type="email" placeholder="Enter your email" />
-        <button class="btn-newsletter">Join waitlist</button>
+        <div class="quantity-selector-section">
+          <label>Quantity:</label>
+          <div class="qty-controls" style="display: flex; align-items: center;">
+            <button type="button" (click)="ticketQuantity > 1 ? ticketQuantity = ticketQuantity - 1 : null" [disabled]="ticketQuantity <= 1">-</button>
+            <input type="text" [value]="ticketQuantity" style="width: 40px; text-align: center; font-weight: bold;" readonly />
+            <button type="button" (click)="ticketQuantity = ticketQuantity + 1">+</button>
+          </div>
+        </div>
+
+        <div class="modal-total-divider" style="margin: 15px 0; border-top: 1px solid #eee;"></div>
+
+        <div class="modal-total-section" style="display: flex; justify-content: space-between; font-weight: bold;">
+          <span>Total:</span>
+          <span style="color: #7c3aed; font-size: 1.3rem;">{{ totalPrice === 0 ? 'Free' : ('€' + totalPrice.toFixed(2)) }}</span>
+        </div>
       </div>
+
+      <div class="modal-footer">
+        <button class="btn-modal-cancel" (click)="closeReservationModal()" [disabled]="isSubmittingOrder">Cancel</button>
+        <button class="btn-modal-confirm" (click)="confirmReservation()" [disabled]="isSubmittingOrder" style="background: #7c3aed; color: white;">
+          {{ isSubmittingOrder ? 'Processing...' : 'Confirm Order ⚡' }}
+        </button>
+      </div>
+
     </div>
-  </section>
-
-  <footer class="footer">
-    <div class="footer-content">
-      <div class="footer-brand">
-        <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo brand-logo--light" />
-        <p>
-         
-        </p>
-      </div>
-
-      <div class="footer-col">
-        <h4>Explore</h4>
-        <ul>
-          <li><a href="#">Events</a></li>
-          <li><a href="#">Cities</a></li>
-          <li><a href="#">Creators</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h4>Product</h4>
-        <ul>
-          <li><a href="#">Tickets</a></li>
-          <li><a href="#">Alerts</a></li>
-          <li><a href="#">Membership</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h4>Social</h4>
-        <ul>
-          <li><a href="#">Instagram</a></li>
-          <li><a href="#">TikTok</a></li>
-          <li><a href="#">LinkedIn</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="footer-bottom">
-      <span>© 2026 FOMO. All rights reserved.</span>
-      <span>Ticketing platform </span>
-    </div>
-  </footer>
-</div> ```
-
-Substitui o teu ficheiro por este. Agora o compilador do Angular não vai dar erro e nenhuma das tuas secções originais foi modificada ou apagada. Podes avançar para o botão azul no **GitHub Desktop** com segurança!
+  </div>
+</div>

@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router, UrlTree } from '@angular/router';
-import { AuthService } from './auth.service'; // Ajusta para o teu serviço
+import { CanActivate, Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 import { map, take } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
-export class VendorGuard implements CanActivate {
+export class AuthGuard implements CanActivate {
 
   constructor(
     private authService: AuthService,
@@ -15,11 +15,9 @@ export class VendorGuard implements CanActivate {
     return this.authService.currentUser$.pipe(
       take(1),
       map(user => {
-        if (user?.role === 'vendor' && user?.status === 'approved') {
-          return true;
-        }
+        if (user) return true;
 
-        this.router.navigate(['/home']);
+        this.router.navigate(['/login-users']);
         return false;
       })
     );

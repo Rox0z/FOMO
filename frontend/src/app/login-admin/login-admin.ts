@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-login-admin', // Mudei para admin para não dar conflito
@@ -21,6 +22,7 @@ export class LoginAdmin {
   constructor(
     private router: Router,
     private authService: AuthService,
+    private toastService: ToastService
   ) {}
 
   togglePassword() {
@@ -32,7 +34,7 @@ export class LoginAdmin {
 
     // 1. Validação igual ao LoginUsers
     if (!this.email || !this.password) {
-      this.errorMessage = 'Preencha todos os campos!';
+      this.toastService.show('Preencha todos os campos!', 'error');
       return;
     }
 
@@ -58,7 +60,7 @@ export class LoginAdmin {
         } else {
           // Se os dados estiverem certos mas NÃO for admin
           this.isLoading = false;
-          this.errorMessage = 'Acesso negado. Apenas administradores.';
+          this.toastService.show('Acesso negado. Apenas administradores.', 'error');
           localStorage.clear(); // Limpa tudo por segurança
         }
       },
@@ -68,9 +70,9 @@ export class LoginAdmin {
         
         // Tratamento de erro igual ao LoginUsers
         if (error.status === 401) {
-          this.errorMessage = 'Email ou password inválidos.';
+          this.toastService.show('Email ou password inválidos.', 'error');
         } else {
-          this.errorMessage = 'Erro ao fazer login. Tenta novamente.';
+          this.toastService.show('Erro ao fazer login. Tenta novamente.', 'error');
         }
       }
     );

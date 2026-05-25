@@ -31,6 +31,11 @@ export class AuthService {
   login(email: string, password: string): Observable<any> {
     return this.http.post<any>(`${API_URL}/auth/login`, { email, password }).pipe(
       tap(res => {
+        const user = res.user;
+        if (!user.active) {
+          throw new Error('USER_BLOCKED');
+        }
+
         this.storeToken(res.token);
         this.storeUser(res.user);
         this.currentUserSubject.next(res.user);

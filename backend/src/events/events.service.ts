@@ -13,6 +13,7 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { vendorProfiles } from 'src/db/schema/vendorProfiles';
 import { tickets } from 'src/db/schema/tickets';
 
+
 @Injectable()
 export class EventsService {
   constructor(@Inject('DRIZZLE') private db: any) {}
@@ -56,11 +57,12 @@ export class EventsService {
   // -------------------------
   // PUBLIC - FIND ALL APPROVED EVENTS
   // -------------------------
-  async findAll() {
-    return this.db.query.events.findMany({
-      where: eq(events.status, 'approved'),
-    });
-  }
+  async findAll() { 
+  return this.db.query.events.findMany({
+    where: eq(events.status, 'approved'),
+    orderBy: (events, { desc }) => [desc(events.createdAt)], 
+  });
+}
 
   // -------------------------
   // ADMIN - RECALCULATE LIST WITH DETAILS
@@ -73,11 +75,31 @@ export class EventsService {
   // PUBLIC - FIND ONE EVENT
   // -------------------------
   async findOne(id: number) {
-    const event = await this.db.query.events.findFirst({
-      where: eq(events.id, id),
-    });
-    if (!event) throw new NotFoundException(`Event with ID ${id} not found`);
-    return event;
+    const result = await this.db
+      .select({
+        id: events.id,
+        vendorId: events.vendorId,
+        name: events.name,
+        description: events.description,
+        location: events.location,
+        date: events.date,
+        bannerUrl: events.bannerUrl,
+        ticketPrice: events.ticketPrice,
+        maxCapacity: events.maxCapacity,
+        ticketsSold: events.ticketsSold,
+        status: events.status,
+        
+        businessName: vendorProfiles.businessName, 
+      })
+      .from(events)
+      .leftJoin(vendorProfiles, eq(events.vendorId, vendorProfiles.id)) 
+      .where(eq(events.id, id));
+
+    if (!result || result.length === 0) {
+      throw new NotFoundException('Evento não encontrado');
+    }
+
+    return result[0];
   }
 
   // -------------------------
