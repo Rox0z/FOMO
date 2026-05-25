@@ -1,22 +1,42 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsDateString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsString, IsNotEmpty, IsNumber, Min } from 'class-validator';
 
 export class CreateEventDto {
-
-  @ApiProperty({ example: "Tech Conference" })
+  @ApiProperty({ example: "FOMO Rooftop Opening" })
   @IsString()
+  @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ example: "Annual technology conference" })
+  @ApiProperty({ example: "O melhor sunset do Algarve com DJs internacionais." })
   @IsString()
+  @IsNotEmpty()
   description: string;
-
-  @ApiProperty({ example: "2026-06-20T10:00:00Z" })
-  @IsDateString()
-  date: string;
 
   @ApiProperty({ example: "Lisbon" })
   @IsString()
+  @IsNotEmpty()
   location: string;
 
+  @ApiProperty({ example: "2026-06-20" })
+  @IsString()
+  @IsNotEmpty()
+  date: string;
+
+  @ApiProperty({ example: "23:30" })
+  @IsString()
+  @IsNotEmpty()
+  time: string;
+
+  @ApiProperty({ example: 18.0 })
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  @Min(0)
+  price: number;
+
+  @ApiProperty({ example: 200 })
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  @Min(1)
+  maxCapacity: number;
 }

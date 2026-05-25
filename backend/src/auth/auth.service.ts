@@ -13,7 +13,7 @@ export class AuthService {
 
   async register(createUserDto: CreateUserDto) {
     const user = await this.usersService.create(createUserDto);
-    const token = this.generateToken(user.id);
+    const token = this.generateToken(user);
     return {
       user,
       token,
@@ -30,7 +30,7 @@ export class AuthService {
       return null;
     }
 
-    const token = this.generateToken(user.id);
+    const token = this.generateToken(user);
     const { password, ...userWithoutPassword } = user;
     return {
       user: userWithoutPassword,
@@ -38,9 +38,9 @@ export class AuthService {
     };
   }
 
-  private generateToken(userId: number): string {
+  private generateToken(user: any): string {
     return this.jwtService.sign(
-      { sub: userId },
+      { sub: user.id , role: user.role }, // You can include more user info in the token if needed
       {
         expiresIn: '24h',
       },

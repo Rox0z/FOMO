@@ -38,19 +38,39 @@ export class LoginVendors {
     this.isLoading = true;
 
     this.authService.login(this.email, this.password).subscribe(
-      (response) => {
-        console.log('Vendor login successful:', response);
+      (response: any) => {
+        console.log('Login successful:', response);
+        
+        if (response.user && response.user.role === 'vendor') {
+          
+          this.authService.getVendorProfile().subscribe({
+            next: (profile: any) => {
+              // Verificamos se o perfil está aprovado
+              if (profile.status === 'approved') {
+                localStorage.setItem('auth_token', response.token);
+                localStorage.setItem('user_role', response.user.role);
+                
+                this.isLoading = false;
+                this.router.navigate(['/vendor/dashboard']);
+              } else {
+                this.isLoading = false;
+                this.errorMessage = 'A sua conta de vendedor ainda não foi aprovada pelo admin.';
+              }
+            },
+            error: (err) => {
+              this.isLoading = false;
+              this.errorMessage = 'Erro ao verificar o estado da sua conta.';
+            }
+          });
 
-        this.isLoading = false;
-        this.email = '';
-        this.password = '';
-
-        this.router.navigate(['/vendor-dashboard']);
+        } else {
+          this.isLoading = false;
+          this.errorMessage = 'Acesso negado. Apenas para vendedores.';
+          localStorage.clear();
+        }
       },
       (error) => {
         this.isLoading = false;
-        console.error('Vendor login error:', error);
-
         if (error.status === 401) {
           this.errorMessage = 'Email ou password inválidos.';
         } else {

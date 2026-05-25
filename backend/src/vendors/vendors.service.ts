@@ -8,6 +8,7 @@ import { users } from '../db/schema/users';
 import { vendorProfiles } from '../db/schema/vendorProfiles';
 import { UsersService } from '../users/users.service';
 import { CreateVendorDto } from './dto/create-vendor.dto';
+import { UpdateVendorProfileDto } from './dto/update-vendor.dto';
 
 @Injectable()
 export class VendorsService {
@@ -79,38 +80,56 @@ export class VendorsService {
     return result;
   }
 
-  // -------------------------
-  // GET BY USER ID
-  // -------------------------
-  async findOne(userId: number) {
-    const vendor = await this.db.query.vendorProfiles.findFirst({
-      where: (vp, { eq }) => eq(vp.userId, userId),
-    });
-
-    if (!vendor) throw new NotFoundException('Vendor not found');
-
-    return vendor;
-  }
 
   // -------------------------
   // VENDOR OWN PROFILE
   // -------------------------
   async findByUserId(userId: number) {
-    return this.findOne(userId);
+    const result = await this.db
+      .select({
+        id: vendorProfiles.id,
+        userId: vendorProfiles.userId,
+        businessName: vendorProfiles.businessName,
+        businessDescription: vendorProfiles.businessDescription,
+        status: vendorProfiles.status,
+        createdAt: vendorProfiles.createdAt,
+        updatedAt: vendorProfiles.updatedAt,
+        name: users.name,
+        email: users.email,
+        phone: users.phone,
+        countryCode: users.countryCode,
+      })
+      .from(vendorProfiles)
+      .innerJoin(users, eq(vendorProfiles.userId, users.id))
+      .where(eq(vendorProfiles.userId, userId));
+
+    if (!result || result.length === 0) {
+      throw new NotFoundException('Perfil de Vendor não encontrado.');
+    }
+
+    return result[0]; // Retorna o objeto completo com os dados combinados
   }
 
   // -------------------------
   // UPDATE OWN PROFILE
   // -------------------------
-  async updateByUserId(userId: number, dto: any) {
-    const updated = await this.db
-      .update(vendorProfiles)
-      .set(dto)
-      .where((vp, { eq }) => eq(vp.userId, userId))
-      .returning();
+  async updateByUserId(userId: number, dto: UpdateVendorProfileDto) {
+  const updated = await this.db
+    .update(vendorProfiles)
+    .set({
+      businessName: dto.businessName, // 🔒 Forçamos apenas os campos seguros
+      businessDescription: dto.businessDescription,
+      updatedAt: new Date(), // Atualizamos a data de modificação
+    })
+    .where(eq(vendorProfiles.userId, userId)) // 🎯 Sintaxe correta para update
+    .returning();
 
-    return updated[0];
+  if (updated.length === 0) {
+    throw new NotFoundException('Perfil de vendor não encontrado.');
   }
+
+  return updated[0];
+}
 
   // -------------------------
   // DELETE

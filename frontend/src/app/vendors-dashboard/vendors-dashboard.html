@@ -1,170 +1,405 @@
-<div class="dashboard">
+<div class="admin-wrapper" [class.sidebar-collapsed]="isSidebarCollapsed">
+
+  <div class="bg-gradient"></div>
+  <div class="bg-noise"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
   <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-logo">FOMO</div>
-      <span>Vendor Panel</span>
-    </div>
+    <div class="sidebar-content">
+      
+      <div class="sidebar-brand">
+        <button class="menu-toggle" (click)="isSidebarCollapsed = !isSidebarCollapsed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" x2="20" y1="12" y2="12"/>
+            <line x1="4" x2="20" y1="6" y2="6"/>
+            <line x1="4" x2="20" y1="18" y2="18"/>
+          </svg>
+        </button>
+        <span class="brand-text">FOMO <span class="text-accent">Vendor</span></span>
+      </div>
 
-    <nav class="menu">
-      <a class="active">Dashboard</a>
-      <a>Meus eventos</a>
-      <a>Bilhetes</a>
-      <a>Analytics</a>
-      <a>Definições</a>
-    </nav>
+      <nav class="sidebar-nav">
+        <button (click)="switchTab('overview')" [class.active]="activeTab === 'overview'">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+          </span>
+          <span class="nav-text">Overview</span>
+        </button>
+        
+        <button (click)="switchTab('events')" [class.active]="activeTab === 'events' || selectedEvent">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>
+          </span>
+          <span class="nav-text">My Events</span>
+        </button>
+        
+        <button (click)="switchTab('create')" [class.active]="activeTab === 'create'">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          </span>
+          <span class="nav-text">Create Event</span>
+        </button>
+        
+        <button (click)="switchTab('profile')" [class.active]="activeTab === 'profile'">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/></svg>
+          </span>
+          <span class="nav-text">Settings</span>
+        </button>
+      </nav>
 
-    <div class="sidebar-footer">
-      <p>Conta vendedor</p>
-      <strong>fomo.vendor@email.com</strong>
+      <div class="sidebar-footer">
+        <button (click)="logout()" class="btn-logout">
+          <span class="nav-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          </span>
+          <span class="nav-text">Sign Out</span>
+        </button>
+      </div>
     </div>
   </aside>
 
-  <main class="main">
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">Bem-vindo de volta</p>
-        <h1>Dashboard de Vendedor</h1>
-        <p class="subtitle">Gere eventos, bilhetes e vendas da tua conta FOMO.</p>
+  <main class="main-content">
+    
+    <div *ngIf="activeTab === 'overview'" class="tab-container animate-fade-in">
+      <div class="page-header">
+        <h1 class="page-title">Welcome back, <span class="text-gradient">{{ vendorData?.businessName || 'Producer' }}</span></h1>
+        <p class="page-subtitle">Consolidated metrics of your sales performance.</p>
       </div>
-
-      <button class="btn-primary" (click)="openModal()">+ Adicionar evento</button>
-    </header>
-
-    <section class="stats">
-      <div class="stat-card">
-        <span>Eventos ativos</span>
-        <strong>12</strong>
-        <small>+3 este mês</small>
-      </div>
-
-      <div class="stat-card">
-        <span>Bilhetes vendidos</span>
-        <strong>842</strong>
-        <small>Últimos 30 dias</small>
-      </div>
-
-      <div class="stat-card">
-        <span>Receita total</span>
-        <strong>€12,430</strong>
-        <small>Antes de taxas</small>
-      </div>
-
-      <div class="stat-card">
-        <span>Taxa ocupação</span>
-        <strong>78%</strong>
-        <small>Média dos eventos</small>
-      </div>
-    </section>
-
-    <section class="content-grid">
-      <div class="panel events-panel">
-        <div class="panel-header">
-          <div>
-            <h2>Meus eventos</h2>
-            <p>Eventos criados pela tua conta.</p>
+      
+      <div class="metrics-grid">
+        <div class="card-glass dynamic-stat">
+          <div class="stat-icon icon-indigo">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/></svg>
           </div>
-          <button class="btn-ghost" (click)="openModal()">Criar evento</button>
+          <div class="stat-details">
+            <p class="stat-label">Tickets Sold</p>
+            <h3 class="stat-value">{{ globalStats.totalTickets }}</h3>
+          </div>
         </div>
-
-        <div class="events-list">
-          <div class="event-row" *ngFor="let e of events">
-            <img [src]="e.image" [alt]="e.title" />
-
-            <div class="event-info">
-              <h3>{{ e.title }}</h3>
-              <p>{{ e.location }} • {{ e.date }}</p>
-              <span class="badge" [ngClass]="e.status">
-                {{ e.status === 'active' ? 'Ativo' : 'Esgotado' }}
-              </span>
-            </div>
-
-            <div class="event-metrics">
-              <strong>€1,240</strong>
-              <span>receita</span>
-            </div>
-
-            <div class="actions">
-              <button>Editar</button>
-              <button class="danger">Apagar</button>
-            </div>
+        
+        <div class="card-glass dynamic-stat">
+          <div class="stat-icon icon-emerald">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="1" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <div class="stat-details">
+            <p class="stat-label">Total Revenue</p>
+            <h3 class="stat-value text-emerald">{{ globalStats.totalRevenue }}€</h3>
+          </div>
+        </div>
+        
+        <div class="card-glass dynamic-stat">
+          <div class="stat-icon icon-purple">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="stat-details">
+            <p class="stat-label">Events Created</p>
+            <h3 class="stat-value">{{ globalStats.activeEvents }}</h3>
           </div>
         </div>
       </div>
-
-      <aside class="panel side-panel">
-        <h2>Resumo rápido</h2>
-
-        <div class="mini-item">
-          <span>Próximo evento</span>
-          <strong>FOMO Rooftop</strong>
-        </div>
-
-        <div class="mini-item">
-          <span>Bilhetes restantes</span>
-          <strong>128</strong>
-        </div>
-
-        <div class="mini-item">
-          <span>Evento com melhor performance</span>
-          <strong>Techno Night</strong>
-        </div>
-
-        <button class="btn-primary full" (click)="openModal()">Adicionar novo</button>
-      </aside>
-    </section>
-  </main>
-
-  <div class="modal-backdrop" *ngIf="showModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div>
-          <p class="eyebrow">Novo evento</p>
-          <h2>Adicionar evento</h2>
-        </div>
-
-        <button class="close-btn" (click)="closeModal()">×</button>
-      </div>
-
-      <form class="event-form">
-        <div class="form-group">
-          <label>Nome do evento</label>
-          <input type="text" placeholder="Ex: FOMO Rooftop Opening" />
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Localização</label>
-            <input type="text" placeholder="Ex: Faro" />
-          </div>
-
-          <div class="form-group">
-            <label>Data</label>
-            <input type="date" />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Hora</label>
-            <input type="time" />
-          </div>
-
-          <div class="form-group">
-            <label>Preço</label>
-            <input type="number" placeholder="18" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Descrição</label>
-          <textarea placeholder="Descreve o evento..."></textarea>
-        </div>
-
-        <div class="modal-actions">
-          <button type="button" class="btn-ghost" (click)="closeModal()">Cancelar</button>
-          <button type="button" class="btn-primary" (click)="closeModal()">Guardar evento</button>
-        </div>
-      </form>
     </div>
-  </div>
+
+    <div *ngIf="activeTab === 'events'" class="tab-container animate-fade-in">
+      
+      <div *ngIf="!selectedEvent" class="space-y-section">
+        <div class="page-header">
+          <h1 class="page-title">My Events</h1>
+          <p class="page-subtitle">Manage approvals, capacities, and view individual metrics.</p>
+        </div>
+        
+        <div class="card-glass table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Event Name</th>
+                <th>Location</th>
+                <th>Date</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let ev of events">
+                <td class="font-semibold text-white">{{ ev.name }}</td>
+                <td class="text-muted">{{ ev.location }}</td>
+                <td class="text-muted">{{ ev.date | date:'dd/MM/yyyy' }}</td>
+                <td class="font-medium text-accent">{{ (+ev.ticketPrice) }}€</td>
+                <td>
+                  <span [ngClass]="{
+                    'badge-success': ev.status === 'approved',
+                    'badge-warning': ev.status === 'pending',
+                    'badge-danger': ev.status === 'rejected'
+                  }" class="custom-badge">
+                    {{ ev.status === 'approved' ? 'Approved' : (ev.status === 'rejected' ? 'Rejected' : 'Pending') }}
+                  </span>
+                </td>
+                <td class="text-right">
+                  <button (click)="viewEventDetails(ev)" class="btn-secondary btn-sm">
+                    Manage Event →
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="events.length === 0">
+                <td colspan="6" class="table-empty">
+                  You haven't created any commercial events yet.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div *ngIf="selectedEvent" class="space-y-section">
+        <button (click)="backToEventsList()" class="btn-back group">
+          <span class="arrow-transition">←</span> Back to list
+        </button>
+
+        <div class="event-hero-banner shadow-premium">
+          <img *ngIf="selectedEvent.bannerUrl" [src]="selectedEvent.bannerUrl" alt="Banner" class="hero-img">
+          <div *ngIf="!selectedEvent.bannerUrl" class="hero-placeholder">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+            <span class="text-muted text-sm mt-2">No banner image defined</span>
+          </div>
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <div class="hero-left">
+              <span class="hero-tag">Management Metrics</span>
+              <h2 class="hero-title">{{ selectedEvent.name }}</h2>
+            </div>
+            <span [ngClass]="{
+              'badge-success': selectedEvent.status === 'approved',
+              'badge-warning': selectedEvent.status === 'pending',
+              'badge-danger': selectedEvent.status === 'rejected'
+            }" class="custom-badge size-lg">
+              {{ selectedEvent.status | uppercase }}
+            </span>
+          </div>
+        </div>
+
+        <div class="inner-tabs-row">
+          <button (click)="isEditing = false" [class.active]="!isEditing" class="inner-tab">Performance Metrics</button>
+          <button (click)="startEditing()" [class.active]="isEditing" class="inner-tab">Modify Structure</button>
+        </div>
+
+        <div *ngIf="!isEditing" class="metrics-grid animate-fade-in">
+          <div class="card-glass p-6-padded">
+            <h4 class="stat-label">Occupancy Rate</h4>
+            <div class="flex-baseline-gap mt-2">
+              <span class="metric-highlight-value">{{ selectedEvent.occupancyRate | number:'1.0-1' }}%</span>
+              <span class="text-muted text-xs">{{ selectedEvent.ticketsSold }} / {{ selectedEvent.maxCapacity }} Pax</span>
+            </div>
+            <div class="progress-bar-container">
+              <div [style.width.%]="selectedEvent.occupancyRate" class="progress-bar-fill"></div>
+            </div>
+          </div>
+          
+          <div class="card-glass p-6-padded">
+            <h4 class="stat-label">Gross Financial Volume</h4>
+            <div class="flex-baseline-gap mt-2">
+              <span class="metric-highlight-value text-emerald">{{ selectedEvent.totalRevenue }}€</span>
+              <span class="text-muted text-xs">Base Ticket: {{ selectedEvent.calculatedPrice }}€</span>
+            </div>
+          </div>
+          
+          <div class="card-glass p-6-padded">
+            <h4 class="stat-label">Technical Metadata</h4>
+            <div class="metadata-list mt-4">
+              <p class="text-muted text-sm flex items-center gap-2 mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span class="text-white font-medium">{{ selectedEvent.location }}</span>
+              </p>
+              <p class="text-muted text-sm flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                <span class="text-white font-medium">{{ selectedEvent.date | date:'dd/MM/yyyy HH:mm' }}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="isEditing" class="card-glass form-container max-w-xl animate-fade-in">
+          <div class="form-header">
+            <h3 class="form-section-title">Request Structural Revision</h3>
+            <p class="form-section-subtitle">Any changes will create a temporary request in the administrator auditing queue.</p>
+          </div>
+          
+          <form #editForm="ngForm" (ngSubmit)="submitEventEdition(editForm.value)" class="custom-form-layout">
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Commercial Title</label>
+                <input type="text" [(ngModel)]="editFormValues.name" name="name" required class="form-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Location / Venue</label>
+                <input type="text" [(ngModel)]="editFormValues.location" name="location" required class="form-input">
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Execution Date</label>
+                <input type="date" [(ngModel)]="editFormValues.date" name="date" required class="form-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Doors Open Time</label>
+                <input type="time" [(ngModel)]="editFormValues.time" name="time" required class="form-input">
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Ticket Price (€)</label>
+                <input type="number" step="0.01" [(ngModel)]="editFormValues.price" name="price" required class="form-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Maximum Capacity</label>
+                <input type="number" [(ngModel)]="editFormValues.maxCapacity" name="maxCapacity" required class="form-input">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Detailed Description</label>
+              <textarea [(ngModel)]="editFormValues.description" name="description" rows="4" required class="form-input text-area-fixed"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Replace Banner Image</label>
+              <div class="file-upload-dashed">
+                <input type="file" accept="image/*" (change)="onFileSelected($event)" class="file-input-hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-muted mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                <span class="upload-text">Click to upload or drag files here</span>
+                <span class="upload-subtext">PNG, JPG (Max 10MB)</span>
+              </div>
+            </div>
+
+            <div class="form-actions-row">
+              <button type="submit" [disabled]="!editForm.valid" class="btn-primary">
+                Submit Changes
+              </button>
+              <button type="button" (click)="cancelEditing()" class="btn-secondary">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'create'" class="tab-container max-w-xl animate-fade-in">
+      <div class="page-header">
+        <h1 class="page-title">New Commercial Release</h1>
+        <p class="page-subtitle">Register your event into the FOMO global sales infrastructure.</p>
+      </div>
+      
+      <div class="card-glass form-container">
+        <form #createForm="ngForm" (ngSubmit)="submitNewEvent(createForm.value)" class="custom-form-layout">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Event Name</label>
+              <input type="text" ngModel name="name" required class="form-input" placeholder="e.g., Sunset Rooftop Party">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Location / Space</label>
+              <input type="text" ngModel name="location" required class="form-input" placeholder="e.g., Hilton, Lisbon">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Event Date</label>
+              <input type="date" ngModel name="date" required class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Start Time</label>
+              <input type="time" ngModel name="time" required class="form-input">
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label">Base Ticket Price (€)</label>
+              <input type="number" step="0.01" ngModel name="price" required class="form-input" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Maximum Capacity</label>
+              <input type="number" ngModel name="maxCapacity" required class="form-input" placeholder="100">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Sales Description / Line-up</label>
+            <textarea ngModel name="description" rows="4" required class="form-input text-area-fixed" placeholder="Write an appealing description to engage your audience..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Media Asset: Main Banner</label>
+            <div class="file-upload-dashed">
+              <input type="file" accept="image/*" (change)="onFileSelected($event)" class="file-input-hidden">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-muted mb-2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+              <span class="upload-text">Upload promotional event banner</span>
+              <span class="upload-subtext">Recommended ratio 16:9 (Max 10MB)</span>
+            </div>
+          </div>
+
+          <button type="submit" [disabled]="!createForm.valid" class="btn-primary btn-block">
+            Publish and Request Activation
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div *ngIf="activeTab === 'profile'" class="tab-container max-w-xl animate-fade-in">
+      <div class="page-header">
+        <h1 class="page-title">Profile Metadata</h1>
+        <p class="page-subtitle">Manage your company's visual and corporate metadata assets.</p>
+      </div>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div class="card-glass p-4 rounded-xl bg-white/[0.02]">
+          <span class="text-[10px] text-gray-400 font-bold uppercase block mb-1">Contact Phone</span>
+          <span class="text-sm font-medium text-white">{{ vendorData?.phone || 'Not defined' }}</span>
+        </div>
+        <div class="card-glass p-4 rounded-xl bg-white/[0.02]">
+          <span class="text-[10px] text-gray-400 font-bold uppercase block mb-1">Corporate Email Address</span>
+          <span class="text-sm font-medium text-white">{{ vendorData?.email || 'N/A' }}</span>
+        </div>
+        <div class="card-glass p-4 rounded-xl bg-white/[0.02]">
+          <span class="text-[10px] text-gray-400 font-bold uppercase block mb-1">Registration Date</span>
+          <span class="text-sm font-medium text-white">
+            {{ vendorData?.createdAt ? (vendorData.createdAt | date:'dd/MM/yyyy HH:mm') : 'N/A' }}
+          </span>
+        </div>
+        <div class="card-glass p-4 rounded-xl bg-white/[0.02]">
+          <span class="text-[10px] text-gray-400 font-bold uppercase block mb-1">Last Meta Record Update</span>
+          <span class="text-sm font-medium text-white">
+            {{ vendorData?.updatedAt ? (vendorData.updatedAt | date:'dd/MM/yyyy HH:mm') : 'N/A' }}
+          </span>
+        </div>
+      </div>
+
+      <hr class="border-white/5 my-5">
+
+      <div class="card-glass form-container">
+        <form #profileForm="ngForm" (ngSubmit)="updateProfile(profileForm.value)" class="custom-form-layout">
+          <div class="form-group">
+            <label class="form-label">Commercial Name</label>
+            <input type="text" [ngModel]="vendorData?.businessName" name="businessName" class="form-input" placeholder="Name of your production house">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Corporate Bio / Description</label>
+            <textarea [ngModel]="vendorData?.businessDescription" name="businessDescription" rows="5" class="form-input text-area-fixed" placeholder="Tell us about your market focus..."></textarea>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            Save Structural Records
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </main>
 </div>

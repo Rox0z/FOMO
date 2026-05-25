@@ -5,11 +5,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { eq, sql } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import { events } from '../db/schema/events';
+import { eventEdits } from '../db/schema/event.edits';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { Event } from './entities/event.entity';
 import { vendorProfiles } from 'src/db/schema/vendorProfiles';
 import { tickets } from 'src/db/schema/tickets';
 
@@ -20,70 +20,132 @@ export class EventsService {
   // -------------------------
   // CREATE EVENT (VENDOR ONLY)
   // -------------------------
-  async create(createEventDto: CreateEventDto, userId: number) {
-    try {
-      const newEvent = await this.db
-        .insert(events)
-        .values({
-          ...createEventDto,
-          date: new Date(createEventDto.date),
-          createdBy: userId, // 🔥 IMPORTANT
-        })
-        .returning();
+  async create(createEventDto: CreateEventDto, userId: number, bannerUrl: string | null) {
+    const vendorProfile = await this.db.query.vendorProfiles.findFirst({
+      where: eq(vendorProfiles.userId, userId),
+    });
 
-      return newEvent[0];
-    } catch (error) {
-      throw new BadRequestException('Failed to create event');
+    if (!vendorProfile) {
+      throw new ForbiddenException('Apenas utilizadores com perfil de Vendor ativo podem criar eventos.');
     }
-  }
 
-  async findAllWithDetails() {
-    return this.db
-      .select({
-        id: events.id,
-        name: events.name,
-        description: events.description,
-        location: events.location,
-        date: events.date,
-        status: events.status,
-        createdAt: events.createdAt,
-        vendorName: vendorProfiles.businessName,
-        vendorId: events.vendorId,
-        ticketCount: sql<number>`coalesce(count(${tickets.id}), 0)::int`
+    if (vendorProfile.status !== 'approved') {
+      throw new ForbiddenException(
+        `A tua conta de Vendor está atualmente: ${vendorProfile.status}. Não podes criar eventos até seres aprovado pelo Admin.`
+      );
+    }
+
+    const newEvent = await this.db
+      .insert(events)
+      .values({
+        vendorId: vendorProfile.id,
+        name: createEventDto.name,
+        description: createEventDto.description,
+        location: createEventDto.location,
+        date: new Date(createEventDto.date),
+        ticketPrice: String(createEventDto.price),
+        maxCapacity: Number(createEventDto.maxCapacity),
+        bannerUrl: bannerUrl,
+        status: 'pending', 
       })
-      .from(events)
-      // 🎯 CORREÇÃO: Junta usando o vendorId que aponta para o id do Perfil, e não o userId!
-      .leftJoin(vendorProfiles, eq(events.vendorId, vendorProfiles.id)) 
-      .leftJoin(tickets, eq(events.id, tickets.eventId))
-      .groupBy(events.id, vendorProfiles.id);
+      .returning();
+
+    return newEvent[0];
   }
 
   // -------------------------
-  // FIND ALL (PUBLIC)
+  // PUBLIC - FIND ALL APPROVED EVENTS
   // -------------------------
-  async findAll(): Promise<Event[]> {
+  async findAll() {
+    return this.db.query.events.findMany({
+      where: eq(events.status, 'approved'),
+    });
+  }
+
+  // -------------------------
+  // ADMIN - RECALCULATE LIST WITH DETAILS
+  // -------------------------
+  async findAllWithDetails() {
     return this.db.query.events.findMany();
   }
 
   // -------------------------
-  // FIND ONE (PUBLIC)
+  // PUBLIC - FIND ONE EVENT
   // -------------------------
-  async findOne(id: number): Promise<Event> {
+  async findOne(id: number) {
     const event = await this.db.query.events.findFirst({
       where: eq(events.id, id),
     });
-
-    if (!event) {
-      throw new NotFoundException(`Event with ID ${id} not found`);
-    }
-
+    if (!event) throw new NotFoundException(`Event with ID ${id} not found`);
     return event;
   }
 
   // -------------------------
-  // UPDATE (OWNER OR ADMIN)
+  // VENDOR - FIND MY EVENTS
   // -------------------------
-  async update(id: number, dto: UpdateEventDto, user: any): Promise<Event> {
+  async findMyEvents(userId: number) {
+    const vendorProfile = await this.db.query.vendorProfiles.findFirst({
+      where: eq(vendorProfiles.userId, userId),
+    });
+
+    if (!vendorProfile) {
+      throw new ForbiddenException('Vendor profile not found');
+    }
+
+    return this.db.query.events.findMany({
+      where: eq(events.vendorId, vendorProfile.id),
+    });
+  }
+
+  // -------------------------
+  // VENDOR - GET STATISTICS
+  // -------------------------
+  async getMyStats(userId: number) {
+    const vendorProfile = await this.db.query.vendorProfiles.findFirst({
+      where: eq(vendorProfiles.userId, userId),
+    });
+
+    if (!vendorProfile) {
+      throw new ForbiddenException('Vendor profile not found');
+    }
+
+    const myEventsList = await this.db.query.events.findMany({
+      where: eq(events.vendorId, vendorProfile.id),
+    });
+
+    let totalTickets = 0;
+    let totalRevenue = 0;
+    let activeEvents = 0;
+
+    for (const event of myEventsList) {
+      totalTickets += event.ticketsSold;
+      totalRevenue += event.ticketsSold * Number(event.ticketPrice);
+      if (event.status === 'approved') {
+        activeEvents++;
+      }
+    }
+
+    return { totalTickets, totalRevenue, activeEvents };
+  }
+
+  // -------------------------
+  // ADMIN CONTROL - SET STATUS
+  // -------------------------
+  async setStatus(id: number, status: 'approved' | 'rejected' | 'pending') {
+    const updated = await this.db
+      .update(events)
+      .set({ status })
+      .where(eq(events.id, id))
+      .returning();
+
+    if (updated.length === 0) throw new NotFoundException('Event not found');
+    return updated[0];
+  }
+
+  // -------------------------
+  // UPDATE EVENT DIRECTLY (BACKUP / ADMIN ROUTE)
+  // -------------------------
+  async update(id: number, dto: UpdateEventDto, user: any) {
     const event = await this.db.query.events.findFirst({
       where: eq(events.id, id),
     });
@@ -92,7 +154,11 @@ export class EventsService {
       throw new NotFoundException(`Event not found`);
     }
 
-    const isOwner = event.createdBy === user.id;
+    const vendorProfile = await this.db.query.vendorProfiles.findFirst({
+      where: eq(vendorProfiles.userId, user.id),
+    });
+
+    const isOwner = vendorProfile && event.vendorId === vendorProfile.id;
     const isAdmin = user.role === 'admin';
 
     if (!isOwner && !isAdmin) {
@@ -132,19 +198,5 @@ export class EventsService {
   async count() {
     const result = await this.db.query.events.findMany();
     return result.length;
-  }
-
-  async setStatus(id: number, status: 'approved' | 'pending' | 'rejected') {
-    const updated = await this.db
-      .update(events)
-      .set({ status: status })
-      .where(eq(events.id, id))
-      .returning();
-
-    if (!updated.length) {
-      throw new NotFoundException(`Evento com ID ${id} não foi encontrado`);
-    }
-
-    return updated[0];
   }
 }

@@ -11,7 +11,7 @@ export const users = pgTable('users', {
   phone: varchar('phone', { length: 20 }),
   countryCode: varchar('country_code', { length: 5 }),
 
-  role: text('role').notNull().default('user'), // user | admin
+  role: text('role').notNull().default('user'),
 
   active: boolean('active').notNull().default(true),
 
