@@ -36,6 +36,7 @@ export class HomeComponent implements OnInit {
   // --- VARIÁVEIS DE PERFIL ---
   user: any = null;
   isMenuOpen = false;
+  
 
   // --- VARIÁVEIS DE INTERFACE ---
   vibes: string[] = ['All', 'House', 'Techno', 'Sunset', 'Student', 'Premium', 'Live', 'Beach', 'Rooftop'];
@@ -102,7 +103,7 @@ export class HomeComponent implements OnInit {
   }
 
   get filteredEvents(): EventItem[] {
-    const filtered = this.events.filter((event) => {
+    let filtered = this.events.filter((event) => {
       const name = event.name?.toLowerCase() || '';
       const desc = event.description?.toLowerCase() || '';
       const loc = event.location?.toLowerCase() || '';
@@ -115,16 +116,16 @@ export class HomeComponent implements OnInit {
 
       const matchesSearch =
         !this.searchQuery ||
-        name.includes(this.searchQuery) ||
-        desc.includes(this.searchQuery) ||
-        loc.includes(this.searchQuery);
+        name.includes(this.searchQuery.toLowerCase()) ||
+        desc.includes(this.searchQuery.toLowerCase()) ||
+        loc.includes(this.searchQuery.toLowerCase());
 
       return matchesVibe && matchesSearch;
     });
-
     if (this.activeVibe === 'All' && !this.searchQuery) {
-      return filtered.slice(0, 12);
+      filtered.sort((a, b) => b.ticketsSold - a.ticketsSold);
     }
+
     return filtered;
   }
 
@@ -133,7 +134,17 @@ export class HomeComponent implements OnInit {
   }
 
   get regularEvents(): EventItem[] {
-    return this.filteredEvents.filter(event => event.id !== this.featuredEvent?.id);
+    const remaining = this.filteredEvents.filter(event => event.id !== this.featuredEvent?.id);
+
+    if (this.searchQuery) {
+      return remaining;
+    }
+
+    if (this.activeVibe === 'All') {
+      return remaining.slice(0, 4);
+    }
+
+    return remaining.slice(0, 5);
   }
 
   getStockLabel(event: EventItem): string {
