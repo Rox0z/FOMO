@@ -1,0 +1,4 @@
+<div *ngIf="notification$ | async as note" 
+     [class]="'toast ' + note.type">
+  {{ note.message }}
+</div>

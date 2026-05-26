@@ -1,0 +1,103 @@
+<div class="login-wrapper">
+  <div class="bg-gradient"></div>
+  <div class="bg-noise"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="login-card">
+    <div class="card-inner">
+
+      <a routerLink="/home" class="logo-wrap">
+        <svg viewBox="0 0 251.53 51.27" xmlns="http://www.w3.org/2000/svg" class="fomo-logo">
+            <path d="M251.53,19.2V0h-22.73v2.5h-1V0h-50.27v51.27h50.27v-2.5h1v2.5h22.73v-19.2c-3.56,0-6.44-2.88-6.44-6.43s2.88-6.44,6.44-6.44ZM213.65,36.62h-21.97V14.65h21.97v21.97ZM228.8,46.67h-1v-5.26h1v5.26ZM228.8,39.31h-1v-5.26h1v5.26ZM228.8,31.95h-1v-5.26h1v5.26ZM228.8,24.59h-1v-5.26h1v5.26ZM228.8,17.22h-1v-5.25h1v5.25ZM228.8,9.86h-1v-5.25h1v5.25Z"/>
+            <path d="M125.26,0h-50.27v51.27h50.27V0ZM89.14,36.62V14.65h21.97v21.97h-21.97Z"/>
+            <path d="M74,14.65V0H23.73v2.5h-1V0H0v19.2c3.55,0,6.43,2.88,6.43,6.44s-2.88,6.43-6.43,6.43v19.2h22.73v-2.5h1v2.5h14.14v-18.31h36.13v-14.65h-36.13v-3.66h36.13ZM23.73,46.67h-1v-5.26h1v5.26ZM23.73,39.31h-1v-5.26h1v5.26ZM23.73,31.95h-1v-5.26h1v5.26ZM23.73,24.59h-1v-5.26h1v5.26ZM23.73,17.22h-1v-5.25h1v5.25ZM23.73,9.86h-1v-5.25h1v5.25Z"/>
+            <polygon points="176.53 51.27 176.53 0 126.26 0 126.26 51.27 140.41 51.27 140.41 14.65 144.07 14.65 144.07 51.27 158.72 51.27 158.72 14.65 162.38 14.65 162.38 51.27 176.53 51.27"/>
+        </svg>
+        </a>
+
+      <div *ngIf="mode === 'admin'" style="text-align: center; margin-bottom: 1.5rem;">
+        <span style="font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: #ef4444; font-weight: 700;">
+          Admin Access Only
+        </span>
+      </div>
+
+      <form (ngSubmit)="onLogin()">
+        <div class="field-group">
+          <input 
+            type="email" 
+            id="email" 
+            class="field-input" 
+            placeholder=" " 
+            [(ngModel)]="email" 
+            name="email" 
+            required 
+          />
+          <label class="field-label" for="email">Email</label>
+          <span class="input-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </span>
+        </div>
+
+        <div class="field-group">
+          <input 
+            id="password" 
+            [type]="showPassword ? 'text' : 'password'" 
+            class="field-input" 
+            placeholder=" " 
+            [(ngModel)]="password" 
+            name="password" 
+            required 
+          />
+          <label class="field-label" for="password">Password</label>
+          <span class="input-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </span>
+          <span class="input-icon toggle-password" (click)="togglePassword()">
+            <svg *ngIf="!showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+            <svg *ngIf="showPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.79 21.79 0 0 1 5.06-6.94"/>
+              <path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+              <line x1="1" y1="1" x2="23" y2="23"/>
+            </svg>
+          </span>
+        </div>
+
+        <button type="submit" class="btn-entrar" [disabled]="isLoading">
+          <span *ngIf="!isLoading">Sign In</span>
+          <span *ngIf="isLoading" class="btn-spinner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-dasharray="32" style="opacity:.25"></circle>
+              <path d="M12 2C6.47715 2 2 6.47715 2 12C2 13.5661 2.35943 15.0483 3 16.375" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path>
+            </svg>
+          </span>
+        </button>
+      </form>
+
+      <div class="register-text">
+        <ng-container *ngIf="mode === 'user'">
+          Don't have an account? <a routerLink="/register-users" class="register-link">Sign up here</a>
+        </ng-container>
+        
+        <ng-container *ngIf="mode === 'vendor'">
+          Want to be a partner? <a routerLink="/register-vendors" class="register-link">Create a Vendor account</a>
+        </ng-container>
+
+        <ng-container *ngIf="mode === 'admin'">
+          Restricted area for system administrators.
+        </ng-container>
+      </div>
+
+    </div>
+  </div>
+</div>

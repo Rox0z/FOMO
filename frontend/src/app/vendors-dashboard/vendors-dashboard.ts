@@ -275,6 +275,6 @@ export class VendorsDashboard implements OnInit {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_role');
     localStorage.removeItem('user_info');
-    this.router.navigate(['/login-vendors']);
+    this.router.navigate(['/login'], { queryParams: { mode: 'vendor' } });
   }
 }

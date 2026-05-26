@@ -518,7 +518,7 @@ export class AdminPannel implements OnInit {
 
     this.notify('Sessão terminada.');
 
-    this.router.navigate(['/login-admin']);
+    this.router.navigate(['/login'], { queryParams: { mode: 'admin' } });
   }
 
   getCountryName(code: string): string {

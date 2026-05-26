@@ -11,11 +11,11 @@
     </ul>
 
     <div class="nav-right">
-      <a routerLink="/login-users" class="btn-nav-outline nav-link-btn" *ngIf="!user">Sign in</a>
-      <a routerLink="/login-vendors" class="btn-nav-primary nav-link-btn" *ngIf="!user">Promoter</a>
+      <a [routerLink]="['/login']" [queryParams]="{ mode: 'user' }" class="btn-nav-outline nav-link-btn" *ngIf="!user">Sign in</a>
+      <a [routerLink]="['/login']" [queryParams]="{ mode: 'vendor' }" class="btn-nav-primary nav-link-btn" *ngIf="!user">Promoter</a>
       
       <div class="profile-dropdown" *ngIf="user" (click)="toggleMenu()">
-        <span class="user-display-name">👋 {{ user.name || 'User' }}</span>
+        <span class="user-display-name">{{ user.name || 'User' }}</span>
       </div>
     </div>
 
