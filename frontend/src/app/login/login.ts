@@ -71,15 +71,27 @@ export class Login implements OnInit {
         }
 
         // VENDOR PAGE
-        if (this.mode === 'vendor' && user.role !== 'vendor') {
-          this.isLoading = false;
-          this.password = '';
+        if (this.mode === 'vendor'){
+          if(user.role !== 'vendor') {
+            this.isLoading = false;
+            this.password = '';
+            
+            this.authService.logout();
+            this.toast.show('Acesso negado (vendor only)', 'error');
+            return;
+          }
 
-          this.authService.logout();
-          this.toast.show('Acesso negado (vendor only)', 'error');
+          if (!user.approved) {
+            this.isLoading = false;
+            this.password = '';
 
-          return;
+            this.authService.logout();
+            this.toast.show('Conta pendente de aprovação.', 'error');
+            return;
+          }
         }
+
+
 
         // USER PAGE
         if (this.mode === 'user' && user.role !== 'user') {

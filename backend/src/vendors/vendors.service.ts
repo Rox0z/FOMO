@@ -7,7 +7,6 @@ import { and, eq, sql } from 'drizzle-orm';
 import { users } from '../db/schema/users';
 import { vendorProfiles } from '../db/schema/vendorProfiles';
 import { UsersService } from '../users/users.service';
-import { CreateVendorDto } from './dto/create-vendor.dto';
 import { UpdateVendorProfileDto } from './dto/update-vendor.dto';
 
 @Injectable()
@@ -17,46 +16,25 @@ export class VendorsService {
     @Inject('DRIZZLE') private db: any,
   ) {}
 
-  // -------------------------
-  // REGISTER (USER + VENDOR PROFILE)
-  // -------------------------
-  async register(dto: CreateVendorDto) {
-    const user = await this.usersService.create({
-      email: dto.email,
-      password: dto.password,
-      name: dto.name,
-      phone: dto.phone,
-      countryCode: dto.countryCode,
-    });
 
-    await this.db
-      .update(users)
-      .set({
-        role: 'vendor',
-        active: false, // onboarding pending approval
-      })
-      .where(eq(users.id, user.id));
-
-    const vendorProfile = await this.db
+  async createProfile(data: {
+    userId: number;
+    businessName?: string;
+    businessDescription?: string;
+  }) {
+    const result = await this.db
       .insert(vendorProfiles)
       .values({
-        userId: user.id,
-        businessName: dto.businessName,
-        businessDescription: dto.businessDescription,
+        userId: data.userId,
+        businessName: data.businessName ?? '',
+        businessDescription: data.businessDescription,
         status: 'pending',
       })
       .returning();
 
-    return {
-      user: {
-        ...user,
-        role: 'vendor',
-        active: false,
-      },
-      vendorProfile: vendorProfile[0],
-    };
+    return result[0];
   }
-
+  
   // -------------------------
   // ADMIN LIST
   // -------------------------

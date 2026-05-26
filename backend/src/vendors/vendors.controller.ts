@@ -13,7 +13,6 @@ import { RolesGuard } from '../common/guards/role.guard';
 import { RolesDecorator } from '../common/decorators/roles.decorator';
 import { Roles } from '../common/enums/roles.enum';
 
-import { CreateVendorDto } from './dto/create-vendor.dto';
 import { VendorsService } from './vendors.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -23,14 +22,6 @@ import { UpdateVendorProfileDto } from './dto/update-vendor.dto';
 @ApiBearerAuth('access-token')
 export class VendorsController {
   constructor(private readonly vendorsService: VendorsService) {}
-
-  // -------------------------
-  // PUBLIC - REGISTER VENDOR
-  // -------------------------
-  @Post('register')
-  register(@Body() dto: CreateVendorDto) {
-    return this.vendorsService.register(dto);
-  }
 
   // -------------------------
   // ADMIN - LIST ALL VENDORS

@@ -37,4 +37,19 @@ export class CreateUserDto {
   @IsString()
   @MaxLength(5, { message: 'Country code must not exceed 5 characters' })
   countryCode?: string;
+
+  @ApiProperty({ example: 'user', enum: ['user', 'vendor'] })
+  @IsIn(['user', 'vendor'], { message: 'userType must be user or vendor' })
+  userType: 'user' | 'vendor';
+  
+  @ApiProperty({ example: 'Tech Solutions Inc.', required: false })
+  @IsOptional()
+  @IsString()
+  businessName?: string;
+
+  @ApiProperty({ example: 'A leading tech company...', required: false })
+  @IsOptional()
+  @IsString()
+  businessDescription?: string;
+
 }

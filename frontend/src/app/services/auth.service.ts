@@ -67,16 +67,6 @@ export class AuthService {
     );
   }
 
-  registerVendor(vendorData: any): Observable<any> {
-    return this.http.post<any>(`${API_URL}/vendors`, vendorData).pipe(
-      tap(res => {
-        this.storeToken(res.token);
-        this.storeUser(res.user);
-        this.currentUserSubject.next(res.user);
-      })
-    );
-  }
-
   // =========================
   // SESSION
   // =========================

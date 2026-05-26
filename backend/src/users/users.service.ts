@@ -17,7 +17,7 @@ import { User } from './entities/user.entity';
 export class UsersService {
   constructor(@Inject('DRIZZLE') private db: any) {}
 
-  async create(dto: CreateUserDto): Promise<Omit<User, 'password'>> {
+  async create(dto: CreateUserDto, overrides?: { role?: string; active?: boolean }): Promise<Omit<User, 'password'>> {
     const existingUser = await this.db.query.users.findFirst({
       where: eq(users.email, dto.email),
     });
@@ -36,8 +36,8 @@ export class UsersService {
         name: dto.name,
         phone: dto.phone,
         countryCode: dto.countryCode,
-        role: 'user',
-        active: true,
+        role: overrides?.role ?? 'user',
+        active: overrides?.active ?? true,
       })
       .returning();
 
@@ -45,7 +45,6 @@ export class UsersService {
     return user;
   }
 
-  // 🎯 ATUALIZADO: Agora envia explicitamente os campos necessários para o modal do Admin
   async findAll() {
     return await this.db
       .select({
