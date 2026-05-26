@@ -146,7 +146,7 @@ export class EventDetailComponent implements OnInit {
         console.error('Erro no checkout:', err);
         if (err.status === 401) {
           this.toast.show('Sessão expirada ou inválida. Por favor, faz login novamente.', 'error');
-          this.router.navigate(['/login-users']);
+          this.router.navigate(['/login'], { queryParams: { mode: 'user' } });
         } else {
           this.toast.show(err.error?.message || 'Não foi possível completar a reserva.', 'error');
         }

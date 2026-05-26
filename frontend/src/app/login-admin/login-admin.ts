@@ -17,12 +17,12 @@ export class LoginAdmin {
   password: string = '';
   showPassword: boolean = false;
   isLoading: boolean = false;
-  errorMessage: string = '';
+
 
   constructor(
     private router: Router,
     private authService: AuthService,
-    private toastService: ToastService
+    private toast: ToastService
   ) {}
 
   togglePassword() {
@@ -30,53 +30,48 @@ export class LoginAdmin {
   }
 
   onLogin() {
-    this.errorMessage = '';
 
-    // 1. Validação igual ao LoginUsers
-    if (!this.email || !this.password) {
-      this.toastService.show('Preencha todos os campos!', 'error');
-      return;
-    }
-
-    this.isLoading = true;
-
-    // 2. Subscribe no formato que pediste (com as duas funções separadas por vírgula)
-    this.authService.login(this.email, this.password).subscribe(
-      (response: any) => { // Usamos 'any' para evitar o erro da propriedade 'role'
-        console.log('Login successful:', response);
-        
-        // Verificamos se o user é realmente um admin
-        if (response.user && response.user.role === 'admin') {
-          // Guarda os dados necessários para o Interceptor e Guard
-          localStorage.setItem('auth_token', response.token);
-          localStorage.setItem('user_role', response.user.role);
-          
-          this.isLoading = false;
-          this.router.navigate(['/admin-pannel']); // Redireciona para o painel
-          
-          // Limpa os campos
-          this.email = '';
-          this.password = '';
-        } else {
-          // Se os dados estiverem certos mas NÃO for admin
-          this.isLoading = false;
-          this.toastService.show('Acesso negado. Apenas administradores.', 'error');
-          localStorage.clear(); // Limpa tudo por segurança
-        }
-      },
-      (error) => {
-        this.isLoading = false;
-        console.error('Login error:', error);
-        
-        // Tratamento de erro igual ao LoginUsers
-        if (error.status === 401) {
-          this.toastService.show('Email ou password inválidos.', 'error');
-        } else {
-          this.toastService.show('Erro ao fazer login. Tenta novamente.', 'error');
-        }
-      }
-    );
+  if (!this.email || !this.password) {
+    this.toast.show('Preencha todos os campos!', 'error');
+    return;
   }
+
+  this.isLoading = true;
+
+  this.authService.login(this.email, this.password).subscribe({
+    next: (response: any) => {
+      const user = response.user;
+
+      this.isLoading = false;
+
+      if (user.role !== 'admin') {
+        this.toast.show('Acesso negado. Apenas administradores.', 'error');
+        this.authService.logout();
+        return;
+      }
+
+      this.router.navigate(['/admin-pannel']);
+
+      this.email = '';
+      this.password = '';
+    },
+
+    error: (error) => {
+      this.isLoading = false;
+
+      if (error.message === 'USER_BLOCKED') {
+        this.toast.show('Conta bloqueada.', 'error');
+        return;
+      }
+
+      if (error.status === 401) {
+        this.toast.show('Email ou password inválidos.', 'error');
+      } else {
+        this.toast.show('Erro ao fazer login. Tenta novamente.', 'error');
+      }
+    }
+  });
+}
 
   // Se o admin quiser voltar para o registo de users (opcional)
   onRegister() {

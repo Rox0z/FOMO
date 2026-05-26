@@ -132,6 +132,6 @@ export class ProfileComponent implements OnInit {
 
   logout(): void {
     this.authService.logout();
-    this.router.navigate(['/login-users']);
+    this.router.navigate(['/login'], { queryParams: { mode: 'user' } });
   }
 }

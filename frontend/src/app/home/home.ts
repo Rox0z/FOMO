@@ -25,7 +25,7 @@ interface EventItem {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule], // 🌟 HttpClientModule RETIRADO DAQUI para ativar o Interceptor!
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './home.html',
   styleUrls: ['./home.css']
 })
@@ -199,7 +199,6 @@ export class HomeComponent implements OnInit {
 
     console.log('A enviar pedido de checkout (via Interceptor Global) para:', orderPayload);
 
-    // 🌟 Pedido HTTP 100% limpo! O Interceptor Global injeta o cabeçalho automaticamente
     this.http.post(`${this.apiUrl}/orders/checkout`, orderPayload).subscribe({
       next: (response: any) => {
         this.toast.show('Reserva efetuada com sucesso! Os teus bilhetes já foram gerados.', 'success');
@@ -215,10 +214,11 @@ export class HomeComponent implements OnInit {
       error: (err) => {
         console.error('Erro detetado no checkout:', err);
         
-        if (err.status === 401) {
-          this.toast.show('Sessão expirada ou inválida. Por favor, faz login novamente.', 'error');
-          this.router.navigate(['/login-users']);
-        } else {
+      if (err.status === 401) {
+        this.toast.show('Sessão expirada ou inválida. Por favor, faz login novamente.', 'error');
+        this.router.navigate(['/login'], {queryParams: { mode: 'user' }});
+      }
+        else {
           this.toast.show('Não foi possível completar a reserva.', 'error');
         }
         
