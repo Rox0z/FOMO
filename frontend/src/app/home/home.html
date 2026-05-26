@@ -1,0 +1,292 @@
+﻿<div class="page-shell">
+  <nav class="navbar">
+    <div class="nav-brand">
+      <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo" />
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="#discover">Discover</a></li>
+      <li><a routerLink="/events">Events</a></li>
+      <li><a href="#community">Community</a></li>
+    </ul>
+
+    <div class="nav-right" *ngIf="!user; else loggedInMenu">
+      <a routerLink="/login-users" class="btn-nav-outline nav-link-btn">Sign in</a>
+      <a routerLink="/login-vendors" class="btn-nav-primary nav-link-btn">Promoter</a>
+    </div>
+
+    <ng-template #loggedInMenu>
+      <div class="nav-right user-menu-container">
+        <button type="button" class="profile-compact-trigger" (click)="toggleMenu()" aria-label="Open user menu">
+          <span class="user-icon-circle">{{ user?.name?.charAt(0) || user?.email?.charAt(0) || 'U' }}</span>
+          <span class="user-display-name">{{ user?.name || user?.email || 'Conta' }}</span>
+          <span class="chevron-mini">â–¾</span>
+        </button>
+
+            <ul class="dropdown-flat" *ngIf="isMenuOpen">
+          <li><a routerLink="/user/profile" (click)="isMenuOpen = false">O meu perfil</a></li>
+          <li><a routerLink="/user/my-tickets" (click)="isMenuOpen = false">Meus bilhetes</a></li>
+          <li class="divider"></li>
+          <li><button type="button" (click)="onLogout()">Sair</button></li>
+        </ul>
+      </div>
+    </ng-template>
+  </nav>
+
+  <section class="hero" id="discover">
+    <div class="hero-bg-gradient"></div>
+
+    <div class="hero-logo-bg">
+      <img src="/fomo-icon.svg" alt="FOMO icon" />
+    </div>
+
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        never miss the next one
+      </div>
+
+      <h1 class="hero-title">
+        The fastest way to discover and buy tickets for the <span>best events</span>.
+      </h1>
+
+      <p class="hero-subtitle">
+        FOMO helps you find trending nights, premium drops and last-minute access before tickets disappear.
+      </p>
+
+      <div class="hero-cta">
+        <a routerLink="/events" class="btn-primary">Explore events</a>
+        <a routerLink="/about" class="btn-secondary">How it works</a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-num">120+</span>
+          <span class="stat-label">events listed</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">18k</span>
+          <span class="stat-label">active users</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">4.9</span>
+          <span class="stat-label">avg rating</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="ticker-wrap">
+    <div class="ticker">
+      <ng-container *ngFor="let item of tickerItems">
+        <div class="ticker-item">{{ item }} <span class="ticker-sep">â€¢</span></div>
+      </ng-container>
+      <ng-container *ngFor="let item of tickerItems">
+        <div class="ticker-item">{{ item }} <span class="ticker-sep">â€¢</span></div>
+      </ng-container>
+    </div>
+  </div>
+
+  <section class="filter-section">
+    <div class="filter-container">
+      <div class="section-top">
+        <div>
+          <h2 class="section-title">Find your scene</h2>
+          <p class="section-subtitle">Search by vibe, city or event name.</p>
+        </div>
+      </div>
+
+      <div class="search-bar">
+        <span class="search-icon">âŒ•</span>
+        <input
+          type="text"
+          placeholder="Search events, cities, vibes..."
+          (input)="onSearch($event)"
+        />
+      </div>
+
+      <div class="category-grid">
+        <button
+          *ngFor="let category of categories"
+          class="category-btn"
+          [class.active]="activeCategory === category"
+          (click)="setCategory(category)"
+        >
+          {{ category }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="events-section" id="events">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Trending on FOMO</h2>
+        <p class="section-subtitle">
+          Fast-moving events, premium drops and the nights you do not want to miss.
+        </p>
+      </div>
+
+      <a class="see-all" routerLink="/events">See all</a>
+    </div>
+
+    <div class="events-grid" *ngIf="filteredEvents.length > 0; else noResults">
+      <div class="featured-wrap" *ngIf="featuredEvent as featured">
+        <div class="featured-img">
+          <img [src]="featured.image" [alt]="featured.title" />
+          <span class="stock-badge" [ngClass]="getStockClass(featured.stock)">
+            {{ getStockLabel(featured.stock) }}
+          </span>
+        </div>
+
+        <div class="featured-body">
+          <div>
+            <div class="card-category">{{ featured.category }}</div>
+            <h3 class="card-title card-title--lg">{{ featured.title }}</h3>
+            <p class="card-artist">{{ featured.subtitle }}</p>
+
+            <div class="card-details">
+              <div class="detail-item">ðŸ“ {{ featured.location }}</div>
+              <div class="detail-item">ðŸ“… {{ featured.date }}</div>
+              <div class="detail-item">ðŸŽµ {{ featured.tags.join(' â€¢ ') }}</div>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <div class="price-section">
+              <span class="price-label">starting at</span>
+              <span class="price">{{ featured.price }}</span>
+            </div>
+            <button
+              class="btn-buy"
+              type="button"
+              [disabled]="purchasingEventId === featured.id"
+              (click)="buyTicket(featured)"
+            >
+              {{ purchasingEventId === featured.id ? 'Reserving...' : 'Reserve now' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p *ngIf="purchaseMessage" class="purchase-feedback success">{{ purchaseMessage }}</p>
+      <p *ngIf="purchaseError" class="purchase-feedback error">{{ purchaseError }}</p>
+
+      <div class="event-card" *ngFor="let event of regularEvents">
+        <div class="card-image-wrapper">
+          <img [src]="event.image" [alt]="event.title" />
+          <span class="stock-badge" [ngClass]="getStockClass(event.stock)">
+            {{ getStockLabel(event.stock) }}
+          </span>
+        </div>
+
+        <div class="card-content">
+          <div>
+            <div class="card-category">{{ event.category }}</div>
+            <h3 class="card-title">{{ event.title }}</h3>
+            <p class="card-artist">{{ event.subtitle }}</p>
+          </div>
+
+          <div class="card-details">
+            <div class="detail-item">ðŸ“ {{ event.location }}</div>
+            <div class="detail-item">ðŸ“… {{ event.date }}</div>
+            <div class="detail-item">ðŸŽµ {{ event.tags.join(' â€¢ ') }}</div>
+          </div>
+
+          <div class="card-footer">
+            <div class="price-section">
+              <span class="price-label">starting at</span>
+              <span
+                class="price"
+                [class.price-free]="event.price === 'Free'"
+                [class.price-sold]="event.stock === 'sold'"
+              >
+                {{ event.stock === 'sold' ? 'No tickets' : event.price }}
+              </span>
+            </div>
+
+            <button
+              *ngIf="event.stock !== 'sold'"
+              class="btn-buy"
+              type="button"
+              [disabled]="purchasingEventId === event.id"
+              (click)="buyTicket(event)"
+            >
+              {{ purchasingEventId === event.id ? 'Reserving...' : 'Get ticket' }}
+            </button>
+            <button *ngIf="event.stock === 'sold'" class="btn-soldout" type="button" disabled>Sold out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noResults>
+      <div class="no-results">
+        <h3>No events found</h3>
+        <p>Try another category or search term.</p>
+      </div>
+    </ng-template>
+  </section>
+
+  <section class="newsletter" id="community">
+    <div class="newsletter-inner">
+      <div class="newsletter-logo">
+        <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo brand-logo--light" />
+      </div>
+
+      <h2 class="newsletter-title">Be first when the next drop goes live</h2>
+      <p class="newsletter-subtitle">
+        Join FOMO for early access, exclusive releases and real-time ticket alerts.
+      </p>
+
+      <div class="newsletter-form">
+        <input class="newsletter-input" type="email" placeholder="Enter your email" />
+        <button class="btn-newsletter" type="button" (click)="joinWaitlist()">Join waitlist</button>
+      </div>
+      <p *ngIf="newsletterMessage" class="newsletter-feedback">{{ newsletterMessage }}</p>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo brand-logo--light" />
+        <p>
+         
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <ul>
+          <li><a routerLink="/events">Events</a></li>
+          <li><a href="#discover">Cities</a></li>
+          <li><a href="#community">Creators</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a routerLink="/user/my-tickets">Tickets</a></li>
+          <li><a href="#community">Alerts</a></li>
+          <li><a routerLink="/register-users">Membership</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Social</h4>
+        <ul>
+          <li><a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+          <li><a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer">TikTok</a></li>
+          <li><a href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>Â© 2026 FOMO. All rights reserved.</span>
+      <span>Ticketing platform </span>
+    </div>
+  </footer>
+</div>

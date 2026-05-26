@@ -1,0 +1,126 @@
+.tickets-page-wrapper {
+  background:
+    linear-gradient(180deg, #0d0d0d 0, #0d0d0d 250px, #ffffff 250px, #ffffff 100%);
+  font-family: 'Inter', sans-serif;
+}
+
+.ticket-card {
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.ticket-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(124, 58, 237, 0.18);
+}
+
+.ticket-info {
+  flex: 1;
+  padding: 2rem;
+  background: white;
+  position: relative;
+}
+
+.ticket-qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: #f8fafc;
+  border-top: 2px dashed #e2e8f0;
+}
+
+.animate-fade {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (min-width: 768px) {
+  .ticket-card {
+    flex-direction: row;
+  }
+
+  .ticket-info {
+    border-right: 2px dashed #e2e8f0;
+  }
+
+  .ticket-qr {
+    width: 280px;
+    border-top: none;
+    border-left: 2px dashed #e2e8f0;
+  }
+
+  .ticket-card {
+    position: relative;
+  }
+
+  .ticket-card::before,
+  .ticket-card::after {
+    content: '';
+    position: absolute;
+    left: calc(100% - 280px - 12px);
+    width: 24px;
+    height: 24px;
+    background: #050510;
+    border-radius: 50%;
+    z-index: 10;
+  }
+
+  .ticket-card::before { top: -12px; }
+  .ticket-card::after { bottom: -12px; }
+}
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 5%;
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid #e8e8e8;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 64px;
+}
+
+.brand-logo {
+  height: 28px;
+  width: auto;
+  display: block;
+}
+
+.nav-back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #666666;
+  font-size: 14px;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.nav-back-link:hover {
+  color: #000000;
+}

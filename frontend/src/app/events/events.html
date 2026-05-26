@@ -1,0 +1,119 @@
+<div class="fomo-page">
+  <nav class="navbar">
+    <a routerLink="/home" class="nav-brand">
+      <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo" />
+    </a>
+
+    <div class="nav-links">
+      <a routerLink="/home">Home</a>
+      <a routerLink="/about">About</a>
+      <a routerLink="/user/profile">Profile</a>
+    </div>
+  </nav>
+
+  <header class="events-hero">
+    <div class="hero-copy">
+      <span class="eyebrow">live inventory</span>
+      <h1>Events</h1>
+      <p>Nightlife, student parties and premium drops approved by FOMO.</p>
+    </div>
+  </header>
+
+  <main class="events-shell">
+    <section class="toolbar">
+      <div class="search-box">
+        <span>⌕</span>
+        <input type="text" placeholder="Search events, cities, vibes..." (input)="onSearch($event)" />
+      </div>
+
+      <div class="filter-pills">
+        <button type="button" [class.active]="activeFilter === 'all'" (click)="setFilter('all')">All</button>
+        <button type="button" [class.active]="activeFilter === 'available'" (click)="setFilter('available')">Available</button>
+        <button type="button" [class.active]="activeFilter === 'last'" (click)="setFilter('last')">Last tickets</button>
+      </div>
+    </section>
+
+    <p *ngIf="actionMessage" class="feedback success">{{ actionMessage }}</p>
+    <p *ngIf="actionError" class="feedback error">{{ actionError }}</p>
+
+    <div *ngIf="isLoading" class="empty-state">Loading events...</div>
+
+    <section *ngIf="!isLoading && filteredEvents.length > 0" class="events-grid">
+      <article class="event-card" *ngFor="let event of filteredEvents; let i = index">
+        <button type="button" class="image-button" (click)="openEvent(event)">
+          <img [src]="eventImage(event, i)" [alt]="event.name" />
+          <span class="status-pill">{{ remainingTickets(event) > 0 ? remainingTickets(event) + ' left' : 'Sold out' }}</span>
+        </button>
+
+        <div class="event-body">
+          <div>
+            <span class="category">Approved</span>
+            <h2>{{ event.name }}</h2>
+            <p>{{ event.description }}</p>
+          </div>
+
+          <div class="meta">
+            <span>{{ event.location }}</span>
+            <span>{{ formattedDate(event) }}</span>
+          </div>
+
+          <div class="card-footer">
+            <strong>{{ price(event) }}</strong>
+            <button type="button" class="btn-primary" (click)="openEvent(event)">Details</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <div *ngIf="!isLoading && filteredEvents.length === 0" class="empty-state">
+      No events match your search.
+    </div>
+  </main>
+
+  <div class="modal-backdrop" *ngIf="selectedEvent" (click)="closeModal()">
+    <section class="event-modal" (click)="$event.stopPropagation()">
+      <button type="button" class="close-button" (click)="closeModal()" aria-label="Close event details">×</button>
+
+      <img [src]="eventImage(selectedEvent)" [alt]="selectedEvent.name" />
+
+      <div class="modal-content">
+        <span class="eyebrow">approved event</span>
+        <h2>{{ selectedEvent.name }}</h2>
+        <p>{{ selectedEvent.description }}</p>
+
+        <div class="rules-grid">
+          <div>
+            <span>Location</span>
+            <strong>{{ selectedEvent.location }}</strong>
+          </div>
+          <div>
+            <span>Date</span>
+            <strong>{{ formattedDate(selectedEvent) }}</strong>
+          </div>
+          <div>
+            <span>Tickets</span>
+            <strong>{{ remainingTickets(selectedEvent) }} available</strong>
+          </div>
+          <div>
+            <span>Price</span>
+            <strong>{{ price(selectedEvent) }}</strong>
+          </div>
+        </div>
+
+        <div class="event-rules">
+          <strong>Rules</strong>
+          <p>Bring a valid ID. Tickets are personal and checked at the entrance. FOMO reserves the right to block abusive reservations.</p>
+        </div>
+
+        <button
+          type="button"
+          class="reserve-button"
+          [disabled]="reservingId === selectedEvent.id || remainingTickets(selectedEvent) <= 0"
+          (click)="reserve(selectedEvent)"
+        >
+          {{ reservingId === selectedEvent.id ? 'Reserving...' : 'Reserve ticket' }}
+        </button>
+      </div>
+    </section>
+  </div>
+</div>

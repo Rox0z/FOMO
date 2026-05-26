@@ -1,0 +1,542 @@
+<div class="admin-wrapper" [class.sidebar-collapsed]="isSidebarCollapsed">
+
+  <div class="bg-gradient"></div>
+  <div class="bg-noise"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <aside class="sidebar" [class.mobile-open]="mobileMenuOpen">
+    <div class="sidebar-content">
+      
+      <div class="sidebar-brand" style="display: flex; justify-content: flex-start; align-items: center; gap: 12px; width: 100%;">
+        <button class="menu-toggle" (click)="toggleMobileMenu()" style="background: transparent; border: none; color: white; cursor: pointer; display: flex; align-items: center; padding: 0;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        </button>
+        <span>FOMO Admin</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button (click)="setTab('dashboard')" [class.active]="activeTab === 'dashboard'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+          Statistics
+        </button>
+        <button (click)="setTab('users')" [class.active]="activeTab === 'users'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Clients
+        </button>
+        <button (click)="setTab('vendors')" [class.active]="activeTab === 'vendors'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2 2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/></svg>
+          Vendors
+        </button>
+        <button (click)="setTab('events')" [class.active]="activeTab === 'events'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+          Events
+        </button>
+        <button (click)="setTab('requests')" [class.active]="activeTab === 'requests'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Requests
+          <span class="request-count">{{ pendingRequests.length }}</span>
+        </button>
+        <button (click)="setTab('logs')" [class.active]="activeTab === 'logs'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Audit Logs
+        </button>
+      </nav>
+    </div>
+  </aside>
+
+  <div *ngIf="mobileMenuOpen" class="sidebar-overlay" (click)="toggleMobileMenu(false)"></div>
+
+  <div class="main-layout">
+    
+    <header class="topbar">
+      <div class="topbar-right" style="margin-left: auto;">
+        <div class="user-avatar"></div>
+        <button class="btn-logout" (click)="logout()">
+          <span>Logout</span>
+          <svg style="margin-left: 6px; display: inline-block; vertical-align: middle;" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="admin-card">
+      <div class="card-inner">
+
+        <div class="header">
+          <div class="title-section">
+            <h1 *ngIf="activeTab === 'dashboard'">Statistics</h1>
+            <h1 *ngIf="activeTab === 'users'">Clients</h1>
+            <h1 *ngIf="activeTab === 'vendors'">Vendors</h1>
+            <h1 *ngIf="activeTab === 'events'">Events</h1>
+            <h1 *ngIf="activeTab === 'requests'">Access Requests</h1>
+            <h1 *ngIf="activeTab === 'logs'">Audit Logs</h1>
+            <p class="subtitle">FOMO System Management</p>
+          </div>
+
+          <div *ngIf="activeTab === 'vendors'" class="filter-badge-group" style="margin-top: 1.5rem;">
+            <button class="filter-btn" [class.active]="vendorFilter === 'all'" (click)="setVendorFilter('all')">All</button>
+            <button class="filter-btn text-warning" [class.active]="vendorFilter === 'pending'" (click)="setVendorFilter('pending')">Pending</button>
+            <button class="filter-btn text-success" [class.active]="vendorFilter === 'approved'" (click)="setVendorFilter('approved')">Approved</button>
+            <button class="filter-btn text-danger" [class.active]="vendorFilter === 'rejected'" (click)="setVendorFilter('rejected')">Rejected</button>
+          </div>
+
+          <div *ngIf="activeTab === 'events'" class="filter-badge-group" style="margin-top: 1.5rem;">
+            <button class="filter-btn" [class.active]="eventFilter === 'all'" (click)="setEventFilter('all')">All</button>
+            <button class="filter-btn text-warning" [class.active]="eventFilter === 'pending'" (click)="setEventFilter('pending')">Pending</button>
+            <button class="filter-btn text-success" [class.active]="eventFilter === 'approved'" (click)="setEventFilter('approved')">Approved</button>
+            <button class="filter-btn text-danger" [class.active]="eventFilter === 'rejected'" (click)="setEventFilter('rejected')">Rejected</button>
+          </div>
+        </div>
+
+        <p *ngIf="loading">Loading data...</p>
+        <p *ngIf="error" class="error">{{ error }}</p>
+
+        <div *ngIf="!loading">
+          
+          <div *ngIf="activeTab === 'dashboard'" class="stats-grid">
+            <div class="stat-card">
+              <h3>Total Clients</h3>
+              <p class="stat-number">{{ stats.users.total }}</p>
+              <div class="stat-details">
+                <span class="detail-item text-success">● Active: <strong>{{ stats.users.active }}</strong></span>
+                <span class="detail-item text-danger">● Blocked: <strong>{{ stats.users.total - stats.users.active }}</strong></span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <h3>Total Vendors</h3>
+              <p class="stat-number">{{ stats.vendors.total }}</p>
+              <div class="stat-details grid-details">
+                <span class="detail-item text-success">● Approved: <strong>{{ stats.vendors.approved }}</strong></span>
+                <span class="detail-item text-warning">● Pending: <strong>{{ stats.vendors.pending }}</strong></span>
+                <span class="detail-item text-danger">● Rejected: <strong>{{ stats.vendors.rejected }}</strong></span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <h3>Total Events</h3>
+              <p class="stat-number">{{ stats.events.total }}</p>
+              <div class="stat-details grid-details">
+                <span class="detail-item text-success">● Approved: <strong>{{ stats.events.approved }}</strong></span>
+                <span class="detail-item text-warning">● Pending: <strong>{{ stats.events.pending }}</strong></span>
+                <span class="detail-item text-danger">● Rejected: <strong>{{ stats.events.rejected }}</strong></span>
+              </div>
+            </div>
+
+            <div class="stat-card" (click)="setTab('edits')" style="cursor: pointer;">
+              <h3>Active Requests</h3>
+              <p class="stat-number">{{ stats.edits.pending }}</p>
+            </div>
+          </div>
+
+          <div *ngIf="activeTab === 'users'" class="table-wrap">
+            <div class="filter-badge-group" style="margin-bottom: 1.5rem;">
+              <button class="filter-btn" [class.active]="userFilter === 'all'" (click)="setUserFilter('all')">All</button>
+              <button class="filter-btn text-success" [class.active]="userFilter === 'active'" (click)="setUserFilter('active')">Active</button>
+              <button class="filter-btn text-danger" [class.active]="userFilter === 'blocked'" (click)="setUserFilter('blocked')">Blocked</button>
+            </div>
+
+            <div style="margin: 1.5rem 0 1rem 0; display: flex; gap: 10px; align-items: center;">
+              <select [(ngModel)]="searchUserCriteria" (change)="filterUsers()" style="background: #1f1f1f; color: #fff; padding: 0.55rem; border-radius: 6px; border: 1px solid #333; font-size: 0.85rem; outline: none; height: 36px;">
+                <option value="all">General Search</option>
+                <option value="id">User ID</option>
+                <option value="email">Email</option>
+              </select>
+              <input type="text" placeholder="Search..." [(ngModel)]="searchUserQuery" (input)="filterUsers()" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 0.55rem 1rem; border-radius: 6px; color: #fff; width: 250px; font-size: 0.85rem; outline: none; height: 36px;" />
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Access</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let user of filteredUsers" class="clickable-row" (click)="openUserModal(user)">
+                  <td>{{ user.name }}</td>
+                  <td>{{ user.email }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="user.active ? 'badge-success' : 'badge-danger'">
+                      {{ user.active ? 'Active' : 'Blocked' }}
+                    </span>
+                  </td>
+                  <td>
+                    <button *ngIf="user.active" class="btn reject" (click)="$event.stopPropagation(); banUser(user)">Block</button>
+                    <button *ngIf="!user.active" class="btn approve" (click)="$event.stopPropagation(); unbanUser(user)">Activate</button>
+                  </td>
+                </tr>
+                <tr *ngIf="filteredUsers.length === 0">
+                  <td colspan="4" style="text-align: center; color: #888; padding: 20px; font-style: italic;">
+                    No users match the search criteria.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div *ngIf="activeTab === 'vendors'" class="table-wrap">
+            <div style="margin: 1.5rem 0 1rem 0; display: flex; gap: 10px; align-items: center;">
+              <select [(ngModel)]="searchVendorCriteria" (change)="filterVendors()" style="background: #1f1f1f; color: #fff; padding: 0.55rem; border-radius: 6px; border: 1px solid #333; font-size: 0.85rem; outline: none; height: 36px;">
+                <option value="businessName">Business Name</option>
+                <option value="id">Vendor ID</option>
+                <option value="email">Commercial Email</option>
+              </select>
+              <input type="text" placeholder="Search..." [(ngModel)]="searchVendorQuery" (input)="filterVendors()" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 0.55rem 1rem; border-radius: 6px; color: #fff; width: 250px; font-size: 0.85rem; outline: none; height: 36px;" />
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Company</th>
+                  <th>Email</th>
+                  <th>Commercial Status</th>
+                  <th>Login Status</th>
+                  <th>Commercial Moderation</th>
+                  <th>Access Control</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let vendor of filteredVendors" class="clickable-row" (click)="openVendorModal(vendor)">
+                  <td>{{ vendor.businessName }}</td>
+                  <td style="color: #666;">{{ vendor.email }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="{
+                      'badge-success': vendor.status === 'approved',
+                      'badge-warning': vendor.status === 'pending' || !vendor.status,
+                      'badge-danger': vendor.status === 'rejected'
+                    }">
+                      {{ vendor.status === 'approved' ? 'Approved' : (vendor.status === 'rejected' ? 'Rejected' : 'Pending') }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge" [ngClass]="vendor.active ? 'badge-success' : 'badge-danger'">
+                      {{ vendor.active ? 'Active' : 'Blocked' }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="action-buttons-group">
+                      <button *ngIf="vendor.status !== 'approved'" class="btn approve" (click)="$event.stopPropagation(); approveVendor(vendor)">Approve</button>
+                      <button *ngIf="vendor.status !== 'rejected'" class="btn reject" (click)="$event.stopPropagation(); rejectVendor(vendor)">Reject</button>
+                    </div>
+                  </td>
+                  <td>
+                    <button *ngIf="vendor.active" class="btn reject" (click)="$event.stopPropagation(); banVendorUser(vendor)">Block Login</button>
+                    <button *ngIf="!vendor.active" class="btn approve" (click)="$event.stopPropagation(); unbanVendorUser(vendor)">Allow Login</button>
+                  </td>
+                </tr>
+                <tr *ngIf="filteredVendors.length === 0">
+                  <td colspan="6" style="text-align: center; color: #888; padding: 20px; font-style: italic;">
+                    No vendors match the search criteria or filters.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div *ngIf="activeTab === 'events'" class="table-wrap">
+            <div style="margin: 1.5rem 0 1rem 0; display: flex; gap: 10px; align-items: center;">
+              <select [(ngModel)]="searchEventCriteria" (change)="filterEventsByCreator()" style="background: #1f1f1f; color: #fff; padding: 0.55rem; border-radius: 6px; border: 1px solid #333; font-size: 0.85rem; outline: none; height: 36px;">
+                <option value="name">Event Name</option>
+                <option value="id">Event ID</option>
+                <option value="vendorId">Vendor ID (Creator)</option>
+              </select>
+              <input type="text" placeholder="Search..." [(ngModel)]="searchEventCreatorQuery" (input)="filterEventsByCreator()" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 0.55rem 1rem; border-radius: 6px; color: #fff; width: 250px; font-size: 0.85rem; outline: none; height: 36px;" />
+              <p class="table-tip" style="margin: 0 0 0 auto; font-size: 0.85rem; color: #a5b4fc;">💡 Click on an event row to view complete details.</p>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Event Name</th>
+                  <th>Location</th>
+                  <th>Event Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="filteredEvents.length === 0">
+                  <td colspan="4" style="text-align: center; color: #888; padding: 20px; font-style: italic;">
+                    No events match the criteria or selected creator.
+                  </td>
+                </tr>
+                <tr *ngFor="let event of filteredEvents" class="clickable-row" (click)="openEventModal(event)">
+                  <td>{{ event.name }}</td>
+                  <td>{{ event.location }}</td>
+                  <td>{{ event.date | date:'dd/MM/yyyy' }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="{
+                      'badge-success': event.status === 'approved',
+                      'badge-warning': event.status === 'pending' || !event.status,
+                      'badge-danger': event.status === 'rejected'
+                    }">
+                      {{ event.status === 'approved' ? 'Approved' : (event.status === 'rejected' ? 'Rejected' : 'Pending') }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div *ngIf="activeTab === 'requests'">
+            <div class="header-with-filters">
+              <div class="requests-header">
+                <h2>
+                  Pending Requests
+                </h2>
+                <span class="requests-count">
+                  {{ filteredRequests.length }} pendentes
+                </span>
+              </div>
+              <div class="filters">
+                <button
+                  class="filter-btn"
+                  (click)="requestFilter = 'all'"
+                  [class.active]="requestFilter === 'all'">
+                  All
+                </button>
+                <button
+                  class="filter-btn text-warning"
+                  (click)="requestFilter = 'EVENT_PUBLISH'"
+                  [class.active]="requestFilter === 'EVENT_PUBLISH'">
+                  Publishing Event
+                </button>
+                <button
+                  class="filter-btn text-success"
+                  (click)="requestFilter = 'EVENT_EDIT'"
+                  [class.active]="requestFilter === 'EVENT_EDIT'">
+                  Updating Event
+                </button>
+                <button
+                  class="filter-btn text-danger"
+                  (click)="requestFilter = 'VENDOR_APPROVAL'"
+                  [class.active]="requestFilter === 'VENDOR_APPROVAL'">
+                  Vendor Approval
+                </button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Request Date</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngIf="filteredRequests.length === 0">
+                    <td colspan="4"
+                        style="text-align:center; color:#888; padding:24px; font-style:italic;">
+                      No requests pending.
+                    </td>
+                  </tr>
+                  <tr
+                    *ngFor="let req of filteredRequests"
+                    class="clickable-row"
+                    (click)="openRequestModal(req)"
+                    style="cursor:pointer;">
+                    <td>
+                      <span
+                        class="badge"
+                        [ngClass]="{
+                          'badge-warning': req.type === 'EVENT_PUBLISH',
+                          'badge-success': req.type === 'EVENT_EDIT',
+                          'badge-danger': req.type === 'VENDOR_APPROVAL'
+                        }">
+                        {{
+                          req.type === 'EVENT_PUBLISH'
+                            ? 'Publishing Event'
+                            : req.type === 'EVENT_EDIT'
+                              ? 'Updating Event'
+                              : 'Vendor Approval'
+                        }}
+                      </span>
+                    </td>
+                    <td>
+                      {{ req.name || req.businessName }}
+                    </td>
+                    <td>
+                      {{
+                        (req.createdAt || req.updatedAt)
+                          | date:'dd/MM/yyyy'
+                      }}
+                    </td>
+                    <td (click)="$event.stopPropagation()">
+                      <div class="action-buttons-group">
+                        <button
+                          class="btn reject"
+                          (click)="handleReject(req)">
+                          Reject
+                        </button>
+                        <button
+                          class="btn approve"
+                          (click)="handleApprove(req)">
+                          Approve
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div *ngIf="activeTab === 'logs'" class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date/Time</th>
+                  <th>Action Performed</th>
+                  <th>Administrator</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="logs.length === 0">
+                  <td colspan="3" style="text-align: center; color: #888; padding: 24px;">
+                    No audit logs found in the database.
+                  </td>
+                </tr>
+                <tr *ngFor="let log of logs">
+                  <td style="color: #666; font-variant-numeric: tabular-nums;">
+                    {{ log.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}
+                  </td>
+                  <td>{{ log.action }}</td>
+                  <td><span style="color: #4f46e5; font-weight: 600;">●</span> {{ log.admin }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="isEventModalOpen" (click)="closeEventModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Event Details</h2>
+        <button class="close-modal-btn" (click)="closeEventModal()">&times;</button>
+      </div>
+      <div class="modal-body" *ngIf="selectedEvent">
+        <div class="modal-event-title">
+          <h1>{{ selectedEvent.name }}</h1>
+          <span class="badge" [ngClass]="{
+            'badge-success': selectedEvent.status === 'approved',
+            'badge-warning': selectedEvent.status === 'pending' || !selectedEvent.status,
+            'badge-danger': selectedEvent.status === 'rejected'
+          }">
+            {{ selectedEvent.status === 'approved' ? 'Published / Approved' : (selectedEvent.status === 'rejected' ? 'Rejected' : 'Awaiting Validation') }}
+          </span>
+        </div>
+        <div class="modal-info-grid">
+          <div class="info-item">
+            <label>Event ID</label>
+            <p>#{{ selectedEvent.id }}</p>
+          </div>
+          <div class="info-item">
+            <label>Vendor ID</label>
+            <p>#{{ selectedEvent.vendorId }}</p>
+          </div>
+          <div class="info-item">
+            <label>Company / Creator</label>
+            <p>{{ selectedEvent.vendorName || selectedEvent.businessName || 'Not defined' }}</p>
+          </div>
+          <div class="info-item">
+            <label>Venue / Commercial Space</label>
+            <p>{{ selectedEvent.location }}</p>
+          </div>
+          <div class="info-item">
+            <label>Event Date</label>
+            <p>{{ selectedEvent.date | date:'dd MMMM, yyyy' }}</p>
+          </div>
+          <div class="info-item">
+            <label>Doors Open Time</label>
+            <p>{{ selectedEvent.date | date:'HH:mm' }} h</p>
+          </div>
+          <div class="info-item full-width-item highlight-box">
+            <label>Capacity / Purchased Tickets</label>
+            <div class="tickets-counter">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><line x1="13" x2="13" y1="11" y2="13"/></svg>
+              <span><strong>{{ selectedEvent.ticketCount || selectedEvent.soldTickets || 0 }}</strong> tickets sold so far</span>
+            </div>
+          </div>
+          <div class="info-item full-width-item">
+            <label>Event Description</label>
+            <p class="modal-desc">{{ selectedEvent.description }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" *ngIf="selectedEvent">
+        <div class="modal-moderation-actions" style="margin-left: auto;">
+          <button *ngIf="selectedEvent.status !== 'rejected'" class="btn reject" (click)="rejectEvent(selectedEvent)">
+            Reject Publication
+          </button>
+          <button *ngIf="selectedEvent.status !== 'approved'" class="btn approve" (click)="approveEvent(selectedEvent)">
+            Approve & Publish
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="selectedUser" (click)="closeUserModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>User Details</h2>
+        <button class="close-modal-btn" (click)="closeUserModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-event-title">
+          <h1>{{ selectedUser.name }}</h1>
+          <span class="badge" [ngClass]="selectedUser.active ? 'badge-success' : 'badge-danger'">
+            {{ selectedUser.active ? 'Access Active' : 'Access Blocked' }}
+          </span>
+        </div>
+        <div class="modal-info-grid">
+          <div class="info-item"><label>User ID</label><p>#{{ selectedUser.id }}</p></div>
+          <div class="info-item"><label>Access Level (Role)</label><p style="text-transform: uppercase;">{{ selectedUser.role }}</p></div>
+          <div class="info-item full-width-item"><label>Email Address</label><p>{{ selectedUser.email }}</p></div>
+          
+          <div class="info-item"><label>Registration Date</label><p>{{ selectedUser.createdAt | date:'dd/MM/yyyy' }}</p></div>
+          <div class="info-item"><label>Country</label><p>{{ getCountryName(selectedUser.country) }}</p></div>
+          <div class="info-item"><label>Mobile Phone</label><p>{{ selectedUser.phone || selectedUser.phoneNumber || 'Not defined' }}</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="selectedVendor" (click)="closeVendorModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Commercial Vendor Details</h2>
+        <button class="close-modal-btn" (click)="closeVendorModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-event-title">
+          <h1>{{ selectedVendor.businessName }}</h1>
+          <span class="badge" [ngClass]="{
+            'badge-success': selectedVendor.status === 'approved',
+            'badge-warning': selectedVendor.status === 'pending' || !selectedVendor.status,
+            'badge-danger': selectedVendor.status === 'rejected'
+          }">
+            {{ selectedVendor.status === 'approved' ? 'Vendor Approved' : (selectedVendor.status === 'rejected' ? 'Vendor Rejected' : 'Registration Pending') }}
+          </span>
+        </div>
+        <div class="modal-info-grid">
+          <div class="info-item"><label>Vendor ID</label><p>#{{ selectedVendor.id }}</p></div>
+          <div class="info-item"><label>Linked User ID</label><p>#{{ selectedVendor.userId }}</p></div>
+          <div class="info-item full-width-item"><label>Corporate Contact Email</label><p>{{ selectedVendor.email }}</p></div>
+          
+          <div class="info-item"><label>Responsible Person Name</label><p>{{ selectedVendor.name || 'Not defined' }}</p></div>
+          <div class="info-item"><label>Registration Date</label><p>{{ selectedVendor.createdAt | date:'dd/MM/yyyy' }}</p></div>
+          <div class="info-item"><label>Country</label><p>{{ getCountryName(selectedVendor.country) }}</p></div>
+          <div class="info-item"><label>Mobile Phone</label><p>{{ selectedVendor.phone || selectedVendor.phoneNumber || 'Not defined' }}</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
