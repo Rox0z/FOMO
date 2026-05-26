@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import {ToastService} from '../services/toast.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-register-vendors',
@@ -23,37 +23,49 @@ export class RegisterVendors {
   businessDescription: string = '';
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
+
+  showSuccessModal: boolean = false;
   isLoading: boolean = false;
-  errorMessage: string = '';
 
   constructor(
     private router: Router,
     private authService: AuthService,
-    private toast: ToastService
+    private toast: ToastService,
+    private cdr: ChangeDetectorRef // Força o Angular a renderizar o Modal imediatamente
   ) {}
 
-  togglePassword() { this.showPassword = !this.showPassword; }
-  toggleConfirmPassword() { this.showConfirmPassword = !this.showConfirmPassword; }
+  goHome() { 
+    this.authService.logout();
+    this.router.navigate(['/home']);
+  }
+  
+  togglePassword() { 
+    this.showPassword = !this.showPassword; 
+  }
+  
+  toggleConfirmPassword() { 
+    this.showConfirmPassword = !this.showConfirmPassword; 
+  }
 
   onSubmit() {
-
     // Validate all fields
     if (!this.name || !this.email || !this.phone || !this.password || !this.confirmPassword) {
-      this.toast.show('Preencha todos os campos!');
+      this.toast.show('Please fill in all required fields.');
       return;
     }
 
     if (this.password !== this.confirmPassword) {
-      this.toast.show('As passwords não coincidem.');
+      this.toast.show('Passwords do not match.');
       return;
     }
 
     if (this.password.length < 8) {
-      this.toast.show('A password deve ter no mínimo 8 caracteres.');
+      this.toast.show('Password must be at least 8 characters long.');
       return;
     }
 
     this.isLoading = true;
+    
     const vendorData = {
       name: this.name,
       email: this.email,
@@ -65,23 +77,25 @@ export class RegisterVendors {
       userType: 'vendor',
     };
 
-    this.authService.registerVendor(vendorData).subscribe(
+    this.authService.register(vendorData).subscribe(
       (response) => {
         console.log('Vendor registration successful:', response);
         this.isLoading = false;
-        this.router.navigate(['/vendor-dashboard']);
+        this.showSuccessModal = true;
+        this.cdr.detectChanges(); 
       },
       (error) => {
         this.isLoading = false;
         console.error('Registration error:', error);
         if (error.status === 409) {
-          this.toast.show('Email já registado.');
+          this.toast.show('This email is already registered.');
         } else if (error.error?.message) {
           this.toast.show(error.error.message);
         } else {
-          this.toast.show('Erro ao criar conta. Tenta novamente.');
+          this.toast.show('Error creating account. Please try again.');
         }
-      },
+        this.cdr.detectChanges();
+      }
     );
   }
 

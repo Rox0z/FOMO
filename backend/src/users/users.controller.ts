@@ -24,14 +24,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  
-  // PUBLIC REGISTER
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
-  // USER SELF PROFILE
+    // USER SELF PROFILE
   @Get('me')
   @UseGuards(JwtGuard)
   me(@CurrentUser() user: any) {

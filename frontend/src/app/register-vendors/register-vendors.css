@@ -192,3 +192,105 @@ button[type="submit"]:disabled {
   .login-card { padding:1.75rem 1.25rem; }
   .brand .logo { width:110px; }
 }
+
+textarea {
+  width: 100%;
+  padding: 0.78rem 1rem;
+  border-radius: 10px;
+  border: 1.5px solid #e0e0e0;
+  background: #ffffff;
+  font-size: 0.88rem;
+  color: #222;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  font-family: inherit;
+  resize: none;
+}
+
+textarea:focus {
+  border-color: #6c3bff;
+  box-shadow: 0 0 0 3px rgba(108,59,255,0.1);
+}
+
+textarea:focus + label,
+textarea:not(:placeholder-shown) + label {
+  top: -8px; transform: translateY(0); left: 10px;
+  font-size: 0.68rem; background: #ffffff; padding: 0 4px; color: #6c3bff;
+}
+
+.success-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn .25s ease;
+}
+
+.success-card {
+  width: 90%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 22px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  animation: popIn .3s cubic-bezier(.16,1,.3,1);
+}
+
+.success-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#5a2ef5,#7c55ff);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.success-card h2 {
+  margin-bottom: .75rem;
+  color: #111;
+}
+
+.success-card p {
+  color: #666;
+  font-size: .95rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.success-card button {
+  width: 100%;
+  padding: .9rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg,#5a2ef5,#7c55ff);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from { opacity:0; }
+  to { opacity:1; }
+}
+
+@keyframes popIn {
+  from {
+    opacity:0;
+    transform: scale(.92) translateY(10px);
+  }
+  to {
+    opacity:1;
+    transform: scale(1) translateY(0);
+  }
+}
