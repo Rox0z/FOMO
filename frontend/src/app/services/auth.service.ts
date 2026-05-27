@@ -2,14 +2,16 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
-const API_URL = 'http://localhost:3000';
+
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
 
+  private readonly API_URL = environment.apiUrl;
   private currentUserSubject = new BehaviorSubject<any>(this.getUserFromStorage());
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -45,7 +47,7 @@ export class AuthService {
   // =========================
 
     login(email: string, password: string): Observable<any> {
-    return this.http.post<any>(`${API_URL}/auth/login`, {
+    return this.http.post<any>(`${this.API_URL}/auth/login`, {
       email,
       password
     });
@@ -58,7 +60,7 @@ export class AuthService {
   }
 
   register(userData: any): Observable<any> {
-    return this.http.post<any>(`${API_URL}/auth/register`, userData).pipe(
+    return this.http.post<any>(`${this.API_URL}/auth/register`, userData).pipe(
       tap(res => {
         this.storeToken(res.token);
         this.storeUser(res.user);
@@ -85,15 +87,15 @@ export class AuthService {
   // =========================
 
   getUserProfile(): Observable<any> {
-    return this.http.get<any>(`${API_URL}/users/me`);
+    return this.http.get<any>(`${this.API_URL}/users/me`);
   }
 
   getVendorProfile(): Observable<any> {
-    return this.http.get<any>(`${API_URL}/vendors/me`);
+    return this.http.get<any>(`${this.API_URL}/vendors/me`);
   }
 
   private loadCurrentUser(): void {
-    this.http.get<any>(`${API_URL}/users/me`).subscribe({
+    this.http.get<any>(`${this.API_URL}/users/me`).subscribe({
       next: (user) => {
         this.storeUser(user);
         this.currentUserSubject.next(user);
@@ -107,7 +109,7 @@ export class AuthService {
   }
 
   updateProfile(updatedData: any): Observable<any> {
-    return this.http.patch<any>(`${API_URL}/users/me`, updatedData).pipe(
+    return this.http.patch<any>(`${this.API_URL}/users/me`, updatedData).pipe(
       tap(updatedUser => {
         this.storeUser(updatedUser);
         this.currentUserSubject.next(updatedUser);

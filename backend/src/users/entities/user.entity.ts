@@ -1,13 +1,12 @@
 export class User {
   id: number;
   email: string;
-  password?: string; // Should not be returned in API responses
+  password?: string; 
   name: string;
-  phone?: string;
-  countryCode?: string;
-  role: 'user' | 'vendor' | 'admin';
-  superuser: boolean;
+  phone: string | null;
+  countryCode: string | null;
+  role: 'user' | 'vendor' | 'admin' | string;
   active: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 }

@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, varchar, text, timestamp, numeric } from 'drizzle-orm/pg-core';
+import { pgTable, serial, integer, varchar, text, timestamp, numeric, doublePrecision } from 'drizzle-orm/pg-core';
 import { vendorProfiles } from './vendorProfiles';
 
 export const events = pgTable('events', {
@@ -16,7 +16,7 @@ export const events = pgTable('events', {
 
   bannerUrl: text('banner_url'),
 
-  ticketPrice: numeric('ticket_price', { precision: 10, scale: 2 }).notNull().default('0.00'),
+  ticketPrice: doublePrecision('ticket_price').notNull().default(0.00),
 
   maxCapacity: integer('max_capacity').notNull().default(100),
   ticketsSold: integer('tickets_sold').notNull().default(0),

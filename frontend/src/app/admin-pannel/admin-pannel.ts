@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastService } from "../services/toast.service";
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-admin-pannel',
@@ -14,7 +15,7 @@ import { ToastService } from "../services/toast.service";
 })
 export class AdminPannel implements OnInit {
 
-  apiUrl = 'http://localhost:3000/admin';
+  private readonly apiUrl = `${environment.apiUrl}/admin`;
 
   activeTab = 'dashboard';
   loading = false;

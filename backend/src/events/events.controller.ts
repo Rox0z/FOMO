@@ -14,6 +14,7 @@ import {
 
 import { JwtGuard } from '../auth/jwt/jwt.guard';
 import { RolesGuard } from '../common/guards/role.guard';
+import { EventOwnerGuard } from '../common/guards/event-owner.guard';
 import { RolesDecorator } from '../common/decorators/roles.decorator';
 import { Roles } from '../common/enums/roles.enum';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -52,7 +53,6 @@ export class EventsController {
   @UseGuards(JwtGuard, RolesGuard)
   @RolesDecorator(Roles.VENDOR)
   getMyStats(@CurrentUser() user: any) {
-    // 🎯 Ajustado para dar match com o método do teu Service
     return this.eventsService.getMyStats(user.id);
   }
 
@@ -93,11 +93,11 @@ export class EventsController {
     return this.eventsService.create(dto, user.id, bannerUrl);
   }
 
-// ---------------------------------------------------------\
-  // 🎯 VENDOR - REQUEST EVENT EDIT WITH OPTIONAL BANNER UPLOAD
+  // ---------------------------------------------------------\
+  // VENDOR - REQUEST EVENT EDIT WITH OPTIONAL BANNER UPLOAD
   // ---------------------------------------------------------\
   @Put(':id/request-edit')
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseGuards(JwtGuard, RolesGuard, EventOwnerGuard) 
   @RolesDecorator(Roles.VENDOR)
   @UseInterceptors(FileInterceptor('banner'))
   async requestEdit(
@@ -116,8 +116,7 @@ export class EventsController {
   // VENDOR OR ADMIN - UPDATE EVENT DIRECTLY
   // -------------------------
   @Patch(':id')
-  @UseGuards(JwtGuard, RolesGuard)
-  @RolesDecorator(Roles.VENDOR, Roles.ADMIN)
+  @UseGuards(JwtGuard, RolesGuard, EventOwnerGuard)
   update(
     @Param('id') id: string,
     @Body() dto: UpdateEventDto,
@@ -130,7 +129,7 @@ export class EventsController {
   // DELETE (ADMIN ONLY)
   // -------------------------
   @Delete(':id')
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseGuards(JwtGuard, RolesGuard, EventOwnerGuard) 
   @RolesDecorator(Roles.ADMIN)
   remove(@Param('id') id: string, @CurrentUser() user: any) {
     return this.eventsService.remove(+id, user);

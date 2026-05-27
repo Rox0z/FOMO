@@ -100,7 +100,7 @@ async function seed() {
     { vendorId: approvedVendors[2].id, name: 'Premium Electronic Gala', description: 'Evento exclusivo com dress code elegante.', location: 'Pousada de Évora', date: new Date('2026-09-19T19:00:00Z'), status: 'approved', ticketPrice: '75.00', maxCapacity: 300, ticketsSold: 0 },
   ];
 
-  const createdEvents = await db.insert(events).values(eventSeeds).returning();
+  const createdEvents = await db.insert(events).values(eventSeeds as any).returning();
 
 
   // ==========================================
@@ -120,7 +120,7 @@ async function seed() {
       userId: userId,
       eventId: eventId,
       quantity: quantity,
-      totalPrice: quantity * price,
+      totalPrice: (quantity * price) as any,
       status: 'paid',
     }).returning();
 
