@@ -12,11 +12,12 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { vendorProfiles } from 'src/db/schema/vendorProfiles';
 import { tickets } from 'src/db/schema/tickets';
+import type { DrizzleDB } from '../drizzle';
 
 
 @Injectable()
 export class EventsService {
-  constructor(@Inject('DRIZZLE') private db: any) {}
+  constructor(@Inject('DRIZZLE') private db: DrizzleDB) {}
 
   // -------------------------
   // CREATE EVENT (VENDOR ONLY)
@@ -44,7 +45,7 @@ export class EventsService {
         description: createEventDto.description,
         location: createEventDto.location,
         date: new Date(createEventDto.date),
-        ticketPrice: String(createEventDto.price),
+        ticketPrice: createEventDto.price,
         maxCapacity: Number(createEventDto.maxCapacity),
         bannerUrl: bannerUrl,
         status: 'pending', 
@@ -189,7 +190,7 @@ export class EventsService {
 
     const updated = await this.db
       .update(events)
-      .set(dto)
+      .set(dto as any)
       .where(eq(events.id, id))
       .returning();
 

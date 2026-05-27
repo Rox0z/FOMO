@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ToastService } from '../services/toast.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-tickets',
@@ -13,6 +14,9 @@ import { ToastService } from '../services/toast.service';
   styleUrl: './tickets.css'
 })
 export class Tickets implements OnInit {
+
+  private readonly apiUrl = environment.apiUrl;  
+
   tickets: any[] = [];
   isLoading = true;
   error = '';
@@ -31,7 +35,7 @@ export class Tickets implements OnInit {
 
   fetchMyTickets(): void {
     
-    this.http.get('http://localhost:3000/tickets/me')
+    this.http.get(`${this.apiUrl}/tickets/me`)
       .subscribe({
         next: (data: any) => {
           this.tickets = data;

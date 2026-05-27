@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http'; // 🌟 Mantém apenas o Http
 import { FormsModule } from '@angular/forms'; 
 import { AuthService } from '../services/auth.service'; 
 import { ToastService } from '../services/toast.service';
+import { environment } from '../../environments/environment';
 
 interface EventItem {
   id: number;
@@ -31,7 +32,7 @@ interface EventItem {
 })
 export class HomeComponent implements OnInit {
   // --- CONFIGURAÇÃO CENTRAL DA API ---
-  private readonly apiUrl = 'http://localhost:3000';
+  private readonly apiUrl = environment.apiUrl;
 
   // --- VARIÁVEIS DE PERFIL ---
   user: any = null;

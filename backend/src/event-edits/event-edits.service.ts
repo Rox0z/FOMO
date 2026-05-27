@@ -4,11 +4,12 @@ import { eventEdits } from '../db/schema/event.edits';
 import { events } from '../db/schema/events';
 import { vendorProfiles } from '../db/schema/vendorProfiles';
 import { LogsService } from '../logs/logs.service';
+import type { DrizzleDB } from '../drizzle';
 
 @Injectable()
 export class EventEditsService {
   constructor(
-    @Inject('DRIZZLE') private db: any,
+    @Inject('DRIZZLE') private db: DrizzleDB,
     private logsService: LogsService,
   ) {}
 
@@ -21,7 +22,7 @@ export class EventEditsService {
     });
 
     if (!vendorProfile) {
-      throw new ForbiddenException('Perfil comercial de Vendor não encontrado.');
+      throw new ForbiddenException('Commercial profile of Vendor not found.');
     }
 
     const currentEvent = await this.db.query.events.findFirst({
@@ -29,7 +30,7 @@ export class EventEditsService {
     });
 
     if (!currentEvent) {
-      throw new NotFoundException('Evento não encontrado ou não está mapeado no seu perfil.');
+      throw new NotFoundException('Event not found or not mapped to your profile.');
     }
 
     const combinedDateTime = new Date(`${dto.date}T${dto.time}`);
@@ -53,7 +54,7 @@ export class EventEditsService {
 
     return {
       success: true,
-      message: 'Alterações guardadas e submetidas para auditoria com sucesso.',
+      message: 'Changes saved and submitted for review successfully.',
       data: newEditRequest[0]
     };
   }
@@ -61,17 +62,17 @@ export class EventEditsService {
   // ---------------------------------------------------------
   // 2. USADO PELO ADMIN: Aprovar o Pedido
   // ---------------------------------------------------------
-  async approveEditRequest(editId: number) {
+  async approveEditRequest(editId: number, admin: any) {
     const editRequest = await this.db.query.eventEdits.findFirst({
       where: eq(eventEdits.id, editId),
     });
 
     if (!editRequest) {
-      throw new NotFoundException('O pedido de alteração não foi encontrado.');
+      throw new NotFoundException('The edit request was not found.');
     }
 
     if (editRequest.status !== 'pending') {
-      throw new BadRequestException('Este pedido de modificação já foi avaliado.');
+      throw new BadRequestException('This request for modification has already been evaluated.');
     }
 
     // Aplicar no evento principal
@@ -82,7 +83,7 @@ export class EventEditsService {
         description: editRequest.description,
         location: editRequest.location,
         date: editRequest.date,
-        ticketPrice: editRequest.ticketPrice,
+        ticketPrice: editRequest.ticketPrice as any,
         maxCapacity: editRequest.maxCapacity,
         bannerUrl: editRequest.bannerUrl,
         updatedAt: new Date(),
@@ -95,27 +96,29 @@ export class EventEditsService {
       .set({ status: 'approved' })
       .where(eq(eventEdits.id, editId));
 
+    const adminIdentifier = admin?.name || admin?.email || 'Undefined Admin ';
+
     await this.logsService.createLog(
-      `Approved structural updates for Event ID: ${editRequest.eventId} ("${editRequest.name}")`
+      `Approved structural updates for Event ID: ${editRequest.eventId} ("${editRequest.name}")`,adminIdentifier
     );
 
-    return { success: true, message: 'Alterações homologadas com sucesso.' };
+    return { success: true, message: 'Changes approved successfully.' };
   }
 
   // ---------------------------------------------------------
   // 3. USADO PELO ADMIN: Rejeitar o Pedido
   // ---------------------------------------------------------
-  async rejectEditRequest(editId: number) {
+  async rejectEditRequest(editId: number, admin: any) {
     const editRequest = await this.db.query.eventEdits.findFirst({
       where: eq(eventEdits.id, editId),
     });
 
     if (!editRequest) {
-      throw new NotFoundException('O pedido de alteração não foi encontrado.');
+      throw new NotFoundException('The edit request was not found.');
     }
 
     if (editRequest.status !== 'pending') {
-      throw new BadRequestException('Este pedido de modificação já foi avaliado.');
+      throw new BadRequestException('This request for modification has already been evaluated.');
     }
 
     await this.db
@@ -123,10 +126,12 @@ export class EventEditsService {
       .set({ status: 'rejected' })
       .where(eq(eventEdits.id, editId));
 
+    const adminIdentifier = admin?.name || admin?.email || 'Undefined Admin ';
+
     await this.logsService.createLog(
-      `Rejected modification updates for Event ID: ${editRequest.eventId} ("${editRequest.name}")`
+      `Rejected modification updates for Event ID: ${editRequest.eventId} ("${editRequest.name}")`,adminIdentifier
     );
 
-    return { success: true, message: 'Pedido de alteração rejeitado de forma segura.' };
+    return { success: true, message: 'Edit request securely rejected.' };
   }
 }

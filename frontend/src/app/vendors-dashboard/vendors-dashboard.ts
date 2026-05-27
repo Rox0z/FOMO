@@ -5,6 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import { ToastService } from '../services/toast.service';
+import { environment } from '../../environments/environment';
 
 export interface VendorEvent {
   id: number;
@@ -39,7 +40,7 @@ export interface DetailedVendorEvent extends VendorEvent {
   styleUrls: ['./vendors-dashboard.css']
 })
 export class VendorsDashboard implements OnInit {
-  apiUrl = 'http://localhost:3000';
+  private readonly apiUrl = environment.apiUrl;
 
 
   // Estado de Navegação

@@ -5,11 +5,12 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { ToastService } from "../services/toast.service";
+import { environment } from '../../environments/environment';
 
 interface EventItem {
   id: number;
   vendorId: number;
-  businessName?: string; // 🌟 Nova propriedade vinda do Join do Backend
+  businessName?: string; 
   name: string;
   description: string;
   location: string;
@@ -29,7 +30,7 @@ interface EventItem {
   styleUrls: ['./event-details.css']
 })
 export class EventDetailComponent implements OnInit {
-  private readonly apiUrl = 'http://localhost:3000';
+  private readonly apiUrl = environment.apiUrl;
   
   isMenuOpen = false;
   user: any = null;

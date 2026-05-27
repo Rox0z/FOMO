@@ -8,12 +8,13 @@ import { users } from '../db/schema/users';
 import { vendorProfiles } from '../db/schema/vendorProfiles';
 import { UsersService } from '../users/users.service';
 import { UpdateVendorProfileDto } from './dto/update-vendor.dto';
+import type { DrizzleDB } from '../drizzle';
 
 @Injectable()
 export class VendorsService {
   constructor(
     private usersService: UsersService,
-    @Inject('DRIZZLE') private db: any,
+    @Inject('DRIZZLE') private db: DrizzleDB
   ) {}
 
 
@@ -115,7 +116,7 @@ export class VendorsService {
   async remove(userId: number) {
     await this.db
       .delete(vendorProfiles)
-      .where((vp, { eq }) => eq(vp.userId, userId));
+      .where(eq(vendorProfiles.userId, userId));
 
     await this.db
       .delete(users)

@@ -2,10 +2,11 @@ import { Injectable, Inject } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import { tickets } from '../db/schema/tickets';
 import { events } from '../db/schema/events';
+import type { DrizzleDB } from '../drizzle';
 
 @Injectable()
 export class TicketsService {
-  constructor(@Inject('DRIZZLE') private db: any) {}
+  constructor(@Inject('DRIZZLE') private db: DrizzleDB) {}
 
   async findMyTickets(userId: number) {
     // Fazemos um JOIN com os Eventos para ter o Nome, Data e Local no Angular!

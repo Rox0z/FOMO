@@ -12,10 +12,11 @@ import { users } from '../db/schema/users';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import type { DrizzleDB } from '../drizzle';
 
 @Injectable()
 export class UsersService {
-  constructor(@Inject('DRIZZLE') private db: any) {}
+  constructor(@Inject('DRIZZLE') private db: DrizzleDB) {}
 
   async create(dto: CreateUserDto, overrides?: { role?: string; active?: boolean }): Promise<Omit<User, 'password'>> {
     const existingUser = await this.db.query.users.findFirst({
@@ -75,9 +76,10 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return await this.db.query.users.findFirst({
+    const user = await this.db.query.users.findFirst({
       where: eq(users.email, email),
     });
+    return user || null;
   }
 
   async update(id: number, dto: UpdateUserDto): Promise<Omit<User, 'password'>> {
