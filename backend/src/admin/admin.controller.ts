@@ -24,6 +24,11 @@ export class AdminController {
     return this.adminService.overview();
   }
 
+  @Get('requests')
+  getRequestsCount() {
+    return this.adminService.requests();
+  }
+
   @Patch('vendors/:id/approve')
   approveVendor(@Param('id') id: string, @CurrentUser() admin: any) {
     return this.adminService.approveVendor(+id, admin);

@@ -10,6 +10,7 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  Request,
 } from '@nestjs/common';
 
 import { JwtGuard } from '../auth/jwt/jwt.guard';
@@ -25,7 +26,7 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ImagesService } from '../services/images.service';
+import { ImagesService } from '../services/images/images.service';
 import { EventEditsService } from 'src/event-edits/event-edits.service';
 
 @ApiTags('events')
@@ -93,23 +94,22 @@ export class EventsController {
     return this.eventsService.create(dto, user.id, bannerUrl);
   }
 
-  // ---------------------------------------------------------\
+  // ---------------------------------------------------------
   // VENDOR - REQUEST EVENT EDIT WITH OPTIONAL BANNER UPLOAD
-  // ---------------------------------------------------------\
+  // ---------------------------------------------------------
   @Put(':id/request-edit')
   @UseGuards(JwtGuard, RolesGuard, EventOwnerGuard) 
   @RolesDecorator(Roles.VENDOR)
-  @UseInterceptors(FileInterceptor('banner'))
+  @UseInterceptors(FileInterceptor('banner')) // Intercepta a chave 'banner' que vem do Angular
   async requestEdit(
     @Param('id') id: string,
     @Body() dto: UpdateEventDto,
-    @CurrentUser() user: any,      @UploadedFile() file?: Express.Multer.File,
+    @CurrentUser() user: any,
+    @UploadedFile() file?: Express.Multer.File, // Captura o ficheiro físico opcional
   ) {
-    let newBannerUrl: string | null = null;
-    if (file) {
-      newBannerUrl = await this.imagesService.uploadImage(file);
-    }
-    return this.eventEditsService.createEditRequest(+id, dto, user.id, newBannerUrl || '');
+    // 🌟 CORREÇÃO: Passamos diretamente o ficheiro 'file' para o serviço.
+    // O EventEditsService é quem agora vai chamar o ImagesService se o ficheiro existir!
+    return this.eventEditsService.createEditRequest(+id, dto, user.id, file);
   }
 
   // -------------------------

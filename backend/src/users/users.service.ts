@@ -13,10 +13,14 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import type { DrizzleDB } from '../drizzle';
+import { EmailsService } from '../services/emails/emails.service';
 
 @Injectable()
 export class UsersService {
-  constructor(@Inject('DRIZZLE') private db: DrizzleDB) {}
+  constructor(
+    @Inject('DRIZZLE') private db: DrizzleDB,
+    private emailsService: EmailsService
+  ) {}
 
   async create(dto: CreateUserDto, overrides?: { role?: string; active?: boolean }): Promise<Omit<User, 'password'>> {
     const existingUser = await this.db.query.users.findFirst({
@@ -41,6 +45,10 @@ export class UsersService {
         active: overrides?.active ?? true,
       })
       .returning();
+
+    if (newUser && newUser[0] && newUser[0].email && newUser[0].role === 'user') {
+      this.emailsService.sendWelcomeEmail(newUser[0].email, newUser[0].name);
+    }
 
     const { password, ...user } = newUser[0];
     return user;

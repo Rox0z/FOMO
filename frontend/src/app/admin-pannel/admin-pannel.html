@@ -124,9 +124,15 @@
               </div>
             </div>
 
-            <div class="stat-card" (click)="setTab('edits')" style="cursor: pointer;">
-              <h3>Active Requests</h3>
-              <p class="stat-number">{{ stats.edits.pending }}</p>
+            
+            <div class="stat-card">
+              <h3>Pending Requests</h3>
+              <p class="stat-number">{{ stats.edits.total }}</p>
+              <div class="stat-details grid-details">
+                <span class="detail-item text">● New Vendors: <strong>{{ stats.edits.vendorApproval }}</strong></span>
+                <span class="detail-item text">● New Events: <strong>{{ stats.edits.publishingEvent }}</strong></span>
+                <span class="detail-item text">● Updated Events: <strong>{{ stats.edits.updatingEvent }}</strong></span>
+              </div>
             </div>
           </div>
 
@@ -194,7 +200,6 @@
                   <th>Commercial Status</th>
                   <th>Login Status</th>
                   <th>Commercial Moderation</th>
-                  <th>Access Control</th>
                 </tr>
               </thead>
               <tbody>
@@ -221,10 +226,6 @@
                       <button *ngIf="vendor.status !== 'rejected'" class="btn reject" (click)="$event.stopPropagation(); rejectVendor(vendor)">Reject</button>
                     </div>
                   </td>
-                  <td>
-                    <button *ngIf="vendor.active" class="btn reject" (click)="$event.stopPropagation(); banVendorUser(vendor)">Block Login</button>
-                    <button *ngIf="!vendor.active" class="btn approve" (click)="$event.stopPropagation(); unbanVendorUser(vendor)">Allow Login</button>
-                  </td>
                 </tr>
                 <tr *ngIf="filteredVendors.length === 0">
                   <td colspan="6" style="text-align: center; color: #888; padding: 20px; font-style: italic;">
@@ -243,7 +244,6 @@
                 <option value="vendorId">Vendor ID (Creator)</option>
               </select>
               <input type="text" placeholder="Search..." [(ngModel)]="searchEventCreatorQuery" (input)="filterEventsByCreator()" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 0.55rem 1rem; border-radius: 6px; color: #fff; width: 250px; font-size: 0.85rem; outline: none; height: 36px;" />
-              <p class="table-tip" style="margin: 0 0 0 auto; font-size: 0.85rem; color: #a5b4fc;">💡 Click on an event row to view complete details.</p>
             </div>
             <table>
               <thead>
@@ -442,7 +442,7 @@
           </div>
           <div class="info-item">
             <label>Company / Creator</label>
-            <p>{{ selectedEvent.vendorName || selectedEvent.businessName || 'Not defined' }}</p>
+            <p>{{ selectedEvent?.vendorName || 'Not defined' }}</p>
           </div>
           <div class="info-item">
             <label>Venue / Commercial Space</label>
@@ -460,7 +460,7 @@
             <label>Capacity / Purchased Tickets</label>
             <div class="tickets-counter">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><line x1="13" x2="13" y1="11" y2="13"/></svg>
-              <span><strong>{{ selectedEvent.ticketCount || selectedEvent.soldTickets || 0 }}</strong> tickets sold so far</span>
+              <span><strong>{{ selectedEvent?.totalTicketsCount || 0}}</strong> tickets sold so far</span>
             </div>
           </div>
           <div class="info-item full-width-item">

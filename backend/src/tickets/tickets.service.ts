@@ -1,8 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { eq, asc } from 'drizzle-orm';
 import { tickets } from '../db/schema/tickets';
 import { events } from '../db/schema/events';
 import type { DrizzleDB } from '../drizzle';
+
 
 @Injectable()
 export class TicketsService {
@@ -22,7 +23,8 @@ export class TicketsService {
       })
       .from(tickets)
       .innerJoin(events, eq(tickets.eventId, events.id))
-      .where(eq(tickets.userId, userId));
+      .where(eq(tickets.userId, userId))
+      .orderBy(asc(tickets.id));
 
     return myTickets;
   }

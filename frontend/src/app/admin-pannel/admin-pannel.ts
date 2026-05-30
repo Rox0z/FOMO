@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastService } from "../services/toast.service";
 import { environment } from '../../environments/environment';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-admin-pannel',
@@ -53,7 +54,7 @@ export class AdminPannel implements OnInit {
     users: { total: 0, active: 0 },
     vendors: { total: 0, approved: 0, pending: 0, rejected: 0 },
     events: { total: 0, approved: 0, pending: 0, rejected: 0 },
-    edits: { pending: 0 }
+    edits: { total: 0, vendorApproval: 0, publishingEvent: 0, updatingEvent: 0 }
   };
 
   searchUserQuery = '';
@@ -76,7 +77,8 @@ export class AdminPannel implements OnInit {
     private http: HttpClient,
     private cdRef: ChangeDetectorRef,
     private router: Router,
-    private toast: ToastService
+    private toast: ToastService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -107,62 +109,80 @@ export class AdminPannel implements OnInit {
   }
 
   loadOverview() {
-    this.loading = true;
-    this.error = '';
+      this.loading = true;
+      this.error = '';
 
-    this.http.get<any>(`${this.apiUrl}/overview`).subscribe({
-      next: (res: any) => {
-        this.users = res.users || [];
-        this.vendors = res.vendors || [];
-        this.events = res.events || [];
-        this.eventEdits = res.eventEdits || [];
+      // 1. Executa primeiro o overview estrutural para montar as listas e tabelas locais
+      this.http.get<any>(`${this.apiUrl}/overview`).subscribe({
+        next: (res: any) => {
+          this.users = res.users || [];
+          this.vendors = res.vendors || [];
+          this.events = res.events || [];
+          this.eventEdits = res.eventEdits || [];
 
-        this.pendingRequests = [
-          ...this.events
-            .filter((e: any) => e.status === 'pending')
-            .map((e: any) => ({
-              ...e,
-              type: 'EVENT_PUBLISH'
-            })),
+          this.pendingRequests = [
+            ...this.events
+              .filter((e: any) => e.status === 'pending')
+              .map((e: any) => ({
+                ...e,
+                type: 'EVENT_PUBLISH'
+              })),
 
-          ...this.eventEdits
-            .filter((e: any) => e.status === 'pending')
-            .map((e: any) => ({
-              ...e,
-              type: 'EVENT_EDIT'
-            })),
+            ...this.eventEdits
+              .filter((e: any) => e.status === 'pending')
+              .map((e: any) => ({
+                ...e,
+                type: 'EVENT_EDIT'
+              })),
 
-          ...this.vendors
-            .filter((v: any) => v.status === 'pending')
-            .map((v: any) => ({
-              ...v,
-              type: 'VENDOR_APPROVAL'
-            }))
-        ];
+            ...this.vendors
+              .filter((v: any) => v.status === 'pending')
+              .map((v: any) => ({
+                ...v,
+                type: 'VENDOR_APPROVAL'
+              }))
+          ];
 
-        this.filteredUsers = [...this.users];
-        this.filteredVendors = [...this.vendors];
-        this.filteredEvents = [...this.events];
+          this.filteredUsers = [...this.users];
+          this.filteredVendors = [...this.vendors];
+          this.filteredEvents = [...this.events];
 
-        this.userFilter = 'all';
-        this.vendorFilter = 'all';
-        this.eventFilter = 'all';
-        this.requestFilter = 'all';
+          this.userFilter = 'all';
+          this.vendorFilter = 'all';
+          this.eventFilter = 'all';
+          this.requestFilter = 'all';
 
-        this.recalculateAllLocalStats();
+          // 2. Executa os calculos locais dos outros cards (Clientes, Vendors, Eventos)
+          this.recalculateAllLocalStats();
 
-        this.loading = false;
+          // 3. EXECUTADO POR FIM: Faz a chamada dedicada ao requests e aplica os dados reais sem sofrer resets
+          this.http.get<any>(`${this.apiUrl}/requests`).subscribe({
+            next: (statsData: any) => {
+              if (statsData && statsData.breakdown) {
+                this.stats.edits.total = statsData.totalRequests || 0;
+                this.stats.edits.vendorApproval = statsData.breakdown.vendorApproval || 0;
+                this.stats.edits.publishingEvent = statsData.breakdown.publishingEvent || 0;
+                this.stats.edits.updatingEvent = statsData.breakdown.updatingEvent || 0;
+              }
+              this.loading = false;
+              this.cdRef.detectChanges();
+            },
+            error: (err) => {
+              console.error('Erro ao carregar o breakdown de pedidos:', err);
+              this.loading = false;
+              this.cdRef.detectChanges();
+            }
+          });
+        },
 
-        this.cdRef.detectChanges();
-      },
-
-      error: () => {
-        this.error = 'Error loading system overview data.';
-        this.loading = false;
-        this.notify('Erro ao carregar overview.', 'error');
-      }
-    });
-  }
+        error: () => {
+          this.error = 'Error loading system overview data.';
+          this.loading = false;
+          this.notify('Erro ao carregar overview.', 'error');
+          this.cdRef.detectChanges();
+        }
+      });
+    }
 
   loadAuditLogs() {
     this.http.get<any[]>(`${this.apiUrl}/logs`).subscribe({
@@ -191,8 +211,6 @@ export class AdminPannel implements OnInit {
     this.stats.events.approved = this.events.filter(e => e.status === 'approved').length;
     this.stats.events.pending = this.events.filter(e => e.status === 'pending' || !e.status).length;
     this.stats.events.rejected = this.events.filter(e => e.status === 'rejected').length;
-
-    this.stats.edits.pending = this.pendingRequests.length;
   }
 
   setUserFilter(status: string) {
@@ -294,6 +312,24 @@ export class AdminPannel implements OnInit {
     this.filteredEvents = result;
   }
 
+  getEventTicketsCount(event: any): number {
+    if (!event) return 0;
+
+    if (event.tickets && Array.isArray(event.tickets)) {
+      return event.tickets.length;
+    }
+
+    return event.totalTickets || 0;
+  }
+
+  getVendorBusinessName(vendorId: number): string {
+    if (!vendorId || !this.vendors || this.vendors.length === 0) {
+      return 'Unknown Creator';
+    }
+    const vendor = this.vendors.find(v => v.id === vendorId);
+    return vendor ? vendor.businessName : 'Unknown Creator';
+  }
+
   banUser(user: any) {
     this.http.patch(`${this.apiUrl}/users/${user.id}/ban`, {}).subscribe({
       next: () => {
@@ -352,36 +388,6 @@ export class AdminPannel implements OnInit {
 
       error: () => {
         this.notify('Erro ao rejeitar vendor.', 'error');
-      }
-    });
-  }
-
-  banVendorUser(vendor: any) {
-    this.http.patch(`${this.apiUrl}/users/${vendor.userId}/ban`, {}).subscribe({
-      next: () => {
-        vendor.active = false;
-        this.filterVendors();
-        this.loadAuditLogs();
-        this.notify('Conta do vendor bloqueada.');
-      },
-
-      error: () => {
-        this.notify('Erro ao bloquear vendor.', 'error');
-      }
-    });
-  }
-
-  unbanVendorUser(vendor: any) {
-    this.http.patch(`${this.apiUrl}/users/${vendor.userId}/unban`, {}).subscribe({
-      next: () => {
-        vendor.active = true;
-        this.filterVendors();
-        this.loadAuditLogs();
-        this.notify('Conta do vendor desbloqueada.');
-      },
-
-      error: () => {
-        this.notify('Erro ao desbloquear vendor.', 'error');
       }
     });
   }
@@ -513,10 +519,7 @@ export class AdminPannel implements OnInit {
   }
 
   logout() {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_role');
-    localStorage.removeItem('user_info');
-
+    this.authService.logout();
     this.notify('Sessão terminada.');
 
     this.router.navigate(['/login'], { queryParams: { mode: 'admin' } });
