@@ -13,11 +13,15 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { vendorProfiles } from 'src/db/schema/vendorProfiles';
 import { tickets } from 'src/db/schema/tickets';
 import type { DrizzleDB } from '../drizzle';
+import { ImagesService } from 'src/services/images/images.service';
 
 
 @Injectable()
 export class EventsService {
-  constructor(@Inject('DRIZZLE') private db: DrizzleDB) {}
+  constructor(
+    @Inject('DRIZZLE') private db: DrizzleDB,
+    private readonly imagesService: ImagesService
+) {}
 
   // -------------------------
   // CREATE EVENT (VENDOR ONLY)

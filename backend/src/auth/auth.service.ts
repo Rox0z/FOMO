@@ -49,9 +49,19 @@ export class AuthService {
 
     if (!user) return null;
 
-    const token = this.generateToken(user);
+  
     const { password, ...userWithoutPassword } = user;
-    return { user: userWithoutPassword, token };
+
+    let isApproved = true;
+    if (user.role === 'vendor') {
+      const profile = await this.vendorsService.findByUserId(user.id);
+      isApproved = profile.status === 'approved';
+    }
+
+    const finalizedUser = { ...userWithoutPassword, approved: isApproved };
+
+    const token = this.generateToken(finalizedUser);
+    return { user: finalizedUser, token };
   }
 
   private generateToken(user: any): string {

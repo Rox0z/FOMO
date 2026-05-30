@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { EventsController } from './events.controller';
-import { ImagesService } from '../services/images.service';
 import { HttpModule } from '@nestjs/axios';
 import { EventEditsModule } from 'src/event-edits/event-edits.module';
 
@@ -18,7 +17,7 @@ import { memoryStorage } from 'multer';
     }),
   ],
   controllers: [EventsController],
-  providers: [EventsService, ImagesService],
+  providers: [EventsService],
   exports: [EventsService],
 })
 export class EventsModule {}

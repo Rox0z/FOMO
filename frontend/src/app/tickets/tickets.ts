@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ToastService } from '../services/toast.service';
 import { environment } from '../../environments/environment';
+import * as QRCode from 'qrcode';
 
 @Component({
   selector: 'app-tickets',
@@ -33,14 +34,19 @@ export class Tickets implements OnInit {
     this.fetchMyTickets();
   }
 
-  fetchMyTickets(): void {
-    
+    fetchMyTickets(): void {
     this.http.get(`${this.apiUrl}/tickets/me`)
       .subscribe({
-        next: (data: any) => {
-          this.tickets = data;
+        next: async (data: any) => {
+    
+          this.tickets = await Promise.all(
+            data.map(async (ticket: any) => ({
+              ...ticket,
+              qrCodeDataUrl: await this.generateQrCode(ticket.qrCode),
+            }))
+          );
           this.isLoading = false;
-          this.cdr.detectChanges(); 
+          this.cdr.detectChanges();
         },
         error: (err) => {
           this.toast.show('Erro ao carregar os teus bilhetes.');
@@ -49,9 +55,18 @@ export class Tickets implements OnInit {
         }
       });
   }
-
-  getQrCodeUrl(qrData: string): string {
+ 
+  private async generateQrCode(qrData: string): Promise<string> {
     if (!qrData) return '';
-    return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${qrData}&color=1a0b2e&bgcolor=ffffff`;
+    return await QRCode.toDataURL(qrData, {
+      margin: 4,
+      errorCorrectionLevel: 'L',
+      version: 3,
+      width: 150,
+      color: {
+        dark: '#1a0b2e',
+        light: '#ffffff',
+      },
+    });
   }
 }
