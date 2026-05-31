@@ -4,18 +4,16 @@
       <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo" />
     </div>
 
-    <ul class="nav-links">
-      <li><a routerLink="/home" fragment="discover">Discover</a></li>
-      <li><a routerLink="/home" fragment="events">Events</a></li>
-      <li><a routerLink="/home" fragment="community">Community</a></li>
-    </ul>
-
     <div class="nav-right">
       <a [routerLink]="['/login']" [queryParams]="{ mode: 'user' }" class="btn-nav-outline nav-link-btn" *ngIf="!user">Sign in</a>
       <a [routerLink]="['/login']" [queryParams]="{ mode: 'vendor' }" class="btn-nav-primary nav-link-btn" *ngIf="!user">Promoter</a>
+
+      <a routerLink="/cart" class="nav-cart-icon-btn" *ngIf="user" title="Ver Carrinho">
+        <span>🛒</span>
+      </a>
       
       <div class="profile-dropdown" *ngIf="user" (click)="toggleMenu()">
-        <span class="user-display-name">👋 {{ user.name || 'User' }}</span>
+        <span class="user-display-name">{{ user.name || 'User' }}</span>
       </div>
     </div>
 
@@ -61,8 +59,8 @@
             (error)="onImageError($event)"
             class="detail-banner-img"
           />
-          <span class="stock-badge" [ngClass]="getStockClass(event)">
-            {{ getStockLabel(event) }}
+          <span class="stock-badge" [ngClass]="stockStatusClass">
+            {{ stockStatusText }}
           </span>
         </div>
 
@@ -140,7 +138,11 @@
             </div>
 
             <button (click)="confirmPurchase()" [disabled]="isSubmittingOrder" class="btn-primary-home-match">
-              {{ isSubmittingOrder ? 'Processing secure order...' : 'Get Ticket' }}
+              {{ isSubmittingOrder ? 'Processing secure order...' : 'Buy Now' }}
+            </button>
+
+            <button (click)="addToCartOnly()" [disabled]="isSubmittingOrder" class="btn-cart-secondary">
+                Add to Cart
             </button>
             
             <span class="checkout-secure-hint">Secure transaction processed by FOMO Core.</span>

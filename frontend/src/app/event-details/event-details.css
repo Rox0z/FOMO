@@ -112,6 +112,32 @@
   background: #222222;
 }
 
+.btn-cart-secondary {
+  width: 100%;
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+  height: 40px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px; /* Cria um pequeno espaçamento em relação ao botão Buy Now */
+  transition: all var(--transition-fast); /* Sincronizado com a velocidade do teu tema */
+}
+
+.btn-cart-secondary:hover:not(:disabled) {
+  background: #000000; /* Fica preto puro no hover */
+  color: #ffffff;      /* Letras mudam para branco para manter o contraste */
+}
+
+.btn-cart-secondary:disabled {
+  background: #ffffff;
+  color: #a1a1aa;
+  border-color: #e4e4e7;
+  cursor: not-allowed;
+}
+
 /* User Session Components */
 .profile-dropdown {
   background: var(--bg-light);
@@ -311,7 +337,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   z-index: 10;
 }
-.stock-high { background: #10b981; color: #ffffff; }
+.stock-high, .stock-available { background: #10b981; color: #ffffff; }
 .stock-medium { background: #f59e0b; color: #ffffff; }
 .stock-low { background: #ef4444; color: #ffffff; }
 .stock-sold { background: #374151; color: #ffffff; }
@@ -659,4 +685,28 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================\
+   🛒 NAVBAR CART ICON LINK (Design minimalista integrado na Navbar)
+   ========================================================================== */
+.nav-cart-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%; /* Faz o formato de círculo perfeito */
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.nav-cart-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05); /* Dá um micro-efeito de crescimento ao passar o rato */
 }

@@ -10,6 +10,8 @@ import { RoleGuard } from './services/role.guard';
 import { ProfileComponent } from './profile/profile';
 import { Tickets } from './tickets/tickets';
 import { EventDetailComponent } from './event-details/event-details';
+import { PaymentComponent } from './payment/payment';
+import { CartComponent } from './cart/cart';
 
 export const routes: Routes = [
   { path: 'login', component: Login },
@@ -17,6 +19,7 @@ export const routes: Routes = [
   { path: 'register-users', component: RegisterUsers},
   { path: 'home', component: HomeComponent },
   { path: 'event/:id', component: EventDetailComponent},
+  { path: 'cart', component: CartComponent },
   { path: 'user', canActivate: [AuthGuard, RoleGuard], data: { roles: ['user'] },
     children: [
       { path: 'profile', component: ProfileComponent },
@@ -25,5 +28,6 @@ export const routes: Routes = [
   },
   { path: 'vendor-dashboard', component: VendorsDashboard, canActivate: [AuthGuard, RoleGuard], data: { roles: ['vendor'] },},
   { path: 'admin-dashboard', component: AdminPannel, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] },},
+  { path: 'payment', component: PaymentComponent},
   { path: '', redirectTo: 'home', pathMatch: 'full' }
 ];

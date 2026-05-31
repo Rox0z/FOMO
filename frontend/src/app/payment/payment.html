@@ -1,0 +1,97 @@
+<div class="mock-wrapper">
+  <div class="mock-card">
+
+    <!-- Header -->
+    <div class="mock-header">
+      <button class="btn-back" (click)="goBack()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+        Voltar
+      </button>
+      <div class="mock-logo">FOMO <span>Pay</span></div>
+    </div>
+
+    <!-- Resumo da compra -->
+    <div class="order-summary">
+      <div class="summary-row">
+        <span class="summary-label">Evento</span>
+        <span class="summary-value">{{ eventName }}</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Quantidade</span>
+        <span class="summary-value">{{ quantity }} bilhete(s)</span>
+      </div>
+      <div class="summary-row total-row">
+        <span class="summary-label">Total</span>
+        <span class="summary-value total-price">€{{ totalPrice.toFixed(2) }}</span>
+      </div>
+    </div>
+
+    <!-- Formulário de cartão -->
+    <div class="card-form">
+      <p class="form-title">Dados de pagamento</p>
+
+      <div class="field">
+        <label>Número do cartão</label>
+        <input
+          type="text"
+          placeholder="1234 5678 9012 3456"
+          [value]="cardNumber"
+          (input)="formatCardNumber($event)"
+          maxlength="19"
+        />
+      </div>
+
+      <div class="field">
+        <label>Nome no cartão</label>
+        <input
+          type="text"
+          placeholder="João Silva"
+          [(ngModel)]="cardName"
+          maxlength="40"
+        />
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Validade</label>
+          <input
+            type="text"
+            placeholder="MM/AA"
+            [value]="cardExpiry"
+            (input)="formatExpiry($event)"
+            maxlength="5"
+          />
+        </div>
+        <div class="field">
+          <label>CVC</label>
+          <input
+            type="text"
+            placeholder="123"
+            [(ngModel)]="cardCvc"
+            maxlength="4"
+          />
+        </div>
+      </div>
+
+      <p class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
+
+      <button
+        class="btn-pay"
+        (click)="pay()"
+        [disabled]="!isFormValid || isPaying"
+        [class.loading]="isPaying"
+      >
+        <span *ngIf="!isPaying">💳 Pagar €{{ totalPrice.toFixed(2) }}</span>
+        <span *ngIf="isPaying">A processar...</span>
+      </button>
+
+      <p class="mock-notice">
+        🔒 Ambiente de teste — nenhum valor real será cobrado
+      </p>
+    </div>
+
+  </div>
+</div>

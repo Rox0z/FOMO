@@ -25,63 +25,84 @@ export class OrdersService {
     // Usamos uma transação: ou grava tudo com sucesso, ou cancela tudo em caso de erro!
     return await this.db.transaction(async (tx) => {
       
-      //Procurar o evento dentro da transação para obter os valores mais recentes e evitar Race Conditions
-      const event = await tx.query.events.findFirst({
-        where: eq(events.id, dto.eventId),
-      });
+      // Criamos acumuladores globais para consolidar o e-mail no final do checkout
+      const allQrCodeBuffers: Buffer[] = [];
+      const eventNames: string[] = [];
+      let grandTotal = 0;
+      let totalQuantity = 0;
+      let referenceOrderId = 0;
+      const QRCode = require('qrcode');
 
-      if (!event) {
-        throw new NotFoundException('Evento não encontrado');
-      }
+      // [BOA PRÁTICA]: Ordenar os itens por eventId para evitar Deadlocks na BD sob concorrência
+      const sortedItems = dto.items.sort((a, b) => a.eventId - b.eventId);
 
-      //Validar a capacidade e verificar se há overbooking
-      const availableTickets = event.maxCapacity - event.ticketsSold;
-      
-      if (dto.quantity > availableTickets) {
-        throw new BadRequestException(
-          `Lotação esgotada ou insuficiente. Lugares disponíveis: ${availableTickets}. Quantidade solicitada: ${dto.quantity}.`
-        );
-      }
+      // Iteramos cirurgicamente sobre cada item enviado do carrinho
+      for (const item of sortedItems) {
+        
+        // Procurar o evento dentro da transação para obter os valores mais recentes e evitar Race Conditions
+        const event = await tx.query.events.findFirst({
+          where: eq(events.id, item.eventId),
+        });
 
-      const calculatedTotal = event.ticketPrice * dto.quantity;
+        if (!event) {
+          throw new NotFoundException(`O evento com ID ${item.eventId} não foi encontrado.`);
+        }
 
-      //Criar a Ordem de Compra (Order)
-      const [newOrder] = await tx.insert(orders).values({
-        userId,
-        eventId: dto.eventId,
-        quantity: dto.quantity,
-        totalPrice: calculatedTotal,
-        status: 'paid',
-        paymentReference: 'SIM-CHECKOUT-' + Date.now(),
-      }).returning();
+        const availableTickets = event.maxCapacity - event.ticketsSold;
+        if (item.quantity > availableTickets) {
+          throw new BadRequestException(
+            `Lotação esgotada ou insuficiente para o evento "${event.name}". Disponíveis: ${availableTickets}, solicitados: ${item.quantity}.`
+          );
+        }
 
-      // Criar os Bilhetes (Tickets) individuais correspondentes à quantidade comprada
-      const ticketsToCreate = Array.from({ length: dto.quantity }).map(() => ({
-        userId,
-        eventId: dto.eventId,
-        orderId: newOrder.id,
-        qrCode: crypto.randomUUID(), // O código único para o QR
-        status: 'active',
-      }));
+        const calculatedTotal = event.ticketPrice * item.quantity;
+        
+        // Acumular totais globais
+        grandTotal += calculatedTotal;
+        totalQuantity += item.quantity;
+        eventNames.push(event.name);
 
-      const insertedTickets = await tx
-        .insert(tickets)
-        .values(ticketsToCreate)
-        .returning();
+        // 1. Criar a ordem de compra para este evento específico
+        const [newOrder] = await tx
+          .insert(orders)
+          .values({
+            userId,
+            eventId: item.eventId,
+            quantity: item.quantity,
+            totalPrice: calculatedTotal,
+            status: 'paid',
+            paymentReference: 'SIM-' + Date.now() + '-' + item.eventId,
+          })
+          .returning();
 
-      // Incrementar o contador de ticketsSold diretamente no Evento correspondente
-      await tx
-        .update(events)
-        .set({
-          ticketsSold: event.ticketsSold + dto.quantity,
-        })
-        .where(eq(events.id, dto.eventId));
+        // Guardamos o ID da primeira ordem apenas como referência visual para o e-mail original
+        if (referenceOrderId === 0) {
+          referenceOrderId = newOrder.id;
+        }
 
-      // 6. Enviar email de confirmação para o usuário
-      if(buyer?.email) {
-        const QRCode = require('qrcode');
-        const qrCodeBuffers: Buffer[] = [];
+        // 2. Gerar os registos individuais de ingressos no banco de dados
+        const ticketsToCreate = Array.from({ length: item.quantity }).map(() => ({
+          userId,
+          eventId: item.eventId,
+          orderId: newOrder.id,
+          qrCode: crypto.randomUUID(),
+          status: 'active',
+        }));
 
+        const insertedTickets = await tx
+          .insert(tickets)
+          .values(ticketsToCreate)
+          .returning();
+
+        // 3. Incrementar o contador de ticketsSold diretamente no Evento correspondente
+        await tx
+          .update(events)
+          .set({
+            ticketsSold: event.ticketsSold + item.quantity,
+          })
+          .where(eq(events.id, item.eventId));
+
+        // 4. Gerar e acumular os buffers dos QR Codes deste evento específico
         const orderedTicketsForEmail = insertedTickets.sort((a, b) => a.id - b.id);
 
         for (const ticket of orderedTicketsForEmail) {
@@ -96,24 +117,28 @@ export class OrdersService {
               dark: '#1a0b2e',
               light: '#ffffff',
             }
-        });
-          qrCodeBuffers.push(buffer);
+          });
+          allQrCodeBuffers.push(buffer);
         }
+      }
 
+      // 5. Enviar um único email de confirmação agregado com todos os QR Codes gerados
+      if (buyer?.email && sortedItems.length > 0) {
         this.emailsService.sendOrderConfirmation(
           buyer.email,
           buyer.name,
-          newOrder.id,
-          calculatedTotal,
-          dto.quantity,
-          event.name,
-          qrCodeBuffers
+          referenceOrderId,
+          grandTotal,
+          totalQuantity,
+          eventNames.join(', '), // Ex: "Rock in Rio, Web Summit"
+          allQrCodeBuffers
         );
       }
-      // Retorna a ordem de compra preenchida juntamente com uma mensagem informativa de sucesso
+
+      // Retorna uma resposta amigável com sucesso
       return {
-        ...newOrder,
-        message: 'Reserva efetuada com sucesso e contador de capacidade atualizado!',
+        success: true,
+        message: 'Checkout processado com sucesso!',
       };
     });
   }
