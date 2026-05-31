@@ -205,8 +205,12 @@ export class HomeComponent implements OnInit {
     this.isSubmittingOrder = true;
 
     const orderPayload = {
-      eventId: this.selectedEvent.id,
-      quantity: this.ticketQuantity
+      intems: [
+        {
+          eventId: this.selectedEvent.id,
+          quantity: this.ticketQuantity
+        }
+      ]
     };
 
     console.log('A enviar pedido de checkout (via Interceptor Global) para:', orderPayload);

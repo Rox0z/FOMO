@@ -1,16 +1,17 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { ToastService } from "../services/toast.service";
+import { CartService } from '../services/cart.service';
 import { environment } from '../../environments/environment';
 
 interface EventItem {
   id: number;
   vendorId: number;
-  businessName?: string; 
+  businessName?: string;
   name: string;
   description: string;
   location: string;
@@ -31,44 +32,51 @@ interface EventItem {
 })
 export class EventDetailComponent implements OnInit {
   private readonly apiUrl = environment.apiUrl;
-  
+
   isMenuOpen = false;
   user: any = null;
   event: EventItem | null = null;
   loading = true;
   error: string | null = null;
-  
+
   ticketQuantity = 1;
   isSubmittingOrder = false;
-  readonly fallbackBanner = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=1000';
+  readonly fallbackBanner = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=1200&q=80';
+
+  // Injeção limpa do teu novo CartService para gerir o carrinho global
+  private cartService = inject(CartService);
 
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
-    private router: Router,
-    private cdr: ChangeDetectorRef,
     private authService: AuthService,
-    private toast: ToastService
+    private toast: ToastService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.authService.currentUser$.subscribe((userData: any) => {
-    this.user = userData;
-    this.cdr.detectChanges();
-  });
-    const eventId = this.route.snapshot.paramMap.get('id');
-    if (eventId) {
-      this.fetchEventDetails(+eventId);
-    } else {
-      this.error = 'Evento não especificado.';
-      this.loading = false;
-    }
+    this.authService.currentUser$.subscribe(user => {
+      this.user = user;
+    });
+
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.fetchEventDetails(Number(id));
+      } else {
+        this.error = 'ID do evento inválido.';
+        this.loading = false;
+      }
+    });
   }
 
   fetchEventDetails(id: number): void {
+    this.loading = true;
     this.http.get<EventItem>(`${this.apiUrl}/events/${id}`).subscribe({
       next: (data) => {
-        this.event = data;
+        // CORRIGIDO: O teu backend já devolve o EventItem diretamente na raiz da resposta!
+        this.event = data; 
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -76,6 +84,7 @@ export class EventDetailComponent implements OnInit {
         console.error('Erro ao carregar detalhes do evento:', err);
         this.error = 'Não foi possível encontrar este evento ou ele não está disponível.';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -87,23 +96,22 @@ export class EventDetailComponent implements OnInit {
 
   get isSoldOut(): boolean {
     if (!this.event) return false;
-    return this.event.ticketsSold >= this.event.maxCapacity;
+    return this.event.ticketsSold >= this.event.maxCapacity || this.event.status === 'Sold out';
   }
 
-  getStockLabel(event: EventItem): string {
-    const available = event.maxCapacity - event.ticketsSold;
-    if (available <= 0) return 'Sold out';
-    if (available <= event.maxCapacity * 0.15) return 'Last spots';
-    if (available <= event.maxCapacity * 0.40) return 'Selling fast';
+  get stockStatusText(): string {
+    if (!this.event) return '';
+    const available = this.event.maxCapacity - this.event.ticketsSold;
+    
+    if (this.isSoldOut) return 'Sold out';
+    if (available <= 10) return 'Selling out fast';
     return 'Available';
   }
 
-  getStockClass(event: EventItem): string {
-    const label = this.getStockLabel(event);
-    switch (label) {
-      case 'Available': return 'stock-high';
-      case 'Selling fast': return 'stock-medium';
-      case 'Last spots': return 'stock-low';
+  get stockStatusClass(): string {
+    switch (this.stockStatusText) {
+      case 'Available': return 'stock-available';
+      case 'Selling out fast': return 'stock-low';
       case 'Sold out': return 'stock-sold';
       default: return '';
     }
@@ -127,44 +135,55 @@ export class EventDetailComponent implements OnInit {
     }
   }
 
+  // NOVO MÉTODO: Apenas adiciona ao carrinho local e mantém o utilizador na página
+  addToCartOnly(): void {
+    if (!this.event || this.isSubmittingOrder || this.isSoldOut) return;
+
+    if (!this.user) {
+      this.toast.show('Tens de fazer login para adicionar itens ao carrinho.', 'error');
+      this.router.navigate(['/login'], { queryParams: { mode: 'user' } });
+      return;
+    }
+
+    this.cartService.addToCart({
+      eventId: this.event.id,
+      eventName: this.event.name,
+      quantity: this.ticketQuantity,
+      unitPrice: parseFloat(this.event.ticketPrice),
+      totalPrice: this.totalPrice
+    });
+
+    this.toast.show(`${this.ticketQuantity} bilhete(s) adicionado(s) ao carrinho!`, 'success');
+  }
+
+  // MÉTODO ORIGINAL AJUSTADO: "Comprar Já" redireciona para a tua página de pagamento passando os dados do cartão/evento
   confirmPurchase(): void {
     if (!this.event || this.isSubmittingOrder || this.isSoldOut) return;
 
-    this.isSubmittingOrder = true;
+    if (!this.user) {
+      this.toast.show('Tens de fazer login para comprar bilhetes.', 'error');
+      this.router.navigate(['/login'], { queryParams: { mode: 'user' } });
+      return;
+    }
 
-    const orderPayload = {
-      eventId: this.event.id,
-      quantity: this.ticketQuantity
-    };
-
-    this.http.post(`${this.apiUrl}/orders/checkout`, orderPayload).subscribe({
-      next: (response: any) => {
-        this.toast.show('🎉 Compra efetuada com sucesso! O teu bilhete digital já foi emitido.', 'success');
-        this.isSubmittingOrder = false;
-        this.router.navigate(['/user/my-tickets']);
-      },
-      error: (err) => {
-        console.error('Erro no checkout:', err);
-        if (err.status === 401) {
-          this.toast.show('Sessão expirada ou inválida. Por favor, faz login novamente.', 'error');
-          this.router.navigate(['/login'], { queryParams: { mode: 'user' } });
-        } else {
-          this.toast.show(err.error?.message || 'Não foi possível completar a reserva.', 'error');
-        }
-        this.isSubmittingOrder = false;
+    this.router.navigate(['payment'], {
+      state: {
+        eventId: this.event.id,
+        eventName: this.event.name,
+        quantity: this.ticketQuantity,
+        totalPrice: this.totalPrice
       }
     });
   }
 
   toggleMenu(): void {
-  this.isMenuOpen = !this.isMenuOpen;
-  this.cdr.detectChanges();
-}
+    this.isMenuOpen = !this.isMenuOpen;
+  }
 
   onLogout(): void {
     this.authService.logout();
-    this.isMenuOpen = false;
     this.user = null;
+    this.isMenuOpen = false;
     this.router.navigate(['/home']);
   }
 }
