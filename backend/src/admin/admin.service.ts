@@ -1,5 +1,5 @@
 import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
-import { LogsService } from '../logs/logs.service';
+import { LogsService } from '../admin-logs/logs.service';
 import { UsersService } from '../users/users.service';
 import { VendorsService } from '../vendors/vendors.service';
 import { EventsService } from '../events/events.service';
