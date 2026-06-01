@@ -4,7 +4,7 @@ import { eventEdits } from '../db/schema/event.edits';
 import { events } from '../db/schema/events';
 import { vendorProfiles } from '../db/schema/vendorProfiles';
 import { users } from '../db/schema/users'; 
-import { LogsService } from '../logs/logs.service';
+import { LogsService } from '../admin-logs/logs.service';
 import { EmailsService } from '../services/emails/emails.service';
 import type { DrizzleDB } from '../drizzle';
 import { ImagesService } from '../services/images/images.service';
