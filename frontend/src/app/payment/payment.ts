@@ -36,11 +36,13 @@ export class PaymentComponent implements OnInit {
     // Ler os dados passados pelo event-details via router state
     const state = history.state;
 
-    //if (!state?.eventId) {
-      //Se alguém aceder directamente ao URL sem vir do evento, redirecionar
-      //this.router.navigate(['/home']);
-      //return;
-    //}
+    if (!state || !state.eventId) {
+      this.errorMsg = 'Nenhuma sessão de checkout ativa. A redirecionar para a página principal...';
+      setTimeout(() => {
+        this.router.navigate(['/home']);
+      }, 2000); // Dá 2 segundos para o utilizador conseguir ler o aviso
+      return;
+    }
 
     this.eventId = state.eventId;
     this.eventName = state.eventName;
@@ -79,17 +81,22 @@ export class PaymentComponent implements OnInit {
     this.errorMsg = '';
 
     const orderPayload = {
-      eventId: this.eventId,
-      quantity: this.quantity,
+      items: [
+        {
+          eventId: this.eventId,
+          quantity: this.quantity,
+        }
+      ]
     };
 
     this.http.post(`${this.apiUrl}/orders/checkout`, orderPayload).subscribe({
       next: () => {
-        this.router.navigate(['/checkout/success']);
+        this.isPaying = false;
+        this.router.navigate(['/user/my-tickets']);
       },
       error: (err) => {
-        this.errorMsg = err.error?.message || 'Erro ao processar pagamento. Tenta novamente.';
         this.isPaying = false;
+        this.errorMsg = err.error?.message || 'Erro ao processar pagamento. Tenta novamente.';
       },
     });
   }

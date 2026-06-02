@@ -89,6 +89,30 @@ export class VendorsService {
     return result[0]; // Retorna o objeto completo com os dados combinados
   }
 
+  async findOneProfile(profileId: number) {
+    const result = await this.db
+      .select({
+        id: vendorProfiles.id,
+        userId: vendorProfiles.userId,
+        businessName: vendorProfiles.businessName,
+        businessDescription: vendorProfiles.businessDescription,
+        status: vendorProfiles.status,
+        createdAt: vendorProfiles.createdAt,
+        name: users.name,
+        email: users.email,
+        phone: users.phone,
+      })
+      .from(vendorProfiles)
+      .innerJoin(users, eq(vendorProfiles.userId, users.id))
+      .where(eq(vendorProfiles.id, profileId)); // 🎯 Filtra estritamente pelo ID do Perfil!
+
+    if (!result || result.length === 0) {
+      throw new NotFoundException(`Perfil de Vendor com o ID #${profileId} não foi encontrado.`);
+    }
+
+    return result[0];
+  }
+
   // -------------------------
   // UPDATE OWN PROFILE
   // -------------------------

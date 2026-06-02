@@ -37,23 +37,17 @@ export class AdminService {
         vendorId: events.vendorId,
         createdAt: events.createdAt,
         bannerUrl: events.bannerUrl,
-        // Puxamos o businessName diretamente do Perfil do Vendor
+        ticketsSold: events.ticketsSold,
         vendorName: vendorProfiles.businessName,
       })
       .from(events)
       .leftJoin(vendorProfiles, eq(events.vendorId, vendorProfiles.id));
 
-    // 2. Buscamos a tabela de bilhetes plana para acoplar o total de categorias de cada evento
-    const allTickets = await this.db
-      .select()
-      .from(tickets);
-
     // 3. Cruzamos a contagem para cada um dos eventos da lista
     const eventsListParsed = eventsWithDetails.map(evt => {
-      const eventTickets = allTickets.filter(t => t.eventId === evt.id);
       return {
         ...evt,
-        totalTicketsCount: eventTickets.length // Injeta a contagem real na raiz do objeto
+        totalTicketsCount: evt.ticketsSold || 0 // Injeta a contagem real na raiz do objeto
       };
     });
 

@@ -44,13 +44,13 @@ export class VendorsController {
   }
 
   // -------------------------
-  // ADMIN - GET VENDOR BY ID
+  // ADMIN - GET VENDOR BY PROFILE ID
   // -------------------------
   @Get(':id')
   @UseGuards(JwtGuard, RolesGuard)
   @RolesDecorator(Roles.ADMIN)
   findOne(@Param('id') id: string) {
-    return this.vendorsService.findByUserId(+id);
+    return this.vendorsService.findOneProfile(+id);
   }
 
   // -------------------------

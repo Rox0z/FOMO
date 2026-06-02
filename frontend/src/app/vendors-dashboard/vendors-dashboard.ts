@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import { ToastService } from '../services/toast.service';
 import { environment } from '../../environments/environment';
+import { AuthService } from '../services/auth.service';
 
 export interface VendorEvent {
   id: number;
@@ -64,7 +65,8 @@ export class VendorsDashboard implements OnInit {
     private http: HttpClient, 
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private toast: ToastService
+    private toast: ToastService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -73,20 +75,11 @@ export class VendorsDashboard implements OnInit {
     this.loadMyEvents();
   }
 
-  private getAuthHeaders() {
-    const token = localStorage.getItem('auth_token');
-    return {
-      headers: new HttpHeaders({
-        'Authorization': `Bearer ${token}`
-      })
-    };
-  }
-
   // ---------------------------------------------------------
   // CHAMADAS HTTP (GET)
   // ---------------------------------------------------------
   loadProfile() {
-    this.http.get<any>(`${this.apiUrl}/vendors/me`, this.getAuthHeaders()).subscribe({
+    this.http.get<any>(`${this.apiUrl}/vendors/me`).subscribe({
       next: (data) => {
         this.vendorData = data;
         this.cdr.detectChanges();
@@ -100,7 +93,7 @@ export class VendorsDashboard implements OnInit {
   }
 
   loadStats() {
-    this.http.get<GlobalStats>(`${this.apiUrl}/events/my-stats`, this.getAuthHeaders()).subscribe({
+    this.http.get<GlobalStats>(`${this.apiUrl}/events/my-stats`).subscribe({
       next: (data) => {
         this.globalStats = data;
         this.cdr.detectChanges();
@@ -113,7 +106,7 @@ export class VendorsDashboard implements OnInit {
   }
 
   loadMyEvents() {
-    this.http.get<VendorEvent[]>(`${this.apiUrl}/events/my-events`, this.getAuthHeaders()).subscribe({
+    this.http.get<VendorEvent[]>(`${this.apiUrl}/events/my-events`).subscribe({
       next: (data) => {
         this.events = data;
         this.cdr.detectChanges();
@@ -150,7 +143,7 @@ export class VendorsDashboard implements OnInit {
       formData.append('banner', this.selectedFile);
     }
 
-    this.http.post(`${this.apiUrl}/events`, formData, this.getAuthHeaders()).subscribe({
+    this.http.post(`${this.apiUrl}/events`, formData).subscribe({
       next: () => {
         this.toast.show('Evento submetido com sucesso!');
         this.loadMyEvents();
@@ -184,7 +177,7 @@ export class VendorsDashboard implements OnInit {
     }
 
     // Enviamos o formData no PUT em vez do updatedData
-    this.http.put(`${this.apiUrl}/events/${this.selectedEvent.id}/request-edit`, formData, this.getAuthHeaders()).subscribe({
+    this.http.put(`${this.apiUrl}/events/${this.selectedEvent.id}/request-edit`, formData).subscribe({
       next: () => {
         this.toast.show('Alterações enviadas! O evento atual continuará live sem alterações até o Admin aprovar.');
         this.isEditing = false;
@@ -200,7 +193,7 @@ export class VendorsDashboard implements OnInit {
   }
 
   updateProfile(profileData: any): void {
-    this.http.patch(`${this.apiUrl}/vendors/me`, profileData, this.getAuthHeaders()).subscribe({
+    this.http.patch(`${this.apiUrl}/vendors/me`, profileData).subscribe({
       next: () => {
         this.toast.show('Perfil atualizado com sucesso!');
         this.loadProfile();
@@ -273,9 +266,7 @@ export class VendorsDashboard implements OnInit {
   }
 
   logout() {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_role');
-    localStorage.removeItem('user_info');
+    this.authService.logout();
     this.router.navigate(['/login'], { queryParams: { mode: 'vendor' } });
   }
 }

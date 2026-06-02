@@ -28,6 +28,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ImagesService } from '../services/images/images.service';
 import { EventEditsService } from 'src/event-edits/event-edits.service';
+import { VendorApprovedGuard } from 'src/common/guards/vendor-approved.guard';
 
 @ApiTags('events')
 @ApiBearerAuth('access-token')
@@ -48,7 +49,7 @@ export class EventsController {
   }
 
   // -------------------------
-  // VENDOR - GET STATS
+  // VENDOR - GET STATS OF AN EVENT
   // -------------------------
   @Get('my-stats')
   @UseGuards(JwtGuard, RolesGuard)
@@ -79,7 +80,7 @@ export class EventsController {
   // VENDOR - CREATE EVENT
   // -------------------------
   @Post()
-  @UseGuards(JwtGuard, RolesGuard)
+  @UseGuards(JwtGuard, RolesGuard, VendorApprovedGuard)
   @RolesDecorator(Roles.VENDOR, Roles.ADMIN)
   @UseInterceptors(FileInterceptor('banner'))
   async create(
@@ -98,7 +99,7 @@ export class EventsController {
   // VENDOR - REQUEST EVENT EDIT WITH OPTIONAL BANNER UPLOAD
   // ---------------------------------------------------------
   @Put(':id/request-edit')
-  @UseGuards(JwtGuard, RolesGuard, EventOwnerGuard) 
+  @UseGuards(JwtGuard, RolesGuard, EventOwnerGuard, VendorApprovedGuard)
   @RolesDecorator(Roles.VENDOR)
   @UseInterceptors(FileInterceptor('banner')) // Intercepta a chave 'banner' que vem do Angular
   async requestEdit(
@@ -113,10 +114,11 @@ export class EventsController {
   }
 
   // -------------------------
-  // VENDOR OR ADMIN - UPDATE EVENT DIRECTLY
+  // ADMIN - UPDATE EVENT DIRECTLY
   // -------------------------
   @Patch(':id')
   @UseGuards(JwtGuard, RolesGuard, EventOwnerGuard)
+  @RolesDecorator(Roles.ADMIN)
   update(
     @Param('id') id: string,
     @Body() dto: UpdateEventDto,

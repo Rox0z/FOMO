@@ -6,6 +6,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
 
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable is not set.');
+  }
+
   const app = await NestFactory.create(AppModule);
 
   // Enable CORS

@@ -205,7 +205,7 @@ export class HomeComponent implements OnInit {
     this.isSubmittingOrder = true;
 
     const orderPayload = {
-      intems: [
+      items: [
         {
           eventId: this.selectedEvent.id,
           quantity: this.ticketQuantity
