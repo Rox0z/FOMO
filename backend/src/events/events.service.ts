@@ -35,12 +35,6 @@ export class EventsService {
       throw new ForbiddenException('Apenas utilizadores com perfil de Vendor ativo podem criar eventos.');
     }
 
-    if (vendorProfile.status !== 'approved') {
-      throw new ForbiddenException(
-        `A tua conta de Vendor está atualmente: ${vendorProfile.status}. Não podes criar eventos até seres aprovado pelo Admin.`
-      );
-    }
-
     const newEvent = await this.db
       .insert(events)
       .values({

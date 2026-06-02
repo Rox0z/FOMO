@@ -26,7 +26,7 @@ export class VendorApprovedGuard implements CanActivate {
       throw new ForbiddenException('Vendor not approved');
     }
 
-    req.vendor = vendor; // útil para controllers
+    req.vendor = vendor;
     return true;
   }
 }

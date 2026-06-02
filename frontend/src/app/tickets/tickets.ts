@@ -5,7 +5,6 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ToastService } from '../services/toast.service';
 import { environment } from '../../environments/environment';
-import * as QRCode from 'qrcode';
 
 @Component({
   selector: 'app-tickets',
@@ -39,12 +38,7 @@ export class Tickets implements OnInit {
       .subscribe({
         next: async (data: any) => {
     
-          this.tickets = await Promise.all(
-            data.map(async (ticket: any) => ({
-              ...ticket,
-              qrCodeDataUrl: await this.generateQrCode(ticket.qrCode),
-            }))
-          );
+          this.tickets = data;
           this.isLoading = false;
           this.cdr.detectChanges();
         },
@@ -54,19 +48,5 @@ export class Tickets implements OnInit {
           this.cdr.detectChanges();
         }
       });
-  }
- 
-  private async generateQrCode(qrData: string): Promise<string> {
-    if (!qrData) return '';
-    return await QRCode.toDataURL(qrData, {
-      margin: 4,
-      errorCorrectionLevel: 'L',
-      version: 3,
-      width: 150,
-      color: {
-        dark: '#1a0b2e',
-        light: '#ffffff',
-      },
-    });
   }
 }

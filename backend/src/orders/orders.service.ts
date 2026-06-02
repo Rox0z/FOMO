@@ -33,7 +33,7 @@ export class OrdersService {
       let referenceOrderId = 0;
       const QRCode = require('qrcode');
 
-      // [BOA PRÁTICA]: Ordenar os itens por eventId para evitar Deadlocks na BD sob concorrência
+      // Ordenar os itens por eventId para evitar Deadlocks na BD sob concorrência
       const sortedItems = dto.items.sort((a, b) => a.eventId - b.eventId);
 
       // Iteramos cirurgicamente sobre cada item enviado do carrinho
