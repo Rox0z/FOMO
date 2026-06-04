@@ -16,7 +16,7 @@
   --bg-medium: #f5f5f5;
   --transition-fast: 0.2s ease-out;
 
-  /* 🌟 PREMIUM FONTS SMOOTHING */
+  /* PREMIUM FONTS SMOOTHING */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -328,7 +328,7 @@
   
 }
 /* ==========================================================================
-   CLASSES EM FALTA — ESTILOS DO HTML ACTUAL
+   CLASSES EM FALTA - ESTILOS DO HTML ACTUAL
    ========================================================================== */
 
 /* STOCK BADGE (posicionado sobre a imagem) */

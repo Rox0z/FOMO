@@ -29,7 +29,7 @@
 
   <div class="ticker-wrap">
     <div class="ticker">
-      <div class="ticker-item" *ngFor="let item of tickerItems">{{ item }} <span class="ticker-sep">•</span></div>
+      <div class="ticker-item" *ngFor="let item of tickerItems">{{ item }} <span class="ticker-sep">-</span></div>
     </div>
   </div>
 
@@ -78,8 +78,8 @@
             <h3 class="card-title card-title--lg">{{ featured.name }}</h3>
             <p class="card-artist">{{ featured.description | slice:0:140 }}...</p>
             <div class="card-details">
-              <div class="detail-item">📍 {{ featured.location }}</div>
-              <div class="detail-item">📅 {{ featured.date | date:'EEE, MMM dd • HH:mm' }}</div>
+              <div class="detail-item">{{ featured.location }}</div>
+              <div class="detail-item">{{ featured.date | date:'EEE, MMM dd - HH:mm' }}</div>
             </div>
           </div>
 
@@ -109,8 +109,8 @@
           </div>
 
           <div class="card-details">
-            <div class="detail-item">📍 {{ event.location }}</div>
-            <div class="detail-item">📅 {{ event.date | date:'EEE, MMM dd • HH:mm' }}</div>
+            <div class="detail-item">{{ event.location }}</div>
+            <div class="detail-item">{{ event.date | date:'EEE, MMM dd - HH:mm' }}</div>
           </div>
 
           <div class="card-footer">
@@ -146,7 +146,7 @@
       <div class="modal-body">
         <div class="modal-event-summary">
           <h4>{{ selectedEvent.name }}</h4>
-          <p class="modal-event-loc">📍 {{ selectedEvent.location }}</p>
+          <p class="modal-event-loc">{{ selectedEvent.location }}</p>
           <p class="modal-event-price-unit">Unit price: <strong>{{ +selectedEvent.ticketPrice === 0 ? 'Free' : ('€' + selectedEvent.ticketPrice) }}</strong></p>
         </div>
 
@@ -172,7 +172,7 @@
           Cancel
         </button>
         <button type="button" class="btn-modal-cart" (click)="addToCartOnly()" style="background: #efe9fe; color: #7c3aed; padding: 10px 16px; border-radius: 8px; border: 1px solid #ddd; font-weight: 600; cursor: pointer;">
-          Add to Cart 🛒
+          Add to Cart 
         </button>
         <button type="button" class="btn-modal-confirm" (click)="buyNow()" style="background: #7c3aed; color: white; padding: 10px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer;">
           Buy Now ⚡

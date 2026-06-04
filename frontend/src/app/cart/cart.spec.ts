@@ -1,18 +1,24 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute, provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+import { provideHttpClient } from '@angular/common/http';
+import { CartComponent } from './cart';
 
-import { Cart } from './cart';
-
-describe('Cart', () => {
-  let component: Cart;
-  let fixture: ComponentFixture<Cart>;
+describe('CartComponent', () => {
+  let component: CartComponent;
+  let fixture: ComponentFixture<CartComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Cart]
-    })
-    .compileComponents();
+      imports: [CartComponent],
+      providers: [
+        provideRouter([{ path: 'home', children: [] }]),
+        provideHttpClient(),
+        { provide: ActivatedRoute, useValue: { params: of({}), queryParams: of({}), snapshot: { params: {}, queryParams: {}, paramMap: { get: () => null } } } },
+      ],
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(Cart);
+    fixture = TestBed.createComponent(CartComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

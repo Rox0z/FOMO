@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute, provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+import { provideHttpClient } from '@angular/common/http';
 import { HomeComponent } from './home';
 
 describe('HomeComponent', () => {
@@ -7,24 +10,24 @@ describe('HomeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [HomeComponent]
+      imports: [HomeComponent],
+      providers: [
+        provideRouter([{ path: 'home', children: [] }]),
+        provideHttpClient(),
+        { provide: ActivatedRoute, useValue: { params: of({}), queryParams: of({}), snapshot: { params: {}, queryParams: {}, paramMap: { get: () => null } } } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HomeComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should have default category as todos', () => {
-    expect(component.activeCategory).toBe('todos');
-  });
-
-  it('should change category on setCategory', () => {
-    component.setCategory('concertos');
-    expect(component.activeCategory).toBe('concertos');
+  it('starts with the Featured vibe selected', () => {
+    expect(component.activeVibe).toBe('Featured');
   });
 });

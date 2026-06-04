@@ -8,7 +8,7 @@ A comprehensive ticket marketplace platform connecting event organizers (vendors
 * [Mariana Afonso](a61845@ualg.pt)
 * [Dinis Monteiro](a78985@ualg.pt)
 
-## 📋 Documentation
+## Documentation
 
 Complete project documentation is available in the [docs/](docs/) directory:
 
@@ -16,7 +16,7 @@ Complete project documentation is available in the [docs/](docs/) directory:
 |----------|-------------|
 | [01-OVERVIEW.md](docs/01-OVERVIEW.md) | Project overview, objectives, and key features |
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Frontend
 ```bash
@@ -34,7 +34,7 @@ npm start
 ```
 Backend API will be available at `http://localhost:3000/api`
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 fomo/
@@ -44,13 +44,13 @@ fomo/
 └── README.md         # This file
 ```
 
-## 👥 User Roles
+## User Roles
 
 - **Admins** - Platform management and oversight
 - **Vendors** - Event creation and ticket management
 - **Users/Buyers** - Event discovery and ticket purchasing
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend**: Angular
 - **Backend**: Node.js + Express/NestJS
@@ -58,7 +58,7 @@ fomo/
 - **Authentication**: JWT
 - **Payment**: Stripe integration
 
-## 📖 Key Features
+## Key Features
 
 - Event creation and management
 - Ticket inventory management
@@ -67,7 +67,7 @@ fomo/
 - Event reviews and ratings
 - Admin dashboard
 
-## 📝 License
+## License
 
 See [LICENSE](LICENSE) file for details.
 

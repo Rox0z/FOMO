@@ -1,133 +1,96 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { ForbiddenException } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { UsersService } from '../users/users.service';
-import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto } from '../users/dto/create-user.dto';
-import { LoginDto } from '../users/dto/login.dto';
+import { Roles } from '../common/enums/roles.enum';
 
 describe('AuthService', () => {
+  let usersService: any;
+  let vendorsService: any;
+  let jwtService: any;
   let service: AuthService;
-  let usersService: UsersService;
-  let jwtService: JwtService;
 
-  const mockUser = {
+  const user = {
     id: 1,
-    email: 'test@example.com',
-    name: 'Test User',
-    phone: '123456789',
-    countryCode: '+1',
-    userType: 'user' as const,
-    superuser: false,
+    email: 'user@fomo.pt',
+    password: 'hashed',
+    name: 'User Test',
+    role: Roles.USER,
     active: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
   };
 
-  const mockCreateUserDto: CreateUserDto = {
-    email: 'test@example.com',
-    password: 'password123',
-    name: 'Test User',
-    phone: '123456789',
-    countryCode: '+1',
-    userType: 'user',
-  };
-
-  const mockLoginDto: LoginDto = {
-    email: 'test@example.com',
-    password: 'password123',
-  };
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AuthService,
-        {
-          provide: UsersService,
-          useValue: {
-            create: jest.fn(),
-            validateCredentials: jest.fn(),
-            findOne: jest.fn(),
-          },
-        },
-        {
-          provide: JwtService,
-          useValue: {
-            sign: jest.fn(),
-          },
-        },
-      ],
-    }).compile();
-
-    service = module.get<AuthService>(AuthService);
-    usersService = module.get<UsersService>(UsersService);
-    jwtService = module.get<JwtService>(JwtService);
+  beforeEach(() => {
+    usersService = {
+      create: jest.fn(),
+      findByEmail: jest.fn(),
+      checkPassword: jest.fn(),
+      findOne: jest.fn(),
+    };
+    vendorsService = {
+      createProfile: jest.fn(),
+      findByUserId: jest.fn(),
+    };
+    jwtService = { sign: jest.fn().mockReturnValue('jwt-token') };
+    service = new AuthService(usersService, vendorsService, jwtService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  it('rejects public admin registration', async () => {
+    await expect(service.register({ email: 'a@b.pt', password: 'password123', name: 'Admin', userType: 'admin' as any })).rejects.toThrow(ForbiddenException);
   });
 
-  describe('register', () => {
-    it('should register a new user and return user with token', async () => {
-      const mockToken = 'test-jwt-token';
-      jest.spyOn(usersService, 'create').mockResolvedValue(mockUser);
-      jest.spyOn(jwtService, 'sign').mockReturnValue(mockToken);
+  it('registers a normal user and returns a JWT', async () => {
+    const safeUser = { id: 1, email: user.email, name: user.name, role: Roles.USER, active: true };
+    usersService.create.mockResolvedValue(safeUser);
 
-      const result = await service.register(mockCreateUserDto);
+    const result = await service.register({ email: user.email, password: 'password123', name: user.name, userType: 'user' });
 
-      expect(result.user).toEqual(mockUser);
-      expect(result.token).toEqual(mockToken);
-      expect(usersService.create).toHaveBeenCalledWith(mockCreateUserDto);
-    });
+    expect(result).toEqual({ user: safeUser, token: 'jwt-token' });
+    expect(jwtService.sign).toHaveBeenCalledWith({ sub: safeUser.id, role: safeUser.role }, { expiresIn: '24h' });
   });
 
-  describe('login', () => {
-    it('should login user and return user with token', async () => {
-      const mockToken = 'test-jwt-token';
-      jest
-        .spyOn(usersService, 'validateCredentials')
-        .mockResolvedValue(mockUser);
-      jest.spyOn(jwtService, 'sign').mockReturnValue(mockToken);
+  it('registers a vendor as inactive and creates a pending vendor profile', async () => {
+    const safeVendor = { id: 2, email: 'vendor@fomo.pt', name: 'Vendor', role: Roles.VENDOR, active: false };
+    const profile = { id: 10, userId: 2, status: 'pending' };
+    usersService.create.mockResolvedValue(safeVendor);
+    vendorsService.createProfile.mockResolvedValue(profile);
 
-      const result = await service.login(mockLoginDto);
-
-      expect(result.user).toEqual(mockUser);
-      expect(result.token).toEqual(mockToken);
-      expect(usersService.validateCredentials).toHaveBeenCalledWith(
-        mockLoginDto.email,
-        mockLoginDto.password,
-      );
+    const result = await service.register({
+      email: safeVendor.email,
+      password: 'password123',
+      name: safeVendor.name,
+      userType: 'vendor',
+      businessName: 'Vendor Business',
+      businessDescription: 'Events',
     });
 
-    it('should return null if credentials are invalid', async () => {
-      jest
-        .spyOn(usersService, 'validateCredentials')
-        .mockResolvedValue(null);
-
-      const result = await service.login(mockLoginDto);
-
-      expect(result).toBeNull();
-    });
+    expect(usersService.create).toHaveBeenCalledWith(expect.any(Object), { role: 'vendor', active: false });
+    expect(vendorsService.createProfile).toHaveBeenCalledWith({ userId: 2, businessName: 'Vendor Business', businessDescription: 'Events' });
+    expect(result.vendorProfile).toEqual(profile);
   });
 
-  describe('validateUserFromToken', () => {
-    it('should return user by id', async () => {
-      jest.spyOn(usersService, 'findOne').mockResolvedValue(mockUser);
+  it('returns invalid_credentials when the user does not exist', async () => {
+    usersService.findByEmail.mockResolvedValue(null);
+    await expect(service.login({ email: 'missing@fomo.pt', password: 'password123' })).resolves.toEqual({ error: 'invalid_credentials' });
+  });
 
-      const result = await service.validateUserFromToken(1);
+  it('returns account_blocked for inactive users', async () => {
+    usersService.findByEmail.mockResolvedValue({ ...user, active: false });
+    usersService.checkPassword.mockResolvedValue(true);
+    await expect(service.login({ email: user.email, password: 'password123' })).resolves.toEqual({ error: 'account_blocked' });
+  });
 
-      expect(result).toEqual(mockUser);
-      expect(usersService.findOne).toHaveBeenCalledWith(1);
-    });
+  it('returns vendor_not_approved for pending vendors', async () => {
+    usersService.findByEmail.mockResolvedValue({ ...user, role: Roles.VENDOR });
+    usersService.checkPassword.mockResolvedValue(true);
+    vendorsService.findByUserId.mockResolvedValue({ status: 'pending' });
 
-    it('should throw if user not found', async () => {
-      jest
-        .spyOn(usersService, 'findOne')
-        .mockRejectedValue(new Error('User not found'));
+    await expect(service.login({ email: user.email, password: 'password123' })).resolves.toEqual({ error: 'vendor_not_approved' });
+  });
 
-      await expect(service.validateUserFromToken(999)).rejects.toThrow(
-        'User not found',
-      );
-    });
+  it('logs in approved users and strips password from the response', async () => {
+    usersService.findByEmail.mockResolvedValue(user);
+    usersService.checkPassword.mockResolvedValue(true);
+
+    const result = await service.login({ email: user.email, password: 'password123' });
+
+    expect(result).toEqual({ user: expect.not.objectContaining({ password: expect.anything() }), token: 'jwt-token' });
   });
 });

@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class EmailsService {
+  private readonly logger = new Logger(EmailsService.name);
   private transporter: nodemailer.Transporter;
   private fromEmail = `"FOMO Tickets" <${process.env.GMAIL_USER}>`;
 
@@ -21,7 +22,7 @@ export class EmailsService {
       await this.transporter.sendMail({
         from: this.fromEmail,
         to: toEmail,
-        subject: '👋 Welcome to FOMO!',
+        subject: 'Welcome to FOMO!',
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
             <h2 style="color: #7c3aed;">Hello, ${userName}!</h2>
@@ -32,9 +33,9 @@ export class EmailsService {
           </div>
         `,
       });
-      console.log(`Welcome email sent to: ${toEmail}`);
+      this.logger.log(`Welcome email sent to: ${toEmail}`);
     } catch (e) {
-      console.error('Error sending welcome email:', e);
+      this.logger.error('Error sending welcome email', e as Error);
     }
   }
 
@@ -63,10 +64,10 @@ export class EmailsService {
       await this.transporter.sendMail({
         from: this.fromEmail,
         to: toEmail,
-        subject: `🎫 Your ${quantity} tickets for ${eventName} are here!`,
+        subject: `Your ${quantity} tickets for ${eventName} are here!`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; background-color: #ffffff;">
-            <h2 style="color: #7c3aed; text-align: center;">Order Confirmed! 🎉</h2>
+            <h2 style="color: #7c3aed; text-align: center;">Order Confirmed! </h2>
             <p>Hello, <strong>${userName}</strong>!</p>
             <p>Your payment for order <strong>#${orderId}</strong> has been processed. Here are your tickets:</p>
             
@@ -86,15 +87,15 @@ export class EmailsService {
         `,
         attachments: attachments
       });
-      console.log(`Email with ${qrCodeBuffers.length} QR Codes sent to ${toEmail}`);
+      this.logger.log(`Email with ${qrCodeBuffers.length} QR codes sent to ${toEmail}`);
     } catch (e) {
-      console.error('Error sending email with multiple QR Codes:', e);
+      this.logger.error('Error sending email with multiple QR codes', e as Error);
     }
   }
 
   async sendVendorStatusNotification(toEmail: string, userName: string, businessName: string, status: 'approved' | 'rejected') {
     const isApproved = status === 'approved';
-    const subject = isApproved ? '🚀 Vendor Profile Approved! - FOMO' : '❌ Update on Your Vendor Profile - FOMO';
+    const subject = isApproved ? 'Vendor Profile Approved! - FOMO' : 'Update on Your Vendor Profile - FOMO';
 
     try {
       await this.transporter.sendMail({
@@ -114,12 +115,14 @@ export class EmailsService {
           </div>
         `,
       });
-    } catch (e) { console.error('Error sending vendor status email:', e); }
+    } catch (e) {
+      this.logger.error('Error sending vendor status email', e as Error);
+    }
   }
 
   async sendEventStatusNotification(toEmail: string, businessName: string, eventName: string, status: 'approved' | 'rejected') {
     const isApproved = status === 'approved';
-    const subject = isApproved ? `✅ Event Approved: ${eventName}` : `❌ Event Rejected: ${eventName}`;
+    const subject = isApproved ? `Event Approved: ${eventName}` : `Event Rejected: ${eventName}`;
     
     try {
       await this.transporter.sendMail({
@@ -139,12 +142,14 @@ export class EmailsService {
           </div>
         `,
       });
-    } catch (e) { console.error('Error sending event status email:', e); }
+    } catch (e) {
+      this.logger.error('Error sending event status email', e as Error);
+    }
   }
 
   async sendEditStatusNotification(toEmail: string, businessName: string, eventName: string, status: 'approved' | 'rejected') {
     const isApproved = status === 'approved';
-    const subject = isApproved ? `✨ Changes Applied: ${eventName}` : `❌ Changes Rejected: ${eventName}`;
+    const subject = isApproved ? `✨ Changes Applied: ${eventName}` : `Changes Rejected: ${eventName}`;
     
     try {
       await this.transporter.sendMail({
