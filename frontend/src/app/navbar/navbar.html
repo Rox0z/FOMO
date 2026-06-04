@@ -3,12 +3,6 @@
     <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo" />
   </div>
 
- <ul class="nav-links" *ngIf="router.url === '/home' || router.url === '/'">
-    <li><a [routerLink]="['/home']" fragment="discover">Discover</a></li>
-    <li><a [routerLink]="['/home']" fragment="events">Events</a></li>
-    <li><a [routerLink]="['/home']" fragment="community">Community</a></li>
-  </ul>
-
   <div class="nav-right">
     <a [routerLink]="['/login']" [queryParams]="{ mode: 'user' }" class="btn-nav-outline nav-link-btn" *ngIf="!user">Sign in</a>
     <a [routerLink]="['/login']" [queryParams]="{ mode: 'vendor' }" class="btn-nav-primary nav-link-btn" *ngIf="!user">Promoter</a>

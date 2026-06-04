@@ -1,314 +1,335 @@
 # FOMO - Getting Started
 
-## Quick Start
+This guide explains how to configure, run and test the FOMO project locally.
 
-### Option 1: Using Startup Scripts (Recommended)
+## Requirements
 
-**On Linux/Mac:**
+Install the following tools before running the project:
+
+- Node.js 20 or newer
+- npm
+- PostgreSQL
+- Git
+
+Optional services:
+
+- ImgBB API key, for real banner upload support
+- Gmail app password, for email sending through Nodemailer
+
+## Environment Setup
+
+Create a backend environment file:
+
+```bash
+cd backend
+cp .env.example .env
+```
+
+Example `.env` values:
+
+```env
+DATABASE_URL="postgresql://postgres:password@localhost:5432/fomo"
+JWT_SECRET="replace_with_a_strong_secret_with_at_least_32_chars"
+JWT_EXPIRATION="24h"
+PORT=3000
+IMGBB_API_KEY="your_imgbb_api_key_here"
+GMAIL_USER="your_gmail_address_here"
+GMAIL_PASS="your_gmail_app_password_here"
+```
+
+Only `DATABASE_URL` and `JWT_SECRET` are required for the main local backend flow. Image upload and email delivery are optional integrations.
+
+## Database Setup
+
+Create a local PostgreSQL database named `fomo`, or update `DATABASE_URL` with the name you prefer.
+
+Apply the Drizzle schema:
+
+```bash
+cd backend
+npx drizzle-kit push
+```
+
+Seed the database with demo data:
+
+```bash
+npx tsx src/db/seed.ts
+```
+
+The seed creates:
+
+- One administrator
+- Multiple buyers
+- Approved vendors
+- A pending vendor
+- Approved, pending and rejected events
+- Historical orders
+- Tickets
+- Audit logs
+
+All seeded accounts use this password:
+
+```text
+fomo2026
+```
+
+## Running the Project
+
+### Option 1 - Startup scripts
+
+Linux/macOS:
+
 ```bash
 ./start.sh
 ```
 
-**On Windows:**
-```bash
+Windows:
+
+```bat
 start.bat
 ```
 
-### Option 2: Manual Startup
+### Option 2 - Manual startup
 
-#### Start Backend (NestJS)
+Backend:
+
 ```bash
 cd backend
-npm install  # Only needed on first run
-npm run start
+npm install
+npm run start:dev
 ```
-- Backend runs on: `http://localhost:3000`
-- Swagger API docs: `http://localhost:3000/api`
-- **Note:** Migrations run automatically on startup
 
-#### Start Frontend (Angular)
+Backend URL:
+
+```text
+http://localhost:3000
+```
+
+Swagger API documentation:
+
+```text
+http://localhost:3000/api
+```
+
+Frontend:
+
 ```bash
 cd frontend
-npm install  # Only needed on first run
+npm install
 npm run start
 ```
-- Frontend runs on: `http://localhost:4200`
 
----
+Frontend URL:
 
-## Project Structure
-
-```
-FOMO/
-├── backend/                 # NestJS API Server
-│   ├── src/
-│   │   ├── auth/           # Authentication module
-│   │   ├── users/          # User management
-│   │   ├── vendors/        # Vendor management
-│   │   ├── db/
-│   │   │   ├── schema.ts      # Drizzle ORM schema
-│   │   │   └── run-migrations.ts  # Migration runner
-│   │   └── main.ts         # Application entry point
-│   ├── drizzle/            # Database migrations
-│   ├── test/               # E2E tests
-│   └── package.json
-│
-├── frontend/               # Angular Frontend
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── services/   # Authentication service
-│   │   │   ├── guards/     # Route guards
-│   │   │   └── login-users/, register-users/, etc.
-│   │   └── main.ts
-│   └── package.json
-│
-├── start.sh               # Startup script (Linux/Mac)
-├── start.bat              # Startup script (Windows)
-└── README.md
-
+```text
+http://localhost:4200
 ```
 
----
+### Option 3 - Docker (full stack with one command)
 
-## Database Setup
+This option runs PostgreSQL, the NestJS backend and the Angular frontend in isolated containers. No local Node.js or PostgreSQL installation is required.
 
-### Automatic Migrations
-- **Migrations run automatically** when the backend starts (`npm run start`)
-- The migration runner is implemented in `backend/src/db/run-migrations.ts`
-- Called from `backend/src/main.ts` before the app initializes
+**Prerequisites:**
 
-### Manual Migration (if needed)
-```bash
-cd backend
-npx drizzle-kit migrate
-```
+- [Docker](https://docs.docker.com/get-docker/) 20 or newer
+- [Docker Compose](https://docs.docker.com/compose/install/) v2 (included with Docker Desktop)
 
-### Database Connection
-Database credentials are configured in:
-- `backend/.env` - contains `DATABASE_URL`
-- `backend/drizzle.config.ts` - Drizzle ORM configuration
+**1. Configure the backend environment file**
 
-### Drizzle Kit - Schema Management
-
-**Drizzle Kit** is used to manage database schema changes through migrations. When you modify the database schema in `backend/src/db/schema.ts`, you must generate and commit the migration files.
-
-#### Workflow for Schema Changes
-
-1. **Modify the schema** in `backend/src/db/schema.ts`
-   ```typescript
-   // Example: Adding a new column
-   export const users = pgTable('users', {
-     id: serial('id').primaryKey(),
-     email: varchar('email', { length: 255 }).notNull().unique(),
-     // ... other fields
-     newField: varchar('new_field', { length: 255 }).default(''),
-   });
-   ```
-
-2. **Generate the migration** (creates SQL files in `drizzle/` folder)
-   ```bash
-   cd backend
-   npx drizzle-kit generate postgresql
-   ```
-   This creates a new migration file like `drizzle/0001_new_migration.sql`
-
-3. **Review the generated SQL** in `drizzle/0001_new_migration.sql` to ensure it's correct
-
-4. **Commit the migration file** to version control
-   ```bash
-   git add backend/drizzle/0001_new_migration.sql
-   git commit -m "Add new migration: [description]"
-   ```
-
-5. **Migrations apply automatically** on next backend startup
-   - The `run-migrations.ts` script runs migrations when the backend starts
-   - All pending migrations in `drizzle/` folder are applied to the database
-
-#### Important Rules
-
-⚠️ **Before committing schema changes:**
-- Always run `npx drizzle-kit generate postgresql` to create migration files
-- Commit the generated SQL files to version control
-- **Never commit raw schema changes without migrations**
-
-✅ **Migration best practices:**
-- One migration per feature/change
-- Review generated SQL before committing
-- Test migrations locally before pushing to shared repository
-- Migrations are applied in order (based on filename)
-- Never delete or modify existing migration files
-
-#### Useful Drizzle Kit Commands
+The backend container reads from `backend/.env`. Create it from the example and update `DATABASE_URL` to point to the Postgres container:
 
 ```bash
-cd backend
-
-# Generate migrations (creates SQL files from schema changes)
-npx drizzle-kit generate postgresql
-
-# Apply pending migrations to database
-npx drizzle-kit migrate
-
-# Drop all tables and recreate from migrations (USE WITH CAUTION - development only!)
-npx drizzle-kit drop
-
-# View migration status
-npx drizzle-kit studio  # Opens visual migration explorer
+cp backend/.env.example backend/.env
 ```
 
----
+Edit `backend/.env` and set the following values (the credentials must match what is defined in `docker-compose.yml`):
 
-## Available Endpoints
+```env
+DATABASE_URL="postgresql://fomo:1234@postgres-db:5432/fomo"
+JWT_SECRET="replace_with_a_strong_secret_with_at_least_32_chars"
+JWT_EXPIRATION="24h"
+PORT=3000
+```
 
-### Authentication
-- `POST /auth/register` - Register a new user
-- `POST /auth/login` - Login and get JWT token
-- `GET /auth/profile` - Get current user profile (requires auth)
+> **Why `postgres-db` as the host?** Inside Docker's network the backend reaches the database through the service name defined in `docker-compose.yml`, not `localhost`.
 
-### Users
-- `POST /users` - Create a new user
-- `GET /users` - Get all users (requires auth)
-- `GET /users/:id` - Get a specific user (requires auth)
-- `PATCH /users/:id` - Update a user (requires auth)
-- `DELETE /users/:id` - Delete a user (requires auth)
+**2. Start all services**
 
-### Vendors
-- `POST /vendors` - Register a new vendor
-- `GET /vendors` - Get all vendors (requires auth)
-- `GET /vendors/:id` - Get a specific vendor (requires auth)
-- `PATCH /vendors/:id` - Update a vendor (requires auth)
-- `DELETE /vendors/:id` - Delete a vendor (requires auth)
+From the project root (where `docker-compose.yml` lives):
 
----
+```bash
+docker-compose up --build
+```
 
-## Testing
+On first startup the backend container automatically:
 
-### Run Backend Unit Tests
+1. Waits for PostgreSQL to be ready (health check).
+2. Runs `npx drizzle-kit push` to apply the schema.
+3. Runs `npx tsx src/db/seed.ts` to seed demo data.
+4. Starts the NestJS server in development mode.
+
+**3. Access the running services**
+
+| Service | URL |
+| --- | --- |
+| Frontend (Angular) | http://localhost:4200 |
+| Backend API (NestJS) | http://localhost:3000 |
+| Swagger docs | http://localhost:3000/api |
+| PostgreSQL (external) | localhost:5433 |
+
+**Stopping the stack**
+
+```bash
+docker-compose down
+```
+
+To also remove the database volume (deletes all data):
+
+```bash
+docker-compose down -v
+```
+
+**Rebuilding after code changes**
+
+```bash
+docker-compose up --build
+```
+
+**Troubleshooting Docker**
+
+If the backend starts before PostgreSQL is ready, Docker Compose retries automatically thanks to the `depends_on` health check. If you still see connection errors, wait a few seconds and check the logs:
+
+```bash
+docker-compose logs backend
+docker-compose logs postgres-db
+```
+
+## Demo Accounts
+
+| Role | Email | Password | Notes |
+| --- | --- | --- | --- |
+| Admin | admin@fomo.pt | fomo2026 | Platform administrator |
+| Buyer | john@fomo.pt | fomo2026 | Active buyer |
+| Buyer | maria@fomo.pt | fomo2026 | Active buyer |
+| Buyer | blocked@fomo.pt | fomo2026 | Blocked account |
+| Vendor | lx@fomo.pt | fomo2026 | Approved vendor |
+| Vendor | algarve@fomo.pt | fomo2026 | Approved vendor |
+| Vendor | coimbra@fomo.pt | fomo2026 | Pending vendor |
+
+## Main User Flows
+
+### Buyer flow
+
+1. Open the frontend at `http://localhost:4200`.
+2. Browse approved events.
+3. Register or log in as a buyer.
+4. Add an event to the cart.
+5. Complete the simulated checkout.
+6. Open the tickets page to view generated tickets.
+
+### Vendor flow
+
+1. Register as a vendor.
+2. Wait for administrator approval.
+3. Log in after approval.
+4. Open the vendor dashboard.
+5. Create events.
+6. Request edits to existing events when needed.
+7. Check event statistics.
+
+### Admin flow
+
+1. Log in as `admin@fomo.pt`.
+2. Open the admin dashboard.
+3. Approve or reject vendors.
+4. Approve or reject events.
+5. Manage users and review platform metrics.
+6. Review event edit requests.
+
+## Test Commands
+
+### Backend unit tests
+
 ```bash
 cd backend
 npm run test
 ```
 
-### Run Backend E2E Tests
+Expected result in the current project version:
+
+```text
+15 test suites passed, 54 tests passed
+```
+
+### Backend e2e tests
+
 ```bash
 cd backend
 npm run test:e2e
 ```
 
-### Run Frontend Tests
-```bash
-cd frontend
-npm test
-```
+The e2e suite is located in `backend/test/` and covers:
 
----
+- Health endpoints
+- Authentication
+- User routes
+- Vendor routes
+- Event routes
+- Checkout
+- Tickets
+- Admin approvals and moderation routes
 
-## Development Commands
+The e2e tests use mocked service dependencies so they can run quickly and consistently without requiring a live PostgreSQL database.
 
-### Backend
+### Backend build
+
 ```bash
 cd backend
-npm run start:dev       # Start in watch mode
-npm run build          # Build for production
-npm run lint          # Run ESLint
-npm run format        # Format code with Prettier
+npm run build
 ```
 
-### Frontend
+### Frontend build
+
 ```bash
 cd frontend
-ng serve              # Start dev server
-ng build              # Build for production
-ng test               # Run tests
+npm run build
 ```
 
----
+### Frontend tests
 
-## Features
-
-✅ **User Management**
-- User registration and login
-- JWT-based authentication
-- Password hashing with bcryptjs
-- User CRUD operations
-
-✅ **Vendor Management**
-- Vendor registration (separate flow)
-- Vendor activation/approval system (active/inactive)
-- Vendor filtering
-
-✅ **Admin Features**
-- Superuser property for admin identification
-- User approval workflow
-
-✅ **Database**
-- PostgreSQL with Drizzle ORM
-- Automatic migrations on startup
-- Schema management with Drizzle Kit
-
-✅ **API**
-- REST API with NestJS
-- JWT authentication (Bearer token)
-- Swagger/OpenAPI documentation
-- Validation with class-validator
-
-✅ **Frontend**
-- Angular v21.1
-- Reactive forms with validation
-- Authentication service with interceptor
-- Route guards for protected pages
-
----
+```bash
+cd frontend
+npm run test
+```
 
 ## Troubleshooting
 
-### Port Already in Use
-If port 3000 or 4200 is already in use:
-```bash
-# Kill process on port 3000 (Linux/Mac)
-lsof -ti:3000 | xargs kill -9
+### Backend fails because `JWT_SECRET` is missing
 
-# Kill process on port 4200 (Linux/Mac)
-lsof -ti:4200 | xargs kill -9
+Make sure `backend/.env` exists and includes:
+
+```env
+JWT_SECRET="replace_with_a_strong_secret_with_at_least_32_chars"
 ```
 
-### Database Connection Error
-- Verify `DATABASE_URL` in `backend/.env`
-- Ensure PostgreSQL is running
-- Check database credentials
+### Database connection fails
 
-### Migration Errors
-Clear old migrations and regenerate:
+Check that PostgreSQL is running and that `DATABASE_URL` points to the correct database.
+
+### Seed fails
+
+Run the schema push first:
+
 ```bash
 cd backend
-rm -rf drizzle
-npx drizzle-kit generate postgresql  # For the first time
+npx drizzle-kit push
+npx tsx src/db/seed.ts
 ```
 
----
+### Emails are not sent
 
-## Environment Variables
+Email sending is optional. Configure `GMAIL_USER` and `GMAIL_PASS` with valid credentials if email delivery is required.
 
-Create `backend/.env`:
-```
-DATABASE_URL=postgresql://fomo:password@localhost:5432/fomo
-JWT_SECRET=your-secret-key-here
-NODE_ENV=development
-PORT=3000
-```
+### Image upload fails
 
----
-
-## Next Steps
-
-- [ ] Implement admin dashboard for vendor approval
-- [ ] Implement pagination for list endpoints
-- [ ] Add more comprehensive error handling
-- [ ] Setup CI/CD pipeline
-- [ ] Configure production deployment
-
----
-
-For more information, see:
-- [Backend README](./backend/README.md)
-- [Frontend README](./frontend/README.md)
+Image upload is optional. Configure `IMGBB_API_KEY` if real upload support is required.
