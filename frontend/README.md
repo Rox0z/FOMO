@@ -1,59 +1,126 @@
-# Frontend
+# FOMO Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.5.
+Angular frontend for the FOMO ticket marketplace platform.
 
-## Development server
+## Main Responsibilities
 
-To start a local development server, run:
+- Display approved events
+- Show event details
+- Register buyers and vendors
+- Authenticate users
+- Protect routes based on authentication and role
+- Provide buyer cart and checkout screens
+- Display generated tickets
+- Provide vendor dashboard
+- Provide administrator dashboard
 
-```bash
-ng serve
-```
+## Tech Stack
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- Angular
+- TypeScript
+- Angular Router
+- Angular Forms
+- RxJS
+- Vitest / Angular test runner
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+## Installation
 
 ```bash
-ng build
+npm install
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Development Server
 
 ```bash
-ng test
+npm run start
 ```
 
-## Running end-to-end tests
+Open:
 
-For end-to-end (e2e) testing, run:
+```text
+http://localhost:4200
+```
+
+The frontend expects the backend API to be running at:
+
+```text
+http://localhost:3000
+```
+
+## Main Routes
+
+| Route | Description | Access |
+| --- | --- | --- |
+| `/home` | Public home page and event listing | Public |
+| `/event/:id` | Event details | Public |
+| `/login` | User login | Public |
+| `/register-users` | Buyer registration | Public |
+| `/register-vendors` | Vendor registration | Public |
+| `/cart` | Cart page | Authenticated buyer |
+| `/payment` | Simulated checkout page | Authenticated buyer |
+| `/user/profile` | Buyer profile | Authenticated buyer |
+| `/user/my-tickets` | Buyer tickets | Authenticated buyer |
+| `/vendor-dashboard` | Vendor dashboard | Authenticated vendor |
+| `/admin-dashboard` | Admin dashboard | Authenticated admin |
+
+## Frontend Structure
+
+```text
+src/app/
+├── admin-dashboard/      # Admin platform management UI
+├── cart/                 # Buyer cart UI
+├── event-details/        # Event detail page
+├── home/                 # Public event listing
+├── login/                # Login screen
+├── navbar/               # Navigation component
+├── payment/              # Simulated checkout UI
+├── profile/              # User profile screen
+├── register-users/       # Buyer registration
+├── register-vendors/     # Vendor registration
+├── services/             # Auth, guards, cart and toast services
+├── tickets/              # Buyer tickets page
+└── vendors-dashboard/    # Vendor dashboard
+```
+
+## Authentication and Authorization
+
+The frontend uses route guards to restrict access by role:
+
+- `AuthGuard`: requires an authenticated user.
+- `RoleGuard`: checks allowed roles for protected routes.
+
+The main supported roles are:
+
+- `user`
+- `vendor`
+- `admin`
+
+## Build
 
 ```bash
-ng e2e
+npm run build
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Tests
 
-## Additional Resources
+```bash
+npm run test
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Notes
+
+- Checkout is simulated by the backend and does not integrate real payments.
+- QR codes are generated on the backend when tickets are created.
+- The frontend should be used together with the seeded backend data for a complete demo.
+- If backend endpoints are changed, update the relevant frontend services and route flows.
+
+
+## Testing
+
+Run the frontend tests in CI mode with:
+
+```bash
+npm run test:ci
+```
+
+Validated result: 12 spec files passed, 13 tests passed.

@@ -21,9 +21,35 @@
       </p>
 
       <div class="hero-cta">
-        <button class="btn-primary" (click)="setVibe('Featured')">Explore events</button>
-        <a href="#events" class="btn-secondary">How it works</a>
+        <button type="button" class="btn-primary" (click)="goToEventsPage()">Explore events</button>
+        <button type="button" class="btn-secondary" (click)="scrollToHowItWorks()">How it works</button>
       </div>
+    </div>
+  </section>
+
+  <section class="how-it-works" id="how-it-works">
+    <div class="how-header">
+      <span class="section-kicker">how it works</span>
+      <h2>From discovery to checkout in three steps.</h2>
+      <p>FOMO keeps the flow direct: find an event, check availability, and reserve without losing your place.</p>
+    </div>
+
+    <div class="steps-grid">
+      <article>
+        <span>01</span>
+        <h3>Pick your night</h3>
+        <p>Browse curated events by vibe, city, stock and date.</p>
+      </article>
+      <article>
+        <span>02</span>
+        <h3>Reserve fast</h3>
+        <p>Choose quantity and add tickets to cart or go straight to checkout.</p>
+      </article>
+      <article>
+        <span>03</span>
+        <h3>Keep it ready</h3>
+        <p>Your tickets stay in your account for quick access at the entrance.</p>
+      </article>
     </div>
   </section>
 
@@ -43,7 +69,7 @@
       </div>
 
       <div class="search-bar">
-        <span class="search-icon">⌕</span>
+        <span class="search-icon">Search</span>
         <input type="text" placeholder="Search events, cities, vibes..." (input)="onSearch($event)" />
       </div>
 
@@ -78,15 +104,18 @@
             <h3 class="card-title card-title--lg">{{ featured.name }}</h3>
             <p class="card-artist">{{ featured.description | slice:0:140 }}...</p>
             <div class="card-details">
-              <div class="detail-item">{{ featured.location }}</div>
-              <div class="detail-item">{{ featured.date | date:'EEE, MMM dd - HH:mm' }}</div>
+              <div class="detail-item"><span>Location</span>{{ featured.location }}</div>
+              <div class="detail-item"><span>Date</span>{{ featured.date | date:'EEE, MMM dd - HH:mm' }}</div>
             </div>
           </div>
 
           <div class="card-footer">
             <div class="price-section">
               <span class="price-label">starting at</span>
-              <span class="price">{{ +featured.ticketPrice === 0 ? 'Free' : ('€' + featured.ticketPrice) }}</span>
+              <span class="price" *ngIf="+featured.ticketPrice === 0; else featuredPrice">Free</span>
+              <ng-template #featuredPrice>
+                <span class="price">&euro;{{ featured.ticketPrice }}</span>
+              </ng-template>
             </div>
             <button class="btn-buy" (click)="openReservationModal(featured, $event)" [disabled]="getStockLabel(featured) === 'Sold out'">
               {{ getStockLabel(featured) === 'Sold out' ? 'Sold out' : 'Get ticket' }}
@@ -109,14 +138,17 @@
           </div>
 
           <div class="card-details">
-            <div class="detail-item">{{ event.location }}</div>
-            <div class="detail-item">{{ event.date | date:'EEE, MMM dd - HH:mm' }}</div>
+            <div class="detail-item"><span>Location</span>{{ event.location }}</div>
+            <div class="detail-item"><span>Date</span>{{ event.date | date:'EEE, MMM dd - HH:mm' }}</div>
           </div>
 
           <div class="card-footer">
             <div class="price-section">
               <span class="price-label">starting at</span>
-              <span class="price">{{ +event.ticketPrice === 0 ? 'Free' : '€' + event.ticketPrice }}</span>
+              <span class="price" *ngIf="+event.ticketPrice === 0; else eventPrice">Free</span>
+              <ng-template #eventPrice>
+                <span class="price">&euro;{{ event.ticketPrice }}</span>
+              </ng-template>
             </div>
             <button *ngIf="getStockLabel(event) !== 'Sold out'" class="btn-buy" (click)="openReservationModal(event, $event)">
               Get ticket
@@ -140,14 +172,20 @@
       
       <div class="modal-header">
         <h3>Fast Checkout</h3>
-        <button class="btn-close-modal" (click)="closeReservationModal()">✕</button>
+        <button class="btn-close-modal" (click)="closeReservationModal()" aria-label="Close checkout">&times;</button>
       </div>
 
       <div class="modal-body">
         <div class="modal-event-summary">
           <h4>{{ selectedEvent.name }}</h4>
           <p class="modal-event-loc">{{ selectedEvent.location }}</p>
-          <p class="modal-event-price-unit">Unit price: <strong>{{ +selectedEvent.ticketPrice === 0 ? 'Free' : ('€' + selectedEvent.ticketPrice) }}</strong></p>
+          <p class="modal-event-price-unit">
+            Unit price:
+            <strong *ngIf="+selectedEvent.ticketPrice === 0; else selectedEventPrice">Free</strong>
+            <ng-template #selectedEventPrice>
+              <strong>&euro;{{ selectedEvent.ticketPrice }}</strong>
+            </ng-template>
+          </p>
         </div>
 
         <div class="quantity-selector-section">
@@ -163,7 +201,10 @@
 
         <div class="modal-total-section" style="display: flex; justify-content: space-between; font-weight: bold;">
           <span>Total:</span>
-          <span style="color: #7c3aed; font-size: 1.3rem;">{{ totalPrice === 0 ? 'Free' : ('€' + totalPrice.toFixed(2)) }}</span>
+          <span style="color: #7c3aed; font-size: 1.3rem;" *ngIf="totalPrice === 0; else totalPriceValue">Free</span>
+          <ng-template #totalPriceValue>
+            <span style="color: #7c3aed; font-size: 1.3rem;">&euro;{{ totalPrice.toFixed(2) }}</span>
+          </ng-template>
         </div>
       </div>
 
@@ -175,8 +216,7 @@
           Add to Cart 
         </button>
         <button type="button" class="btn-modal-confirm" (click)="buyNow()" style="background: #7c3aed; color: white; padding: 10px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer;">
-          Buy Now ⚡
-        </button>
+          Buy Now</button>
       </div>
 
     </div>
