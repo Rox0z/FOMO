@@ -64,7 +64,6 @@ export class RegisterUsers {
 
     this.authService.register(registrationData).subscribe({
       next: (response: any) => {
-        console.log('Registration successful:', response);
         this.isLoading = false;
         
         this.router.navigate(['/home']);

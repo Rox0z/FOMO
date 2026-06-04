@@ -5,23 +5,44 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { events } from '../db/schema/events';
-import { eventEdits } from '../db/schema/event.edits';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { vendorProfiles } from 'src/db/schema/vendorProfiles';
-import { tickets } from 'src/db/schema/tickets';
+import { vendorProfiles } from '../db/schema/vendorProfiles';
 import type { DrizzleDB } from '../drizzle';
-import { ImagesService } from 'src/services/images/images.service';
 
 
 @Injectable()
 export class EventsService {
   constructor(
     @Inject('DRIZZLE') private db: DrizzleDB,
-    private readonly imagesService: ImagesService
-) {}
+  ) {}
+
+
+  private parseEventDate(date: string, time?: string): Date {
+    const eventDate = new Date(time ? `${date}T${time}:00` : date);
+    if (Number.isNaN(eventDate.getTime())) {
+      throw new BadRequestException('Invalid event date or time.');
+    }
+    return eventDate;
+  }
+
+  private mapUpdateDto(dto: UpdateEventDto) {
+    const updateData: Record<string, unknown> = {};
+
+    if (dto.name !== undefined) updateData.name = dto.name;
+    if (dto.description !== undefined) updateData.description = dto.description;
+    if (dto.location !== undefined) updateData.location = dto.location;
+    if (dto.maxCapacity !== undefined) updateData.maxCapacity = Number(dto.maxCapacity);
+    if (dto.price !== undefined) updateData.ticketPrice = Number(dto.price).toFixed(2);
+    if (dto.date !== undefined || dto.time !== undefined) {
+      updateData.date = this.parseEventDate(dto.date ?? new Date().toISOString().slice(0, 10), dto.time);
+    }
+
+    updateData.updatedAt = new Date();
+    return updateData;
+  }
 
   // -------------------------
   // CREATE EVENT (VENDOR ONLY)
@@ -42,11 +63,11 @@ export class EventsService {
         name: createEventDto.name,
         description: createEventDto.description,
         location: createEventDto.location,
-        date: new Date(createEventDto.date),
+        date: this.parseEventDate(createEventDto.date, createEventDto.time),
         ticketPrice: String(createEventDto.price),
         maxCapacity: Number(createEventDto.maxCapacity),
         bannerUrl: bannerUrl,
-        status: 'pending', 
+        status: 'pending',
       })
       .returning();
 
@@ -174,7 +195,7 @@ export class EventsService {
 
     const updated = await this.db
       .update(events)
-      .set(dto as any)
+      .set(this.mapUpdateDto(dto))
       .where(eq(events.id, id))
       .returning();
 

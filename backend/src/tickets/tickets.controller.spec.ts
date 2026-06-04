@@ -1,20 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { TicketsController } from './tickets.controller';
-import { TicketsService } from './tickets.service';
 
 describe('TicketsController', () => {
-  let controller: TicketsController;
+  it('delegates ticket listing to TicketsService with current user id', () => {
+    const service = { findMyTickets: jest.fn().mockReturnValue([{ id: 1 }]) };
+    const controller = new TicketsController(service as any);
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [TicketsController],
-      providers: [TicketsService],
-    }).compile();
-
-    controller = module.get<TicketsController>(TicketsController);
-  });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+    expect(controller.findMyTickets({ id: 7 })).toEqual([{ id: 1 }]);
+    expect(service.findMyTickets).toHaveBeenCalledWith(7);
   });
 });

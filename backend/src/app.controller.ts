@@ -4,7 +4,6 @@ import type { DrizzleDB } from './drizzle';
 
 @Controller()
 export class AppController {
-
   constructor(@Inject('DRIZZLE') private readonly db: DrizzleDB) {}
 
   @Get('api/health')
@@ -14,11 +13,12 @@ export class AppController {
 
   @Get('api/db-health')
   async dbHealth(): Promise<{ status: string }> {
-
+    try {
       await this.db.execute(sql`SELECT 1`);
       return { status: 'ok' };
-    } catch (e) {
-      console.trace(e);
+    } catch (error) {
+      console.trace(error);
       return { status: 'error' };
     }
+  }
 }

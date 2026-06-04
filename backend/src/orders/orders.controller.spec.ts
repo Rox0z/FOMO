@@ -1,20 +1,12 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersController } from './orders.controller';
-import { OrdersService } from './orders.service';
 
 describe('OrdersController', () => {
-  let controller: OrdersController;
+  it('delegates checkout to OrdersService with current user id', () => {
+    const service = { simulateCheckout: jest.fn().mockReturnValue({ success: true }) };
+    const controller = new OrdersController(service as any);
+    const dto = { items: [{ eventId: 1, quantity: 2 }] };
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [OrdersController],
-      providers: [OrdersService],
-    }).compile();
-
-    controller = module.get<OrdersController>(OrdersController);
-  });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+    expect(controller.checkout({ id: 7 }, dto)).toEqual({ success: true });
+    expect(service.simulateCheckout).toHaveBeenCalledWith(7, dto);
   });
 });

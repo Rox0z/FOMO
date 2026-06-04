@@ -1,18 +1,24 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute, provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+import { provideHttpClient } from '@angular/common/http';
+import { AdminDashboard } from './admin-dashboard';
 
-import { AdminPannel } from './admin-dashboard';
-
-describe('AdminPannel', () => {
-  let component: AdminPannel;
-  let fixture: ComponentFixture<AdminPannel>;
+describe('AdminDashboard', () => {
+  let component: AdminDashboard;
+  let fixture: ComponentFixture<AdminDashboard>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminPannel]
-    })
-    .compileComponents();
+      imports: [AdminDashboard],
+      providers: [
+        provideRouter([{ path: 'home', children: [] }]),
+        provideHttpClient(),
+        { provide: ActivatedRoute, useValue: { params: of({}), queryParams: of({}), snapshot: { params: {}, queryParams: {}, paramMap: { get: () => null } } } },
+      ],
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(AdminPannel);
+    fixture = TestBed.createComponent(AdminDashboard);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

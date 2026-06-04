@@ -54,7 +54,7 @@ function bannerUrl(index: number): string {
 // ============================================================
 
 async function resetDatabase() {
-  console.log('🧹 A limpar a base de dados...');
+  console.log('A limpar a base de dados...');
   await db.execute(sql`
     TRUNCATE TABLE
       audit_logs,
@@ -66,7 +66,7 @@ async function resetDatabase() {
       users
     RESTART IDENTITY CASCADE;
   `);
-  console.log('🧼 Base de dados limpa (IDs reiniciados)!');
+  console.log('Base de dados limpa (IDs reiniciados)!');
 }
 
 // ============================================================
@@ -74,7 +74,7 @@ async function resetDatabase() {
 // ============================================================
 
 async function seed() {
-  console.log('🌱 A iniciar o Seed...');
+  console.log('A iniciar o Seed...');
   await resetDatabase();
 
   const defaultPassword = await bcrypt.hash('fomo2026', 10);
@@ -82,7 +82,7 @@ async function seed() {
   // ==========================================
   // 1. ADMIN
   // ==========================================
-  console.log('🔐 A criar administrador...');
+  console.log('A criar administrador...');
   await db.insert(schema.users).values({
     email: 'admin@fomo.pt',
     password: defaultPassword,
@@ -95,7 +95,7 @@ async function seed() {
   // ==========================================
   // 2. VENDORS (promotores)
   // ==========================================
-  console.log('🏢 A criar promotores...');
+  console.log('A criar promotores...');
 
   const vendorsRaw = [
     {
@@ -146,7 +146,7 @@ async function seed() {
         'Colectivo de Coimbra dedicado à música experimental e electrónica de vanguarda. Sónica, espaços alternativos e arte performativa.',
       phone: '913555555',
       countryCode: '+351',
-      status: 'pending' as const, // ainda não aprovado — bom para testes
+      status: 'pending' as const, // ainda não aprovado - bom para testes
     },
   ];
 
@@ -181,7 +181,7 @@ async function seed() {
   // ==========================================
   // 3. UTILIZADORES NORMAIS (compradores)
   // ==========================================
-  console.log('👤 A criar utilizadores...');
+  console.log('A criar utilizadores...');
 
   const buyersRaw = [
     { email: 'john@fomo.pt', name: 'John Doe', phone: '916100001', countryCode: '+351' },
@@ -192,7 +192,7 @@ async function seed() {
     { email: 'beatriz@fomo.pt', name: 'Beatriz Nunes', phone: '916100006', countryCode: '+351' },
     { email: 'carlos@fomo.pt', name: 'Carlos Mendes', phone: '916100007', countryCode: '+351' },
     { email: 'sofia@fomo.pt', name: 'Sofia Rodrigues', phone: '916100008', countryCode: '+351' },
-    // Utilizador inactivo (conta bloqueada) — útil para testar login bloqueado
+    // Utilizador inactivo (conta bloqueada) - útil para testar login bloqueado
     { email: 'blocked@fomo.pt', name: 'Utilizador Bloqueado', phone: '916100009', countryCode: '+351', active: false },
   ];
 
@@ -216,7 +216,7 @@ async function seed() {
   // ==========================================
   // 4. EVENTOS
   // ==========================================
-  console.log('🎉 A criar eventos...');
+  console.log('A criar eventos...');
 
   // [vendorIndex, name, price, cap, date fn, status, location]
   const eventsRaw: Array<{
@@ -261,7 +261,7 @@ async function seed() {
       status: 'approved',
       location: 'Lx Factory Hall, Lisboa',
       description:
-        'Formato ao estilo Boiler Room — câmeras, DJs a 360° e energia crua. Uma noite que ficará na memória. Lineup revelado 48h antes do evento.',
+        'Formato ao estilo Boiler Room - câmeras, DJs a 360° e energia crua. Uma noite que ficará na memória. Lineup revelado 48h antes do evento.',
     },
     {
       vendorIdx: 0,
@@ -272,7 +272,7 @@ async function seed() {
       status: 'approved',
       location: 'Pavilhão Carlos Lopes, Lisboa',
       description:
-        'A festa de encerramento da temporada 2025 com um mega lineup surpresa. Já aconteceu — consulta o próximo evento LX Productions.',
+        'A festa de encerramento da temporada 2025 com um mega lineup surpresa. Já aconteceu - consulta o próximo evento LX Productions.',
     },
     // ---- Braga Music Group (idx 1) ----
     {
@@ -310,11 +310,11 @@ async function seed() {
     },
     {
       vendorIdx: 1,
-      name: 'Noite Celta — Braga Antiga',
+      name: 'Noite Celta - Braga Antiga',
       price: '20.00',
       cap: 400,
       date: futureDate(45),
-      status: 'pending', // aguarda aprovação — bom para testes de admin
+      status: 'pending', // aguarda aprovação - bom para testes de admin
       location: 'Museu Pio XII, Braga',
       description:
         'Música tradicional celta fusionada com electrónica moderna. Uma viagem sonora às raízes galegas e bracarenses. Em pedido de aprovação.',
@@ -351,7 +351,7 @@ async function seed() {
       status: 'approved',
       location: 'Plano B, Porto',
       description:
-        'A noite de clubbing underground mais popular do Porto. Minimal, acid e techno nas caves do Plano B. Sempre sold out — compra já o teu bilhete.',
+        'A noite de clubbing underground mais popular do Porto. Minimal, acid e techno nas caves do Plano B. Sempre sold out - compra já o teu bilhete.',
     },
     {
       vendorIdx: 2,
@@ -398,7 +398,7 @@ async function seed() {
       description:
         'Pool party secreta num herdade privada nos arredores de Faro. Música, piscina, brunch e lineup surpresa. Localização enviada 24h antes.',
     },
-    // ---- Coimbra Underground (idx 4) — promotor ainda pending ----
+    // ---- Coimbra Underground (idx 4) - promotor ainda pending ----
     {
       vendorIdx: 4,
       name: 'Coimbra Noise Session',
@@ -436,7 +436,7 @@ async function seed() {
   // ==========================================
   // 5. COMPRAS DE BILHETES
   // ==========================================
-  console.log('🎟️ A simular histórico de compras...');
+  console.log('A simular histórico de compras...');
 
   async function buyTickets(
     userId: number,
@@ -495,7 +495,7 @@ async function seed() {
   // 3  = FOMO Closing Party 2025 (800 cap, aprovado, passado)
   // 4  = Minho Electronic Festival (1500 cap, aprovado, futuro)
   // 5  = Braga Student Night (800 cap, aprovado, futuro)
-  // 6  = Acoustic Sessions Garden (100 cap, aprovado, futuro) — fica quase cheio
+  // 6  = Acoustic Sessions Garden (100 cap, aprovado, futuro) - fica quase cheio
   // 7  = Noite Celta (400 cap, pending)
   // 8  = Porto Industrial Techno (600 cap, aprovado, futuro)
   // 9  = Hardcore Beats Rave (400 cap, aprovado, futuro)
@@ -506,28 +506,28 @@ async function seed() {
   // 14 = Faro Secret Pool Party (200 cap, aprovado, futuro)
   // 15 = Coimbra Noise Session (80 cap, pending)
 
-  // John (users[0]) — fã de techno em Lisboa e Porto
+  // John (users[0]) - fã de techno em Lisboa e Porto
   await buyTickets(normalUsers[0].id, createdEvents[0].id, 2);
   await buyTickets(normalUsers[0].id, createdEvents[2].id, 1);
   await buyTickets(normalUsers[0].id, createdEvents[8].id, 2);
   await buyTickets(normalUsers[0].id, createdEvents[3].id, 1); // evento passado
 
-  // Maria (users[1]) — adora festas no Algarve e Braga
+  // Maria (users[1]) - adora festas no Algarve e Braga
   await buyTickets(normalUsers[1].id, createdEvents[12].id, 3);
   await buyTickets(normalUsers[1].id, createdEvents[13].id, 2);
   await buyTickets(normalUsers[1].id, createdEvents[5].id, 2);
 
-  // Pedro (users[2]) — consome tudo no Porto
+  // Pedro (users[2]) - consome tudo no Porto
   await buyTickets(normalUsers[2].id, createdEvents[9].id, 4);
   await buyTickets(normalUsers[2].id, createdEvents[10].id, 2);
   await buyTickets(normalUsers[2].id, createdEvents[11].id, 1);
 
-  // Ana (users[3]) — prefere eventos mais íntimos
+  // Ana (users[3]) - prefere eventos mais íntimos
   await buyTickets(normalUsers[3].id, createdEvents[1].id, 2);
   await buyTickets(normalUsers[3].id, createdEvents[6].id, 1);
   await buyTickets(normalUsers[3].id, createdEvents[14].id, 1);
 
-  // Rui (users[4]) — mega fan do festival de Braga
+  // Rui (users[4]) - mega fan do festival de Braga
   await buyTickets(normalUsers[4].id, createdEvents[4].id, 4);
   await buyTickets(normalUsers[4].id, createdEvents[5].id, 3);
 
@@ -539,45 +539,45 @@ async function seed() {
   await buyTickets(normalUsers[6].id, createdEvents[8].id, 2);
   await buyTickets(normalUsers[6].id, createdEvents[2].id, 1);
 
-  // Sofia (users[7]) — lota quase por completo o Acoustic Sessions (cap=100)
-  // Já temos: Ana comprou 1 = 1 vendido. Sofia compra 96 → total 97/100
+  // Sofia (users[7]) - lota quase por completo o Acoustic Sessions (cap=100)
+  // Já temos: Ana comprou 1 = 1 vendido. Sofia compra 96 -> total 97/100
   await buyTickets(normalUsers[7].id, createdEvents[6].id, 96);
 
   // ==========================================
   // 6. LOGS DE AUDITORIA
   // ==========================================
-  console.log('📝 A escrever logs de auditoria...');
+  console.log('A escrever logs de auditoria...');
 
   await db.insert(schema.auditLogs).values([
     { action: 'Sistema inicializado e migração da base de dados verificada com sucesso.' },
     { action: 'Perfis de vendor aprovados: LX Productions, Braga Music Group, Porto Techno Hub, Algarve Summer Events.', admin: 'Admin FOMO' },
     { action: 'Perfil de vendor Coimbra Underground mantido em estado pending para revisão manual.', admin: 'Admin FOMO' },
     { action: 'Aprovação em massa de 12 eventos de produção executada.', admin: 'Admin FOMO' },
-    { action: 'Evento "Noite Celta — Braga Antiga" aguarda aprovação — verificar licenças de utilização do espaço.', admin: 'Admin FOMO' },
+    { action: 'Evento "Noite Celta - Braga Antiga" aguarda aprovação - verificar licenças de utilização do espaço.', admin: 'Admin FOMO' },
     { action: 'Evento "Coimbra Noise Session" aguarda aprovação do promotor associado.', admin: 'Admin FOMO' },
-    { action: 'Simulação de compras históricas concluída — 8 utilizadores, 19 ordens geradas.', admin: 'Admin FOMO' },
+    { action: 'Simulação de compras históricas concluída - 8 utilizadores, 19 ordens geradas.', admin: 'Admin FOMO' },
     { action: 'Evento "Acoustic Sessions Garden" próximo da lotação máxima (97/100 bilhetes vendidos). Monitorizar.', admin: 'Admin FOMO' },
   ]);
 
-  console.log('\n✅ Seed concluído com sucesso!');
-  console.log('\n📊 Resumo:');
-  console.log('  • 1 admin  |  5 vendors (4 aprovados, 1 pending)  |  9 utilizadores (8 ativos, 1 bloqueado)');
-  console.log('  • 16 eventos (12 aprovados, 3 pending, 1 passado)');
-  console.log('  • Acoustic Sessions Garden: 97/100 bilhetes — quase esgotado!');
-  console.log('\n🔑 Credenciais de acesso (password: fomo2026):');
-  console.log('  admin@fomo.pt           → ADMIN');
-  console.log('  lx@fomo.pt              → VENDOR (aprovado)');
-  console.log('  braga@fomo.pt           → VENDOR (aprovado)');
-  console.log('  porto@fomo.pt           → VENDOR (aprovado)');
-  console.log('  algarve@fomo.pt         → VENDOR (aprovado)');
-  console.log('  coimbra@fomo.pt         → VENDOR (pending)');
-  console.log('  john@fomo.pt            → USER');
-  console.log('  blocked@fomo.pt         → USER (bloqueado — testa login bloqueado)');
+  console.log('\nSeed concluído com sucesso!');
+  console.log('\nResumo:');
+  console.log('  - 1 admin  |  5 vendors (4 aprovados, 1 pending)  |  9 utilizadores (8 ativos, 1 bloqueado)');
+  console.log('  - 16 eventos (12 aprovados, 3 pending, 1 passado)');
+  console.log('  - Acoustic Sessions Garden: 97/100 bilhetes - quase esgotado!');
+  console.log('\nCredenciais de acesso (password: fomo2026):');
+  console.log('  admin@fomo.pt           -> ADMIN');
+  console.log('  lx@fomo.pt              -> VENDOR (aprovado)');
+  console.log('  braga@fomo.pt           -> VENDOR (aprovado)');
+  console.log('  porto@fomo.pt           -> VENDOR (aprovado)');
+  console.log('  algarve@fomo.pt         -> VENDOR (aprovado)');
+  console.log('  coimbra@fomo.pt         -> VENDOR (pending)');
+  console.log('  john@fomo.pt            -> USER');
+  console.log('  blocked@fomo.pt         -> USER (bloqueado - testa login bloqueado)');
 
   process.exit(0);
 }
 
 seed().catch((err) => {
-  console.error('❌ Erro crítico ao executar o seed:', err);
+  console.error('Erro crítico ao executar o seed:', err);
   process.exit(1);
 });

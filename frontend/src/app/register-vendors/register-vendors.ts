@@ -78,7 +78,6 @@ export class RegisterVendors {
 
     this.authService.register(vendorData).subscribe(
       (response) => {
-        console.log('Vendor registration successful:', response);
         this.isLoading = false;
         this.showSuccessModal = true;
         this.cdr.detectChanges(); 
