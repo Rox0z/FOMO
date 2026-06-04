@@ -12,12 +12,16 @@ import { Tickets } from './tickets/tickets';
 import { EventDetailComponent } from './event-details/event-details';
 import { PaymentComponent } from './payment/payment';
 import { CartComponent } from './cart/cart';
+import { About } from './home/about/about';
+import { EventsPage } from './events/events';
 
 export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'register-vendors', component: RegisterVendors},
   { path: 'register-users', component: RegisterUsers},
   { path: 'home', component: HomeComponent },
+  { path: 'about', component: About },
+  { path: 'events', component: EventsPage },
   { path: 'event/:id', component: EventDetailComponent},
   { path: 'cart', component: CartComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['user'] },},
   { path: 'user', canActivate: [AuthGuard, RoleGuard], data: { roles: ['user'] },

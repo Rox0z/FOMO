@@ -43,7 +43,7 @@
       </div>
 
       <div class="search-bar">
-        <span class="search-icon">⌕</span>
+        <span class="search-icon">Search</span>
         <input type="text" placeholder="Search events, cities, vibes..." (input)="onSearch($event)" />
       </div>
 
@@ -78,8 +78,8 @@
             <h3 class="card-title card-title--lg">{{ featured.name }}</h3>
             <p class="card-artist">{{ featured.description | slice:0:140 }}...</p>
             <div class="card-details">
-              <div class="detail-item">{{ featured.location }}</div>
-              <div class="detail-item">{{ featured.date | date:'EEE, MMM dd - HH:mm' }}</div>
+              <div class="detail-item"><span>Location</span>{{ featured.location }}</div>
+              <div class="detail-item"><span>Date</span>{{ featured.date | date:'EEE, MMM dd - HH:mm' }}</div>
             </div>
           </div>
 
@@ -109,8 +109,8 @@
           </div>
 
           <div class="card-details">
-            <div class="detail-item">{{ event.location }}</div>
-            <div class="detail-item">{{ event.date | date:'EEE, MMM dd - HH:mm' }}</div>
+            <div class="detail-item"><span>Location</span>{{ event.location }}</div>
+            <div class="detail-item"><span>Date</span>{{ event.date | date:'EEE, MMM dd - HH:mm' }}</div>
           </div>
 
           <div class="card-footer">

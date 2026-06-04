@@ -397,8 +397,11 @@
 }
 
 .search-icon {
-  font-size: 16px;
-  color: var(--text-secondary);
+  color: var(--accent-color);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .search-bar input {
@@ -642,6 +645,15 @@
   gap: 8px;
   font-size: 13px;
   color: var(--text-secondary);
+}
+
+.detail-item span {
+  color: var(--accent-color);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  min-width: 54px;
+  text-transform: uppercase;
 }
 
 .card-footer {
@@ -1311,7 +1323,7 @@ a:focus {
 }
 
 /* ==========================================
-   GRELHA DINÂMICA DE 3 COLUNAS (PESQUISA/OUTRAS ABAS)
+   GRELHA DINAMICA DE 3 COLUNAS (PESQUISA/OUTRAS ABAS)
    ========================================== */
 .events-grid.grid-equal-3 {
   display: grid !important;
