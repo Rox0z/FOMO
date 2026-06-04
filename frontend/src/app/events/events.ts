@@ -36,12 +36,22 @@ export class EventsPage implements OnInit {
   actionError = '';
   reservingId: number | null = null;
 
-  private fallbackImages = [
-    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=80',
-  ];
+  private eventImages: Record<string, string> = {
+    'rock in winter 2026': 'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?auto=format&fit=crop&w=1200&q=80',
+    'pop fest summer': 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=80',
+    'tributo historico: queen & pink floyd': 'https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?auto=format&fit=crop&w=1200&q=80',
+    'indie rock sessions': 'https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1200&q=80',
+    'hip-hop national summit': 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80',
+    'trap & drill night': 'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?auto=format&fit=crop&w=1200&q=80',
+    'r&b classics & soul vibes': 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80',
+    'cypher live portugal': 'https://images.unsplash.com/photo-1521337581100-8ca9a73a5f79?auto=format&fit=crop&w=1200&q=80',
+    'deep house rooftop session': 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80',
+    'techno beach opening 2026': 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?auto=format&fit=crop&w=1200&q=80',
+    'afro house sunset': 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&w=1200&q=80',
+    'premium electronic gala': 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=1200&q=80',
+  };
+
+  private fallbackImages = Object.values(this.eventImages);
 
   constructor(
     private http: HttpClient,
@@ -139,7 +149,8 @@ export class EventsPage implements OnInit {
   }
 
   eventImage(event: ApiEvent, index = 0): string {
-    return event.bannerUrl || this.fallbackImages[index % this.fallbackImages.length];
+    const key = this.normalizeEventName(event.name);
+    return event.bannerUrl || this.eventImages[key] || this.fallbackImages[index % this.fallbackImages.length];
   }
 
   price(event: ApiEvent): string {
@@ -157,5 +168,13 @@ export class EventsPage implements OnInit {
       hour: '2-digit',
       minute: '2-digit',
     }).format(date);
+  }
+
+  private normalizeEventName(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
   }
 }

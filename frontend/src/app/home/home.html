@@ -20,7 +20,7 @@
         <button type="button" class="profile-compact-trigger" (click)="toggleMenu()" aria-label="Open user menu">
           <span class="user-icon-circle">{{ user?.name?.charAt(0) || user?.email?.charAt(0) || 'U' }}</span>
           <span class="user-display-name">{{ user?.name || user?.email || 'Conta' }}</span>
-          <span class="chevron-mini">â–¾</span>
+          <span class="chevron-mini">v</span>
         </button>
 
             <ul class="dropdown-flat" *ngIf="isMenuOpen">
@@ -79,10 +79,10 @@
   <div class="ticker-wrap">
     <div class="ticker">
       <ng-container *ngFor="let item of tickerItems">
-        <div class="ticker-item">{{ item }} <span class="ticker-sep">â€¢</span></div>
+        <div class="ticker-item">{{ item }} <span class="ticker-sep">/</span></div>
       </ng-container>
       <ng-container *ngFor="let item of tickerItems">
-        <div class="ticker-item">{{ item }} <span class="ticker-sep">â€¢</span></div>
+        <div class="ticker-item">{{ item }} <span class="ticker-sep">/</span></div>
       </ng-container>
     </div>
   </div>
@@ -97,7 +97,7 @@
       </div>
 
       <div class="search-bar">
-        <span class="search-icon">âŒ•</span>
+        <span class="search-icon">Search</span>
         <input
           type="text"
           placeholder="Search events, cities, vibes..."
@@ -146,9 +146,9 @@
             <p class="card-artist">{{ featured.subtitle }}</p>
 
             <div class="card-details">
-              <div class="detail-item">ðŸ“ {{ featured.location }}</div>
-              <div class="detail-item">ðŸ“… {{ featured.date }}</div>
-              <div class="detail-item">ðŸŽµ {{ featured.tags.join(' â€¢ ') }}</div>
+              <div class="detail-item"><span>Location</span>{{ featured.location }}</div>
+              <div class="detail-item"><span>Date</span>{{ featured.date }}</div>
+              <div class="detail-item"><span>Tags</span>{{ featured.tags.join(' / ') }}</div>
             </div>
           </div>
 
@@ -188,9 +188,9 @@
           </div>
 
           <div class="card-details">
-            <div class="detail-item">ðŸ“ {{ event.location }}</div>
-            <div class="detail-item">ðŸ“… {{ event.date }}</div>
-            <div class="detail-item">ðŸŽµ {{ event.tags.join(' â€¢ ') }}</div>
+            <div class="detail-item"><span>Location</span>{{ event.location }}</div>
+            <div class="detail-item"><span>Date</span>{{ event.date }}</div>
+            <div class="detail-item"><span>Tags</span>{{ event.tags.join(' / ') }}</div>
           </div>
 
           <div class="card-footer">
@@ -285,7 +285,7 @@
     </div>
 
     <div class="footer-bottom">
-      <span>Â© 2026 FOMO. All rights reserved.</span>
+      <span>&copy; 2026 FOMO. All rights reserved.</span>
       <span>Ticketing platform </span>
     </div>
   </footer>

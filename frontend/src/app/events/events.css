@@ -53,10 +53,7 @@
 }
 
 .events-hero {
-  background:
-    radial-gradient(ellipse at 80% 20%, rgba(139, 0, 0, 0.45), transparent 55%),
-    radial-gradient(ellipse at 20% 80%, rgba(88, 28, 135, 0.42), transparent 55%),
-    #0d0d0d;
+  background: linear-gradient(135deg, #0d0d0d 0%, #1a0a2e 52%, #2d0a1a 100%);
   color: white;
   padding: 88px 40px;
   text-align: center;
@@ -129,6 +126,14 @@
   width: 100%;
 }
 
+.search-symbol {
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .filter-pills {
   display: flex;
   gap: 10px;
@@ -169,6 +174,13 @@
   border-radius: 8px;
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.06);
   overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.event-card:hover {
+  border-color: rgba(124, 58, 237, 0.28);
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
 }
 
 .image-button {
@@ -186,6 +198,14 @@
   height: 100%;
   object-fit: cover;
   width: 100%;
+}
+
+.image-button img {
+  transition: transform 0.35s ease;
+}
+
+.event-card:hover .image-button img {
+  transform: scale(1.05);
 }
 
 .status-pill {
