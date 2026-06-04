@@ -13,7 +13,6 @@ export class OrdersController {
   @Post('checkout')
   @UseGuards(JwtGuard)
   checkout(@CurrentUser() user: any, @Body() createOrderDto: CreateOrderDto) {
-    // Passamos o ID do utilizador logado e os dados da encomenda
     return this.ordersService.simulateCheckout(user.id, createOrderDto);
   }
 }

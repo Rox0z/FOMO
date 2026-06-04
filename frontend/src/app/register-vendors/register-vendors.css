@@ -294,3 +294,33 @@ textarea:not(:placeholder-shown) + label {
     transform: scale(1) translateY(0);
   }
 }
+.logo-wrap {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.6rem;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+.fomo-logo {
+  width: 150px;
+  height: auto;
+  fill: #111111;
+  display: block;
+  margin: 0 auto 0.6rem;
+  transition: filter 0.2s ease;
+}
+.logo-wrap:hover .fomo-logo {
+  filter: drop-shadow(0 0 5px rgba(108, 59, 255, 0.4)) drop-shadow(0 0 10px rgba(108, 59, 255, 0.2));
+}
+.logo-wrap p {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #aaaaaa;
+  margin: 0;
+}

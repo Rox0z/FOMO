@@ -1,29 +1,4 @@
 <div class="page-shell">
-  <nav class="navbar">
-    <div class="nav-brand">
-      <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo" />
-    </div>
-
-    <div class="nav-right">
-      <a [routerLink]="['/login']" [queryParams]="{ mode: 'user' }" class="btn-nav-outline nav-link-btn" *ngIf="!user">Sign in</a>
-      <a [routerLink]="['/login']" [queryParams]="{ mode: 'vendor' }" class="btn-nav-primary nav-link-btn" *ngIf="!user">Promoter</a>
-
-      <a routerLink="/cart" class="nav-cart-icon-btn" *ngIf="user" title="Ver Carrinho">
-        <span>🛒</span>
-      </a>
-      
-      <div class="profile-dropdown" *ngIf="user" (click)="toggleMenu()">
-        <span class="user-display-name">{{ user.name || 'User' }}</span>
-      </div>
-    </div>
-
-    <ul class="dropdown-flat" *ngIf="isMenuOpen && user">
-      <li><a routerLink="/user/profile">O meu perfil</a></li>
-      <li><a routerLink="/user/my-tickets">Meus bilhetes</a></li>
-      <li class="divider"></li>
-      <li><button (click)="onLogout()">Sair</button></li>
-    </ul>
-  </nav>
 
   <div class="detail-main-wrapper">
     <div class="glow-orb orb-top-left"></div>
@@ -125,11 +100,14 @@
           <div *ngIf="!isSoldOut" class="widget-action-area">
             <div class="qty-selector-row">
               <label for="ticketQtySelect">Quantity</label>
-              <div class="qty-custom-dropdown-wrap">
-                <select id="ticketQtySelect" [(ngModel)]="ticketQuantity" [disabled]="isSubmittingOrder" class="qty-native-select">
-                  <option *ngFor="let n of [1,2,3,4,5]" [value]="n">{{ n }} ticket{{ n > 1 ? 's' : '' }}</option>
-                </select>
+              <div class="qty-custom-dropdown-wrap" style="display: flex; gap: 10px; align-items: center;">
+                <button type="button" (click)="ticketQuantity = ticketQuantity > 1 ? ticketQuantity - 1 : 1" [disabled]="isSubmittingOrder" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.2); background: transparent; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;">-</button>
+                <input type="text" [value]="ticketQuantity" style="width: 30px; text-align: center; font-weight: bold; background: transparent; color: white; border: none; font-size: 1rem;" readonly />
+                <button type="button" (click)="ticketQuantity = (event && ticketQuantity < (event.maxCapacity - event.ticketsSold)) ? ticketQuantity + 1 : ticketQuantity" [disabled]="isSubmittingOrder || !event || ticketQuantity >= (event.maxCapacity - event.ticketsSold)" style="width: 32px; height: 32px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.2); background: transparent; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;">+</button>
               </div>
+            </div>
+            <div *ngIf="event" style="font-size: 0.78rem; color: rgba(255,255,255,0.5); margin-top: 4px; margin-bottom: 4px;">
+              {{ event.maxCapacity - event.ticketsSold }} ticket(s) available
             </div>
 
             <div class="total-summary-display">
@@ -163,4 +141,4 @@
       </div>
     </footer>
   </div>
-</div>
+</div>  

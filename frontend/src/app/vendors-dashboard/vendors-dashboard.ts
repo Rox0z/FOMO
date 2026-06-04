@@ -44,20 +44,16 @@ export class VendorsDashboard implements OnInit {
   private readonly apiUrl = environment.apiUrl;
 
 
-  // Estado de Navegação
   activeTab: 'overview' | 'events' | 'profile' | 'create' = 'overview';
   selectedFile: File | null = null;
   isSidebarCollapsed: boolean = false;
 
-  // Dados da Empresa e Métricas Gerais
   globalStats: GlobalStats = { totalTickets: 0, totalRevenue: 0, activeEvents: 0 };
   events: VendorEvent[] = [];
   vendorData: any = null;
 
-  // Estado Único de Seleção Avançada
   selectedEvent: DetailedVendorEvent | null = null;
   
-  // Controlo de Modo de Edição
   isEditing: boolean = false;
   editFormValues: any = {};
 
@@ -85,9 +81,9 @@ export class VendorsDashboard implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Erro ao carregar o perfil do vendor:', err);
-        this.vendorData = {'Erro ao Carregar': 'Tente novamente mais tarde.'};
-        this.toast.show('Erro ao carregar o perfil do vendor.');
+        console.error('Error fetching vendor profile:', err);
+        this.vendorData = {'Error fetching profile': 'Please try again later.'};
+        this.toast.show('Error fetching vendor profile.');
       }
     });
   }
@@ -99,8 +95,8 @@ export class VendorsDashboard implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Erro ao carregar estatísticas:', err);
-        this.toast.show('Erro ao carregar estatísticas.');
+        console.error('Error fetching statistics:', err);
+        this.toast.show('Error fetching statistics.');
       }
     });
   }
@@ -112,8 +108,8 @@ export class VendorsDashboard implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Erro ao carregar os eventos:', err);
-        this.toast.show('Erro ao carregar os eventos.');
+        console.error('Error fetching events:', err);
+        this.toast.show('Error fetching events.');
       }
     });
   }
@@ -134,7 +130,10 @@ export class VendorsDashboard implements OnInit {
     formData.append('name', eventData.name);
     formData.append('description', eventData.description);
     formData.append('location', eventData.location);
-    formData.append('date', eventData.date);
+    const combinedDate = eventData.date && eventData.time
+      ? `${eventData.date}T${eventData.time}:00`
+      : `${eventData.date}T00:00:00`;
+    formData.append('date', combinedDate);
     formData.append('time', eventData.time);
     formData.append('price', String(eventData.price));
     formData.append('maxCapacity', String(eventData.maxCapacity));
@@ -151,7 +150,7 @@ export class VendorsDashboard implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        this.toast.show('Erro ao criar evento');
+        this.toast.show('Error creating event. Please try again.');
       }
     });
   }
@@ -159,35 +158,34 @@ export class VendorsDashboard implements OnInit {
   submitEventEdition(updatedData: any): void {
     if (!this.selectedEvent) return;
     
-    // Criamos um FormData nativo em vez de enviar JSON puro
     const formData = new FormData();
 
-    // Injetamos todos os dados de texto do formulário no FormData
     formData.append('name', updatedData.name);
     formData.append('description', updatedData.description);
     formData.append('location', updatedData.location);
-    formData.append('date', updatedData.date);
+    const combinedDate = updatedData.date && updatedData.time
+      ? `${updatedData.date}T${updatedData.time}:00`
+      : `${updatedData.date}T00:00:00`;
+    formData.append('date', combinedDate);
     formData.append('time', updatedData.time);
     formData.append('price', String(updatedData.price));
     formData.append('maxCapacity', String(updatedData.maxCapacity));
 
-    // Se o utilizador selecionou um ficheiro novo, anexamo-lo com o nome correto: 'banner'
     if (this.selectedFile) {
       formData.append('banner', this.selectedFile);
     }
 
-    // Enviamos o formData no PUT em vez do updatedData
     this.http.put(`${this.apiUrl}/events/${this.selectedEvent.id}/request-edit`, formData).subscribe({
       next: () => {
-        this.toast.show('Alterações enviadas! O evento atual continuará live sem alterações até o Admin aprovar.');
+        this.toast.show('Changes submitted! The event will remain live without changes until the Admin approves.');
         this.isEditing = false;
-        this.selectedFile = null; // Limpa o ficheiro selecionado para a próxima ação
+        this.selectedFile = null; 
         this.loadMyEvents();
         this.backToEventsList();
       },
       error: (err) => {
-        console.error('Erro ao submeter alteração de evento:', err);
-        this.toast.show('Erro ao processar o seu pedido de alteração.');
+        console.error('Error submitting event modification:', err);
+        this.toast.show('Error processing your modification request.');
       }
     });
   }
@@ -199,8 +197,8 @@ export class VendorsDashboard implements OnInit {
         this.loadProfile();
       },
       error: (err) => {
-        console.error('Erro ao atualizar perfil:', err);
-        this.toast.show('Erro ao atualizar o perfil comercial.');
+        console.error('Error updating profile:', err);
+        this.toast.show('Error updating commercial profile.');
       }
     });
   }

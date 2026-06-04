@@ -33,7 +33,6 @@ interface EventItem {
 export class EventDetailComponent implements OnInit {
   private readonly apiUrl = environment.apiUrl;
 
-  isMenuOpen = false;
   user: any = null;
   event: EventItem | null = null;
   loading = true;
@@ -43,7 +42,6 @@ export class EventDetailComponent implements OnInit {
   isSubmittingOrder = false;
   readonly fallbackBanner = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=1200&q=80';
 
-  // Injeção limpa do teu novo CartService para gerir o carrinho global
   private cartService = inject(CartService);
 
   constructor(
@@ -75,14 +73,13 @@ export class EventDetailComponent implements OnInit {
     this.loading = true;
     this.http.get<EventItem>(`${this.apiUrl}/events/${id}`).subscribe({
       next: (data) => {
-        // CORRIGIDO: O teu backend já devolve o EventItem diretamente na raiz da resposta!
         this.event = data; 
         this.loading = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Erro ao carregar detalhes do evento:', err);
-        this.error = 'Não foi possível encontrar este evento ou ele não está disponível.';
+        console.error('Error fetching event details:', err);
+        this.error = 'Error fetching event details:';
         this.loading = false;
         this.cdr.detectChanges();
       }
@@ -102,17 +99,19 @@ export class EventDetailComponent implements OnInit {
   get stockStatusText(): string {
     if (!this.event) return '';
     const available = this.event.maxCapacity - this.event.ticketsSold;
-    
+
     if (this.isSoldOut) return 'Sold out';
-    if (available <= 10) return 'Selling out fast';
+    if (available <= this.event.maxCapacity * 0.15) return 'Last spots';
+    if (available <= this.event.maxCapacity * 0.40) return 'Selling fast';
     return 'Available';
   }
 
   get stockStatusClass(): string {
     switch (this.stockStatusText) {
-      case 'Available': return 'stock-available';
-      case 'Selling out fast': return 'stock-low';
-      case 'Sold out': return 'stock-sold';
+      case 'Available':    return 'stock-available';
+      case 'Selling fast': return 'stock-low';
+      case 'Last spots':   return 'stock-last';
+      case 'Sold out':     return 'stock-sold';
       default: return '';
     }
   }
@@ -131,16 +130,15 @@ export class EventDetailComponent implements OnInit {
       }).catch(console.error);
     } else {
       navigator.clipboard.writeText(window.location.href);
-      this.toast.show('Link do evento copiado para a área de transferência!', 'success');
+      this.toast.show('Event link copied to clipboard!', 'success');
     }
   }
 
-  // NOVO MÉTODO: Apenas adiciona ao carrinho local e mantém o utilizador na página
   addToCartOnly(): void {
     if (!this.event || this.isSubmittingOrder || this.isSoldOut) return;
 
     if (!this.user) {
-      this.toast.show('Tens de fazer login para adicionar itens ao carrinho.', 'error');
+      this.toast.show('You need to log in to add items to your cart.', 'error');
       this.router.navigate(['/login'], { queryParams: { mode: 'user' } });
       return;
     }
@@ -153,37 +151,34 @@ export class EventDetailComponent implements OnInit {
       totalPrice: this.totalPrice
     });
 
-    this.toast.show(`${this.ticketQuantity} bilhete(s) adicionado(s) ao carrinho!`, 'success');
+    this.toast.show(`${this.ticketQuantity} ticket(s) added to your cart!`, 'success');
   }
 
-  // MÉTODO ORIGINAL AJUSTADO: "Comprar Já" redireciona para a tua página de pagamento passando os dados do cartão/evento
   confirmPurchase(): void {
     if (!this.event || this.isSubmittingOrder || this.isSoldOut) return;
 
     if (!this.user) {
-      this.toast.show('Tens de fazer login para comprar bilhetes.', 'error');
+      this.toast.show('You need to log in to purchase tickets.', 'error');
       this.router.navigate(['/login'], { queryParams: { mode: 'user' } });
       return;
     }
 
-    this.router.navigate(['payment'], {
-      state: {
-        eventId: this.event.id,
-        eventName: this.event.name,
-        quantity: this.ticketQuantity,
-        totalPrice: this.totalPrice
-      }
+    const available = this.event.maxCapacity - this.event.ticketsSold;
+    if (this.ticketQuantity > available) {
+      this.toast.show(`Só há ${available} bilhete(s) disponível(is).`, 'error');
+      this.ticketQuantity = available > 0 ? available : 1;
+      return;
+    }
+
+    this.cartService.clearCart();
+    this.cartService.addToCart({
+      eventId: this.event.id,
+      eventName: this.event.name,
+      quantity: this.ticketQuantity,
+      unitPrice: parseFloat(this.event.ticketPrice),
+      totalPrice: this.totalPrice
     });
-  }
 
-  toggleMenu(): void {
-    this.isMenuOpen = !this.isMenuOpen;
-  }
-
-  onLogout(): void {
-    this.authService.logout();
-    this.user = null;
-    this.isMenuOpen = false;
-    this.router.navigate(['/home']);
+    this.router.navigate(['/payment']);
   }
 }

@@ -14,6 +14,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import type { DrizzleDB } from '../drizzle';
 import { EmailsService } from '../services/emails/emails.service';
+import { Roles } from '../common/enums/roles.enum';
 
 @Injectable()
 export class UsersService {
@@ -41,12 +42,12 @@ export class UsersService {
         name: dto.name,
         phone: dto.phone,
         countryCode: dto.countryCode,
-        role: overrides?.role ?? 'user',
+        role: (overrides?.role as Roles) ?? Roles.USER,
         active: overrides?.active ?? true,
       })
       .returning();
 
-    if (newUser && newUser[0] && newUser[0].email && newUser[0].role === 'user') {
+    if (newUser && newUser[0] && newUser[0].email && newUser[0].role === Roles.USER) {
       this.emailsService.sendWelcomeEmail(newUser[0].email, newUser[0].name);
     }
 
@@ -67,7 +68,7 @@ export class UsersService {
         phone: users.phone,         
       })
       .from(users)
-      .where(eq(users.role, 'user'));
+      .where(eq(users.role, Roles.USER));
   }
 
   async findOne(id: number): Promise<Omit<User, 'password'>> {
@@ -155,16 +156,22 @@ export class UsersService {
     return user;
   }
 
+  async checkPassword(email: string, password: string): Promise<boolean> {
+    const user = await this.findByEmail(email);
+    if (!user || !user.password) return false;
+    return bcrypt.compare(password, user.password);
+  }
+
   async count(): Promise<{ total: number; active: number }> {
     const [totalRes, activeRes] = await Promise.all([
       this.db
         .select({ count: sql<number>`count(*)` })
         .from(users)
-        .where(eq(users.role, 'user')),
+        .where(eq(users.role, Roles.USER)),
       this.db
         .select({ count: sql<number>`count(*)` })
         .from(users)
-        .where(and(eq(users.role, 'user'), eq(users.active, true)))
+        .where(and(eq(users.role, Roles.USER), eq(users.active, true)))
     ]);
 
     return {

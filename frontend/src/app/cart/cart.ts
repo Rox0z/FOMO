@@ -2,8 +2,6 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { CartService } from '../services/cart.service';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../environments/environment';
 import { ToastService } from '../services/toast.service';
 
 @Component({
@@ -14,8 +12,8 @@ import { ToastService } from '../services/toast.service';
   styleUrls: ['./cart.css']
 })
 export class CartComponent {
+
   cartService = inject(CartService);
-  private http = inject(HttpClient);
   private router = inject(Router);
   private toast = inject(ToastService);
   
@@ -23,7 +21,7 @@ export class CartComponent {
 
   removeItem(eventId: number) {
     this.cartService.removeItem(eventId);
-    this.toast.show('Bilhete removido do carrinho.', 'error');
+    this.toast.show('Ticket removed from cart.', 'error');
   }
 
   checkout() {
@@ -32,24 +30,13 @@ export class CartComponent {
 
     this.isProcessing = true;
 
-    const payload = {
-      items: items.map(item => ({
-        eventId: item.eventId,
-        quantity: item.quantity
-      }))
-    };
-
-    this.http.post(`${environment.apiUrl}/orders/checkout`, payload).subscribe({
-      next: () => {
-        this.toast.show('Compra efetuada com sucesso! Verifica o teu email.', 'success');
-        this.cartService.clearCart();
+    this.router.navigate(['/payment'])
+      .then(() => {
         this.isProcessing = false;
-        this.router.navigate(['/user/my-tickets']);
-      },
-      error: (err) => {
-        this.toast.show(err.error?.message || 'Erro ao processar o pagamento.', 'error');
+      })
+      .catch(() => {
         this.isProcessing = false;
-      }
-    });
+        this.toast.show('Error opening payment page. Please try again.', 'error');
+      });
   }
 }

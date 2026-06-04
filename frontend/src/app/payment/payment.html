@@ -1,40 +1,50 @@
 <div class="mock-wrapper">
   <div class="mock-card">
 
-    <!-- Header -->
     <div class="mock-header">
       <button class="btn-back" (click)="goBack()">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="m15 18-6-6 6-6" />
         </svg>
-        Voltar
+        Back
       </button>
       <div class="mock-logo">FOMO <span>Pay</span></div>
     </div>
 
-    <!-- Resumo da compra -->
     <div class="order-summary">
-      <div class="summary-row">
-        <span class="summary-label">Evento</span>
-        <span class="summary-value">{{ eventName }}</span>
+      <ng-container *ngIf="cartService.cartItems().length > 0">
+        <div class="summary-row" *ngFor="let item of cartService.cartItems()" style="font-size: 0.95rem; margin-bottom: 6px; color: #555;">
+          <span class="summary-label">{{ item.eventName }}</span>
+          <span class="summary-value">{{ item.quantity }}x (€{{ item.unitPrice.toFixed(2) }})</span>
+        </div>
+      </ng-container>
+
+      <div class="summary-row" *ngIf="cartService.cartItems().length === 0" style="font-size: 0.95rem; margin-bottom: 6px; color: #999;">
+        <span class="summary-label">Your cart is empty.</span>
       </div>
-      <div class="summary-row">
-        <span class="summary-label">Quantidade</span>
-        <span class="summary-value">{{ quantity }} bilhete(s)</span>
+
+      <div style="border-top: 1px dashed #ddd; margin: 12px 0;"></div>
+
+      <div class="summary-row" style="font-size: 0.9rem; color: #666; margin-bottom: 4px;">
+        <span>Subtotal:</span>
+        <span>€{{ cartService.cartTotal().toFixed(2) }}</span>
       </div>
-      <div class="summary-row total-row">
-        <span class="summary-label">Total</span>
-        <span class="summary-value total-price">€{{ totalPrice.toFixed(2) }}</span>
+
+      <div class="summary-row" style="font-size: 0.9rem; color: #666; margin-bottom: 4px;">
+        <span>Service Fee (2.5% + €1.50 per ticket):</span>
+        <span>€{{ ((cartService.totalItems() * 1.50) + (cartService.cartTotal() * 0.025)).toFixed(2) }}</span>
+      </div>
+
+      <div class="summary-row total-row" style="font-size: 1.2rem; font-weight: bold; color: #111; margin-top: 8px;">
+        <span>Grand Total:</span>
+        <span style="color: #7c3aed;">€{{ (cartService.cartTotal() + (cartService.totalItems() * 1.50) + (cartService.cartTotal() * 0.025)).toFixed(2) }}</span>
       </div>
     </div>
 
-    <!-- Formulário de cartão -->
     <div class="card-form">
-      <p class="form-title">Dados de pagamento</p>
-
       <div class="field">
-        <label>Número do cartão</label>
+        <label>Card number</label>
         <input
           type="text"
           placeholder="1234 5678 9012 3456"
@@ -45,10 +55,10 @@
       </div>
 
       <div class="field">
-        <label>Nome no cartão</label>
+        <label>Cardholder name</label>
         <input
           type="text"
-          placeholder="João Silva"
+          placeholder="John Doe"
           [(ngModel)]="cardName"
           maxlength="40"
         />
@@ -56,10 +66,10 @@
 
       <div class="field-row">
         <div class="field">
-          <label>Validade</label>
+          <label>Expiration date</label>
           <input
             type="text"
-            placeholder="MM/AA"
+            placeholder="MM/YY"
             [value]="cardExpiry"
             (input)="formatExpiry($event)"
             maxlength="5"
@@ -78,19 +88,13 @@
 
       <p class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
 
-      <button
-        class="btn-pay"
-        (click)="pay()"
-        [disabled]="!isFormValid || isPaying"
-        [class.loading]="isPaying"
-      >
-        <span *ngIf="!isPaying">💳 Pagar €{{ totalPrice.toFixed(2) }}</span>
-        <span *ngIf="isPaying">A processar...</span>
+      <button 
+        class="btn-pay-submit" 
+        (click)="pay()" 
+        [disabled]="isPaying || cartService.cartItems().length === 0"
+        style="width: 100%; margin-top: 15px; padding: 12px; background: #7c3aed; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+        {{ isPaying ? 'Processing Payment...' : 'Pay Now' }}
       </button>
-
-      <p class="mock-notice">
-        🔒 Ambiente de teste — nenhum valor real será cobrado
-      </p>
     </div>
 
   </div>

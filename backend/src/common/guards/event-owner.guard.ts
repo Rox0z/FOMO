@@ -11,37 +11,35 @@ export class EventOwnerGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
-    const user = req.user; // Injetado pelo JwtGuard
+    const user = req.user;
     const eventId = Number(req.params.id);
 
     if (isNaN(eventId)) {
-      throw new NotFoundException('ID do evento inválido');
+      throw new NotFoundException('Invalid event ID');
     }
 
     if (user.role === Roles.ADMIN) {
       return true;
     }
 
-    // 1. Procurar o perfil de promotor logged in
     const vendor = await this.db.query.vendorProfiles.findFirst({
       where: (vp, { eq }) => eq(vp.userId, user.id),
     });
 
     if (!vendor) {
-      throw new ForbiddenException('Perfil de promotor não encontrado.');
+      throw new ForbiddenException('Vendor profile not found.');
     }
 
-    // 2. Procurar o evento
     const event = await this.db.query.events.findFirst({
       where: (e, { eq }) => eq(e.id, eventId),
     });
 
     if (!event) {
-      throw new NotFoundException('Evento não encontrado');
+      throw new NotFoundException('Event not found');
     }
 
     if (event.vendorId !== vendor.id) {
-      throw new ForbiddenException('Não tens permissão para gerir este evento.');
+      throw new ForbiddenException('You do not have permission to modify this event.');
     }
 
     req.event = event;

@@ -1,0 +1,39 @@
+<nav class="navbar">
+  <div class="nav-brand" [routerLink]="['/home']" style="cursor: pointer;">
+    <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo" />
+  </div>
+
+ <ul class="nav-links" *ngIf="router.url === '/home' || router.url === '/'">
+    <li><a [routerLink]="['/home']" fragment="discover">Discover</a></li>
+    <li><a [routerLink]="['/home']" fragment="events">Events</a></li>
+    <li><a [routerLink]="['/home']" fragment="community">Community</a></li>
+  </ul>
+
+  <div class="nav-right">
+    <a [routerLink]="['/login']" [queryParams]="{ mode: 'user' }" class="btn-nav-outline nav-link-btn" *ngIf="!user">Sign in</a>
+    <a [routerLink]="['/login']" [queryParams]="{ mode: 'vendor' }" class="btn-nav-primary nav-link-btn" *ngIf="!user">Promoter</a>
+
+    <a routerLink="/cart" class="nav-cart-btn" title="View Cart" *ngIf="user">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="cart-icon">
+        <circle cx="8" cy="21" r="1"/>
+        <circle cx="19" cy="21" r="1"/>
+        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+      </svg>
+      
+      <span class="cart-badge" *ngIf="cartService.totalItems() > 0">
+        {{ +cartService.totalItems() }}
+      </span>
+    </a>
+
+    <div class="profile-dropdown" *ngIf="user" (click)="toggleMenu()">
+      <span class="user-display-name">{{ user.name || 'User' }}</span>
+    </div>
+  </div>
+
+  <ul class="dropdown-flat" *ngIf="isMenuOpen && user">
+    <li><a [routerLink]="['/user/profile']" (click)="isMenuOpen = false">Profile</a></li>
+    <li><a [routerLink]="['/user/my-tickets']" (click)="isMenuOpen = false">My Tickets</a></li>
+    <li class="divider"></li>
+    <li><button (click)="onLogout()">Sign Out</button></li>
+  </ul>
+</nav>

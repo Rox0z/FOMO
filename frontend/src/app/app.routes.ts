@@ -4,7 +4,7 @@ import { RegisterVendors } from './register-vendors/register-vendors';
 import { RegisterUsers } from './register-users/register-users';
 import { HomeComponent } from './home/home';
 import { VendorsDashboard } from './vendors-dashboard/vendors-dashboard';
-import { AdminPannel } from './admin-pannel/admin-pannel';
+import { AdminDashboard } from './admin-dashboard/admin-dashboard';
 import { AuthGuard} from './services/auth.guard';
 import { RoleGuard } from './services/role.guard';
 import { ProfileComponent } from './profile/profile';
@@ -19,7 +19,7 @@ export const routes: Routes = [
   { path: 'register-users', component: RegisterUsers},
   { path: 'home', component: HomeComponent },
   { path: 'event/:id', component: EventDetailComponent},
-  { path: 'cart', component: CartComponent },
+  { path: 'cart', component: CartComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['user'] },},
   { path: 'user', canActivate: [AuthGuard, RoleGuard], data: { roles: ['user'] },
     children: [
       { path: 'profile', component: ProfileComponent },
@@ -27,7 +27,8 @@ export const routes: Routes = [
     ]
   },
   { path: 'vendor-dashboard', component: VendorsDashboard, canActivate: [AuthGuard, RoleGuard], data: { roles: ['vendor'] },},
-  { path: 'admin-dashboard', component: AdminPannel, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] },},
-  { path: 'payment', component: PaymentComponent},
-  { path: '', redirectTo: 'home', pathMatch: 'full' }
+  { path: 'admin-dashboard', component: AdminDashboard, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] },},
+  { path: 'payment', component: PaymentComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['user'] },},
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: '**', redirectTo: 'home' }
 ];

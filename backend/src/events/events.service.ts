@@ -32,7 +32,7 @@ export class EventsService {
     });
 
     if (!vendorProfile) {
-      throw new ForbiddenException('Apenas utilizadores com perfil de Vendor ativo podem criar eventos.');
+      throw new ForbiddenException(' Only vendors with an active profile can create events.');
     }
 
     const newEvent = await this.db
@@ -43,7 +43,7 @@ export class EventsService {
         description: createEventDto.description,
         location: createEventDto.location,
         date: new Date(createEventDto.date),
-        ticketPrice: createEventDto.price,
+        ticketPrice: String(createEventDto.price),
         maxCapacity: Number(createEventDto.maxCapacity),
         bannerUrl: bannerUrl,
         status: 'pending', 
@@ -95,7 +95,7 @@ export class EventsService {
       .where(eq(events.id, id));
 
     if (!result || result.length === 0) {
-      throw new NotFoundException('Evento não encontrado');
+      throw new NotFoundException('Event not found');
     }
 
     return result[0];
@@ -147,20 +147,6 @@ export class EventsService {
     }
 
     return { totalTickets, totalRevenue, activeEvents };
-  }
-
-  // -------------------------
-  // ADMIN CONTROL - SET STATUS
-  // -------------------------
-  async setStatus(id: number, status: 'approved' | 'rejected' | 'pending') {
-    const updated = await this.db
-      .update(events)
-      .set({ status })
-      .where(eq(events.id, id))
-      .returning();
-
-    if (updated.length === 0) throw new NotFoundException('Event not found');
-    return updated[0];
   }
 
   // -------------------------
@@ -216,8 +202,14 @@ export class EventsService {
     return { message: `Event ${id} deleted` };
   }
 
+  // -------------------------
+  // COUNT (MÉTRICAS ADMIN)
+  // -------------------------
   async count() {
-    const result = await this.db.query.events.findMany();
-    return result.length;
+    const result = await this.db
+      .select({ count: sql<number>`count(*)` })
+      .from(events);
+      
+    return Number(result[0]?.count ?? 0);
   }
 }

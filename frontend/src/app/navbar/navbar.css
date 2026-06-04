@@ -1,0 +1,215 @@
+/* ==========================================================================
+   COMPONENT: NAVBAR GLOBAL (FOMO)
+   ========================================================================== */
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 70px;
+  box-sizing: border-box;
+}
+
+/* BRAND LOGO */
+.nav-brand {
+  display: flex;
+  align-items: center;
+}
+
+.nav-brand .brand-logo {
+  height: 32px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* LINKS DE NAVEGAÇÃO INTERNA */
+.nav-links {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%); /* Força o ponto central do menu a alinhar com o meio da janela */
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+.nav-links a {
+  color: #1a1a1a; /* A tua --text-primary original */
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: color 0.2s ease-out;
+  cursor: pointer;
+}
+
+.nav-links a:hover {
+  color: #7c3aed; /* O teu roxo --accent-color original */
+}
+
+/* LADO DIREITO (BOTÕES, CARRINHO E PERFIL) */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* O teu espaçamento original de botões */
+}
+
+/* BOTÕES DE LOGIN / PROMOTER */
+.nav-link-btn {
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  transition: all 0.2s ease-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-nav-outline {
+  color: #1a1a1a;
+  border: 1px solid #e5e5e5;
+  background: transparent;
+}
+
+.btn-nav-outline:hover {
+  background: #fafafa;
+  border-color: #1a1a1a;
+}
+
+.btn-nav-primary {
+  color: #ffffff;
+  background: #7c3aed; /* O teu --accent-color */
+  border: 1px solid transparent;
+}
+
+.btn-nav-primary:hover {
+  background: #6d28d9; /* O teu --accent-hover */
+  transform: translateY(-1px);
+}
+
+.nav-cart-btn {
+  position: relative;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: #7c3aed;
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 50%;
+  min-width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-sizing: border-box;
+  line-height: 1;
+}
+
+.nav-cart-icon-btn:hover {
+  background: #f5f5f5; /* O teu --bg-medium */
+  border-color: #ccc;
+  transform: scale(1.05);
+}
+
+/* DROPDOWN DE PERFIL (UTILIZADOR LOGADO) */
+.profile-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 6px 14px;
+  border-radius: 50px;
+  background: #fafafa; /* O teu --bg-light */
+  border: 1px solid #e5e5e5; /* A tua --border-color */
+  transition: all 0.2s ease-out;
+  user-select: none;
+  height: 38px;
+  box-sizing: border-box;
+}
+
+.profile-dropdown:hover {
+  background: #f5f5f5; /* O teu --bg-medium */
+}
+
+.user-display-name {
+  color: #1a1a1a;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* MENU SUSPENSO DE OPÇÕES (MENU FLAT) */
+.dropdown-flat {
+  position: absolute;
+  top: 65px;
+  right: 2rem;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  list-style: none;
+  padding: 0.5rem 0;
+  margin: 0;
+  min-width: 180px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  z-index: 1010;
+  animation: fadeInDropdown 0.2s ease-out;
+}
+
+.dropdown-flat li a, 
+.dropdown-flat li button {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 1.2rem;
+  color: #1a1a1a;
+  text-decoration: none;
+  font-size: 0.9rem;
+  text-align: left;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease-out;
+  box-sizing: border-box;
+}
+
+.dropdown-flat li a:hover, 
+.dropdown-flat li button:hover {
+  background: #f5f5f5; /* O teu --bg-medium */
+  color: #7c3aed; /* O teu roxo de destaque */
+}
+
+/* LINHA DIVISÓRIA */
+.dropdown-flat .divider {
+  height: 1px;
+  background: #e5e5e5;
+  margin: 0.4rem 0;
+  padding: 0;
+}
+
+/* ANIMAÇÃO SUAVE DE ENTRADA DO MENU */
+@keyframes fadeInDropdown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}   

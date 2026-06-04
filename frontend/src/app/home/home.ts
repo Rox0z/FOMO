@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http'; // 🌟 Mantém apenas o HttpClient
+import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms'; 
 import { AuthService } from '../services/auth.service'; 
 import { ToastService } from '../services/toast.service';
+import { CartService } from '../services/cart.service'; 
 import { environment } from '../../environments/environment';
 
 interface EventItem {
@@ -31,46 +32,35 @@ interface EventItem {
   styleUrls: ['./home.css']
 })
 export class HomeComponent implements OnInit {
-  // --- CONFIGURAÇÃO CENTRAL DA API ---
   private readonly apiUrl = environment.apiUrl;
 
-  // --- VARIÁVEIS DE PERFIL ---
   user: any = null;
-  isMenuOpen = false;
-  
 
-  // --- VARIÁVEIS DE INTERFACE ---
-  vibes: string[] = ['All', 'House', 'Techno', 'Sunset', 'Student', 'Premium', 'Live', 'Beach', 'Rooftop'];
-  activeVibe = 'All';
+  vibes: string[] = ['Featured', 'House', 'Techno', 'Sunset', 'Student', 'Premium', 'Live', 'Beach', 'Rooftop'];
+  activeVibe = 'Featured'; 
   searchQuery = '';
-  tickerItems: string[] = ['last tickets live now', 'exclusive drops', 'faro nightlife', 'student parties'];
-
-  // ESTADO MASTER LOCAL
+  tickerItems: string[] = ['last tickets live now', 'exclusive drops', 'nightlife', 'student parties', 'beach vibes', 'rooftop events', 'house music', 'techno beats'];
+  
   events: EventItem[] = [];
-
-  // Imagem de fallback caso o evento não tenha banner cadastrado ou dê erro
   readonly fallbackBanner = 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=1000'; 
 
-  // --- VARIÁVEIS DO POP-UP DE ENCOMENDA MÁGICA ---
   isModalOpen = false;
   selectedEvent: EventItem | null = null;
   ticketQuantity = 1;
-  isSubmittingOrder = false;
 
   constructor(
     private authService: AuthService,
     private router: Router,
     private http: HttpClient,
     private cdr: ChangeDetectorRef,
-    private toast: ToastService
+    private toast: ToastService,
+    private cartService: CartService 
   ) {}
 
   ngOnInit(): void {
     this.authService.currentUser$.subscribe((userData: any) => {
       this.user = userData;
-      console.log('Utilizador na Home:', this.user);
     });
-
     this.fetchApprovedEvents();
   }
 
@@ -78,7 +68,6 @@ export class HomeComponent implements OnInit {
     this.http.get<EventItem[]>(`${this.apiUrl}/events`).subscribe({
       next: (data) => {
         this.events = data;
-        console.log('Eventos carregados com sucesso:', this.events.length);
         this.cdr.detectChanges(); 
       },
       error: (err) => {
@@ -87,16 +76,13 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  onLogout(): void {
-    this.authService.logout();
-    this.isMenuOpen = false;
-    this.user = null;
-    this.router.navigate(['/home']);
-  }
-
   onSearch(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.searchQuery = input.value.toLowerCase().trim();
+
+    if (this.searchQuery) {
+      this.activeVibe = 'Featured';
+    }
   }
 
   setVibe(vibe: string): void {
@@ -109,21 +95,36 @@ export class HomeComponent implements OnInit {
       const desc = event.description?.toLowerCase() || '';
       const loc = event.location?.toLowerCase() || '';
 
-      const matchesVibe =
-        this.activeVibe === 'All' ||
-        name.includes(this.activeVibe.toLowerCase()) ||
-        desc.includes(this.activeVibe.toLowerCase()) ||
-        loc.includes(this.activeVibe.toLowerCase());
+      if (this.activeVibe === 'Featured') {
+        const matchesPromoted = name.includes('promoted') || desc.includes('promoted') || loc.includes('promoted');
+        const matchesFeatured = name.includes('featured') || desc.includes('featured') || loc.includes('featured');
+        
+        const hasSpecificEvents = this.events.some(e => 
+          e.name?.toLowerCase().includes('promoted') || 
+          e.description?.toLowerCase().includes('promoted') ||
+          e.name?.toLowerCase().includes('featured') ||
+          e.description?.toLowerCase().includes('featured')
+        );
+
+        if (hasSpecificEvents && !matchesPromoted && !matchesFeatured) {
+          return false;
+        }
+      } else if (this.activeVibe !== 'All') {
+        const targetVibe = this.activeVibe.toLowerCase();
+        const matchesVibe = name.includes(targetVibe) || desc.includes(targetVibe) || loc.includes(targetVibe);
+        if (!matchesVibe) return false;
+      }
 
       const matchesSearch =
         !this.searchQuery ||
-        name.includes(this.searchQuery.toLowerCase()) ||
-        desc.includes(this.searchQuery.toLowerCase()) ||
-        loc.includes(this.searchQuery.toLowerCase());
+        name.includes(this.searchQuery) ||
+        desc.includes(this.searchQuery) ||
+        loc.includes(this.searchQuery);
 
-      return matchesVibe && matchesSearch;
+      return matchesSearch;
     });
-    if (this.activeVibe === 'All' && !this.searchQuery) {
+
+    if (this.activeVibe === 'Featured' && !this.searchQuery) {
       filtered.sort((a, b) => b.ticketsSold - a.ticketsSold);
     }
 
@@ -131,21 +132,17 @@ export class HomeComponent implements OnInit {
   }
 
   get featuredEvent(): EventItem | undefined {
-    return this.filteredEvents[0];
+    if (this.activeVibe === 'Featured' && !this.searchQuery) {
+      return this.filteredEvents[0];
+    }
+    return undefined;
   }
 
   get regularEvents(): EventItem[] {
-    const remaining = this.filteredEvents.filter(event => event.id !== this.featuredEvent?.id);
-
-    if (this.searchQuery) {
-      return remaining;
+    if (this.featuredEvent) {
+      return this.filteredEvents.filter(event => event.id !== this.featuredEvent?.id).slice(0, 4);
     }
-
-    if (this.activeVibe === 'All') {
-      return remaining.slice(0, 4);
-    }
-
-    return remaining.slice(0, 5);
+    return this.filteredEvents;
   }
 
   getStockLabel(event: EventItem): string {
@@ -172,19 +169,11 @@ export class HomeComponent implements OnInit {
     element.src = this.fallbackBanner;
   }
 
-  toggleMenu() {
-    this.isMenuOpen = !this.isMenuOpen;
-  }
-
-  // --- GESTÃO DO POP-UP DE ENCOMENDA MÁGICA ---
   openReservationModal(eventItem: EventItem, mouseEvent: MouseEvent): void {
-    console.log('Botão clicado! Tentando abrir modal para:', eventItem.name);
     mouseEvent.stopPropagation(); 
-
     this.selectedEvent = eventItem;
     this.ticketQuantity = 1;
     this.isModalOpen = true;
-    
     this.cdr.detectChanges(); 
   }
 
@@ -199,47 +188,40 @@ export class HomeComponent implements OnInit {
     return parseFloat(this.selectedEvent.ticketPrice) * this.ticketQuantity;
   }
 
-  confirmReservation(): void {
-    if (!this.selectedEvent || this.isSubmittingOrder) return;
+  addToCartOnly(): void {
+    if (!this.selectedEvent) return;
 
-    this.isSubmittingOrder = true;
-
-    const orderPayload = {
-      items: [
-        {
-          eventId: this.selectedEvent.id,
-          quantity: this.ticketQuantity
-        }
-      ]
-    };
-
-    console.log('A enviar pedido de checkout (via Interceptor Global) para:', orderPayload);
-
-    this.http.post(`${this.apiUrl}/orders/checkout`, orderPayload).subscribe({
-      next: (response: any) => {
-        this.toast.show('Reserva efetuada com sucesso! Os teus bilhetes já foram gerados.', 'success');
-        this.isSubmittingOrder = false;
-        
-        if (this.selectedEvent) {
-          this.selectedEvent.ticketsSold += this.ticketQuantity;
-        }
-        
-        this.closeReservationModal();
-        this.router.navigate(['/user/my-tickets']);
-      },
-      error: (err) => {
-        console.error('Erro detetado no checkout:', err);
-        
-      if (err.status === 401) {
-        this.toast.show('Sessão expirada ou inválida. Por favor, faz login novamente.', 'error');
-        this.router.navigate(['/login'], {queryParams: { mode: 'user' }});
-      }
-        else {
-          this.toast.show('Não foi possível completar a reserva.', 'error');
-        }
-        
-        this.isSubmittingOrder = false;
-      }
+    this.cartService.addToCart({
+      eventId: this.selectedEvent.id,
+      eventName: this.selectedEvent.name,
+      quantity: this.ticketQuantity,
+      unitPrice: parseFloat(this.selectedEvent.ticketPrice),
+      totalPrice: this.totalPrice
     });
+
+    this.toast.show(`${this.ticketQuantity} ticket(s) added to your cart!`, 'success');
+    this.closeReservationModal();
+  }
+
+  buyNow(): void {
+    if (!this.selectedEvent) return;
+
+    if (!this.user) {
+      this.toast.show('Login required to complete reservation. Redirecting to login page...', 'error');
+      this.closeReservationModal();
+      this.router.navigate(['/login'], { queryParams: { mode: 'user' } });
+      return;
+    }
+
+    this.cartService.addToCart({
+      eventId: this.selectedEvent.id,
+      eventName: this.selectedEvent.name,
+      quantity: this.ticketQuantity,
+      unitPrice: parseFloat(this.selectedEvent.ticketPrice),
+      totalPrice: this.totalPrice
+    });
+
+    this.closeReservationModal();
+    this.router.navigate(['/payment']);
   }
 }

@@ -43,7 +43,7 @@ export class Tickets implements OnInit {
           this.cdr.detectChanges();
         },
         error: (err) => {
-          this.toast.show('Erro ao carregar os teus bilhetes.');
+          this.toast.show('Error fetching your tickets.');
           this.isLoading = false;
           this.cdr.detectChanges();
         }

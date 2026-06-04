@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { CartService } from '../services/cart.service';
 
 @Component({
   selector: 'app-payment',
@@ -14,14 +15,8 @@ import { environment } from '../../environments/environment';
 })
 export class PaymentComponent implements OnInit {
   private readonly apiUrl = environment.apiUrl;
+  protected cartService = inject(CartService);
 
-  // Dados vindos da página de evento via router state
-  eventId: number = 0;
-  eventName: string = '';
-  quantity: number = 1;
-  totalPrice: number = 0;
-
-  // Campos do formulário de cartão falso
   cardNumber = '';
   cardName = '';
   cardExpiry = '';
@@ -33,30 +28,32 @@ export class PaymentComponent implements OnInit {
   constructor(private router: Router, private http: HttpClient) {}
 
   ngOnInit(): void {
-    // Ler os dados passados pelo event-details via router state
-    const state = history.state;
+    if (this.cartService.cartItems().length === 0) {
+      this.router.navigate(['/home']);
+    }
+  }
 
-    if (!state || !state.eventId) {
-      this.errorMsg = 'Nenhuma sessão de checkout ativa. A redirecionar para a página principal...';
-      setTimeout(() => {
-        this.router.navigate(['/home']);
-      }, 2000); // Dá 2 segundos para o utilizador conseguir ler o aviso
-      return;
+  goBack(): void {
+    this.router.navigate(['/cart']);
+  }
+
+  formatCardNumber(event: any): void {
+    let input = event.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    let matches = input.match(/\d{4,16}/g);
+    let match = (matches && matches[0]) || '';
+    let parts = [];
+
+    for (let i = 0, len = match.length; i < len; i += 4) {
+      parts.push(match.substring(i, i + 4));
     }
 
-    this.eventId = state.eventId;
-    this.eventName = state.eventName;
-    this.quantity = state.quantity;
-    this.totalPrice = state.totalPrice;
+    if (parts.length > 0) {
+      this.cardNumber = parts.join(' ');
+    } else {
+      this.cardNumber = input;
+    }
   }
 
-  // Formatar número de cartão com espaços a cada 4 dígitos
-  formatCardNumber(event: any): void {
-    let value = event.target.value.replace(/\D/g, '').substring(0, 16);
-    this.cardNumber = value.replace(/(.{4})/g, '$1 ').trim();
-  }
-
-  // Formatar validade MM/AA
   formatExpiry(event: any): void {
     let value = event.target.value.replace(/\D/g, '').substring(0, 4);
     if (value.length >= 2) {
@@ -80,28 +77,36 @@ export class PaymentComponent implements OnInit {
     this.isPaying = true;
     this.errorMsg = '';
 
+    const cartItems = this.cartService.cartItems();
+    if (cartItems.length === 0) {
+      this.errorMsg = 'Your cart is empty.';
+      this.isPaying = false;
+      return;
+    }
+
+    const itemsPayload = cartItems.map(item => ({ 
+      eventId: item.eventId, 
+      quantity: item.quantity 
+    }));
+
     const orderPayload = {
-      items: [
-        {
-          eventId: this.eventId,
-          quantity: this.quantity,
-        }
-      ]
+      items: itemsPayload
     };
 
     this.http.post(`${this.apiUrl}/orders/checkout`, orderPayload).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.isPaying = false;
+        this.cartService.clearCart();
         this.router.navigate(['/user/my-tickets']);
       },
       error: (err) => {
         this.isPaying = false;
-        this.errorMsg = err.error?.message || 'Erro ao processar pagamento. Tenta novamente.';
-      },
+        if (err.error && err.error.message) {
+          this.errorMsg = err.error.message;
+        } else {
+          this.errorMsg = 'An error occurred during checkout. Please try again.';
+        }
+      }
     });
-  }
-
-  goBack(): void {
-    history.back();
   }
 }

@@ -11,7 +11,6 @@ export class TicketsService {
   constructor(@Inject('DRIZZLE') private db: DrizzleDB) {}
 
   async findMyTickets(userId: number) {
-    // Fazemos um JOIN com os Eventos para ter o Nome, Data e Local no Angular!
     const myTickets = await this.db
       .select({
         id: tickets.id,

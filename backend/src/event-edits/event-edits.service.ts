@@ -19,7 +19,7 @@ export class EventEditsService {
   ) {}
 
   // ---------------------------------------------------------
-  // 1. USADO PELO VENDOR: Criar o Pedido de Edição
+  // (VENDOR) Criar o Edit Request
   // ---------------------------------------------------------
   async createEditRequest(eventId: number, dto: any, userId: number, file?: Express.Multer.File) {
     const vendorProfile = await this.db.query.vendorProfiles.findFirst({
@@ -60,7 +60,7 @@ export class EventEditsService {
 
     return {
       success: true,
-      message: 'Pedido de alteração submetido com sucesso e aguarda homologação do Administrador.',
+      message: 'Alteration request submitted successfully and awaits administrator approval.',
       data: newRequest,
     };
   }
@@ -81,12 +81,10 @@ export class EventEditsService {
       throw new BadRequestException('This request for modification has already been evaluated.');
     }
 
-    // Buscar o evento original antes do update para sabermos quem é o Vendor dono dele
     const originalEvent = await this.db.query.events.findFirst({
       where: eq(events.id, editRequest.eventId),
     });
 
-    // Transferir os dados estruturais homologados para a tabela principal de eventos
     await this.db
       .update(events)
       .set({
@@ -113,7 +111,6 @@ export class EventEditsService {
       `Approved structural updates for Event ID: ${editRequest.eventId} (\"${editRequest.name}\")`, adminIdentifier
     );
 
-    // 🌟 ENVIAR EMAIL EM BACKGROUND AO VENDOR (Aprovado) através da ponte pelo originalEvent
     if (originalEvent) {
       const vendor = await this.db.query.vendorProfiles.findFirst({ 
         where: eq(vendorProfiles.id, originalEvent.vendorId) 
@@ -137,7 +134,7 @@ export class EventEditsService {
   }
 
   // ---------------------------------------------------------
-  // 3. USADO PELO ADMIN: Rejeitar o Pedido
+  // (ADMIN) Rejeitar o Pedido
   // ---------------------------------------------------------
   async rejectEditRequest(editId: number, admin: any) {
     const editRequest = await this.db.query.eventEdits.findFirst({
@@ -152,7 +149,6 @@ export class EventEditsService {
       throw new BadRequestException('This request for modification has already been evaluated.');
     }
 
-    // Buscar o evento original antes do update para sabermos quem é o Vendor dono dele
     const originalEvent = await this.db.query.events.findFirst({
       where: eq(events.id, editRequest.eventId),
     });
@@ -168,7 +164,6 @@ export class EventEditsService {
       `Rejected structural updates for Event ID: ${editRequest.eventId}`, adminIdentifier
     );
 
-    // 🌟 ENVIAR EMAIL EM BACKGROUND AO VENDOR (Rejeitado) através da ponte pelo originalEvent
     if (originalEvent) {
       const vendor = await this.db.query.vendorProfiles.findFirst({ 
         where: eq(vendorProfiles.id, originalEvent.vendorId) 

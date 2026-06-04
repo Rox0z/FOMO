@@ -1,53 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
 
-/* Navbar mantida */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 18px 40px;
-  background: white;
-  border-bottom: 1px solid #e5e5e5;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  height: 72px;
-}
-
-.brand-logo {
-  height: 32px;
-  width: auto;
-  display: block;
-  object-fit: contain;
-}
-
-.nav-right {
-  display: flex;
-  gap: 24px;
-  align-items: center;
-}
-
-.nav-link-back {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
-  color: #666666;
-  font-size: 14px;
-  font-weight: 600;
-  transition: color 0.2s ease;
-}
-
-.nav-link-back:hover {
-  color: #000000;
-}
-
 .profile-page-wrapper {
   background: radial-gradient(circle at 20% 10%, #1a0b2e 0%, #050510 100%) !important;
   font-family: 'Inter', sans-serif !important;
   -webkit-font-smoothing: antialiased;
-  /* Reduzido de 4rem para 2.5rem para diminuir a distância do topo */
-  padding-top: 2.5rem; 
+  padding-top: 30px; 
   padding-bottom: 4rem;
 }
 
@@ -70,7 +27,7 @@
 }
 
 .main-white-card {
-  /* Arredondamento ligeiramente maior para a nova escala */
+  margin-top: 0px;
   border-radius: 48px !important; 
   box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.4);
 }

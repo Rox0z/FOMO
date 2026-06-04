@@ -101,15 +101,12 @@ export class EventsController {
   @Put(':id/request-edit')
   @UseGuards(JwtGuard, RolesGuard, EventOwnerGuard, VendorApprovedGuard)
   @RolesDecorator(Roles.VENDOR)
-  @UseInterceptors(FileInterceptor('banner')) // Intercepta a chave 'banner' que vem do Angular
+  @UseInterceptors(FileInterceptor('banner'))
   async requestEdit(
     @Param('id') id: string,
     @Body() dto: UpdateEventDto,
     @CurrentUser() user: any,
-    @UploadedFile() file?: Express.Multer.File, // Captura o ficheiro físico opcional
-  ) {
-    // 🌟 CORREÇÃO: Passamos diretamente o ficheiro 'file' para o serviço.
-    // O EventEditsService é quem agora vai chamar o ImagesService se o ficheiro existir!
+    @UploadedFile() file?: Express.Multer.File,) {
     return this.eventEditsService.createEditRequest(+id, dto, user.id, file);
   }
 
@@ -117,13 +114,12 @@ export class EventsController {
   // ADMIN - UPDATE EVENT DIRECTLY
   // -------------------------
   @Patch(':id')
-  @UseGuards(JwtGuard, RolesGuard, EventOwnerGuard)
+  @UseGuards(JwtGuard, RolesGuard)
   @RolesDecorator(Roles.ADMIN)
   update(
     @Param('id') id: string,
     @Body() dto: UpdateEventDto,
-    @CurrentUser() user: any,
-  ) {
+    @CurrentUser() user: any) {
     return this.eventsService.update(+id, dto, user);
   }
 
@@ -131,7 +127,7 @@ export class EventsController {
   // DELETE (ADMIN ONLY)
   // -------------------------
   @Delete(':id')
-  @UseGuards(JwtGuard, RolesGuard, EventOwnerGuard) 
+  @UseGuards(JwtGuard, RolesGuard) 
   @RolesDecorator(Roles.ADMIN)
   remove(@Param('id') id: string, @CurrentUser() user: any) {
     return this.eventsService.remove(+id, user);

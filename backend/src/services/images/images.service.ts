@@ -13,24 +13,21 @@ export class ImagesService {
 
   async uploadImage(file: Express.Multer.File): Promise<string> {
     if (!file || !file.buffer) {
-      throw new BadRequestException('Ficheiro inválido.');
+      throw new BadRequestException('Invalid file upload');
     }
 
     if (!file.mimetype.startsWith('image/')) {
-      throw new BadRequestException('Só são permitidas imagens.');
+      throw new BadRequestException('Only image files are allowed.');
     }
 
     try {
-      // 1. COMPRESSÃO / OTIMIZAÇÃO
       const optimizedImage = await sharp(file.buffer)
-        .resize({ width: 1200 }) // reduz tamanho máximo
-        .jpeg({ quality: 80 })   // compressão leve (boa qualidade + performance)
+        .resize({ width: 1200 })
+        .jpeg({ quality: 80 })  
         .toBuffer();
 
-      // 2. Converter para base64
       const base64Image = optimizedImage.toString('base64').replace(/\s/g, '');
 
-      // 3. Preparar request para ImgBB
       const formData = new FormData();
       formData.append('image', base64Image);
 
@@ -45,14 +42,13 @@ export class ImagesService {
         ),
       );
 
-      // 5. Retornar URL final da imagem
       return response.data.data.url;
 
     } catch (error) {
       console.error('ImgBB upload error:', error?.response?.data || error.message);
 
       throw new BadRequestException(
-        error?.response?.data?.error?.message || 'Falha no upload da imagem',
+        error?.response?.data?.error?.message || 'Failed to upload image cloud',
       );
     }
   }

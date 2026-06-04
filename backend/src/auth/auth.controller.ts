@@ -29,6 +29,15 @@ export class AuthController {
     if (!result) {
       throw new UnauthorizedException('Invalid email or password');
     }
+    if ('error' in result) {
+      if (result.error === 'account_blocked') {
+        throw new UnauthorizedException('account_blocked');
+      }
+      if (result.error === 'vendor_not_approved') {
+        throw new UnauthorizedException('vendor_not_approved');
+      }
+      throw new UnauthorizedException('Invalid email or password');
+    }
     return result;
   }
 
