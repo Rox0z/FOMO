@@ -14,7 +14,6 @@ export class ToastService {
     toast.innerText = message;
     container.appendChild(toast);
     
-    // Remove o toast após 3 segundos
     setTimeout(() => toast.remove(), 3000);
   }
 }

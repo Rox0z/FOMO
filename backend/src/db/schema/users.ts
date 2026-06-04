@@ -1,5 +1,7 @@
-import { pgTable, serial, text, varchar, boolean, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, varchar, boolean, timestamp, pgEnum } from 'drizzle-orm/pg-core';
+import { Roles } from '../../common/enums/roles.enum';
 
+export const roleEnum = pgEnum('user_role', [Roles.USER, Roles.VENDOR, Roles.ADMIN]);
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -11,7 +13,7 @@ export const users = pgTable('users', {
   phone: varchar('phone', { length: 20 }),
   countryCode: varchar('country_code', { length: 5 }),
 
-  role: text('role').notNull().default('user'),
+  role: roleEnum('role').notNull().default(Roles.USER),
 
   active: boolean('active').notNull().default(true),
 

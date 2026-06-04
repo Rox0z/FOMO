@@ -13,7 +13,6 @@ export class NotificationService {
 
   show(message: string, type: 'success' | 'error' = 'success') {
     this.notificationSubject.next({ message, type });
-    // Limpa a notificação automaticamente após 3 segundos
     setTimeout(() => this.notificationSubject.next(null), 3000);
   }
 }

@@ -8,13 +8,13 @@ import { environment } from '../../environments/environment';
 import { AuthService } from '../services/auth.service';
 
 @Component({
-  selector: 'app-admin-pannel',
+  selector: 'app-admin-dashboard',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './admin-pannel.html',
-  styleUrls: ['./admin-pannel.css']
+  templateUrl: './admin-dashboard.html',
+  styleUrls: ['./admin-dashboard.css']
 })
-export class AdminPannel implements OnInit {
+export class AdminDashboard implements OnInit {
 
   private readonly apiUrl = `${environment.apiUrl}/admin`;
 
@@ -112,7 +112,6 @@ export class AdminPannel implements OnInit {
       this.loading = true;
       this.error = '';
 
-      // 1. Executa primeiro o overview estrutural para montar as listas e tabelas locais
       this.http.get<any>(`${this.apiUrl}/overview`).subscribe({
         next: (res: any) => {
           this.users = res.users || [];
@@ -152,10 +151,8 @@ export class AdminPannel implements OnInit {
           this.eventFilter = 'all';
           this.requestFilter = 'all';
 
-          // 2. Executa os calculos locais dos outros cards (Clientes, Vendors, Eventos)
           this.recalculateAllLocalStats();
 
-          // 3. EXECUTADO POR FIM: Faz a chamada dedicada ao requests e aplica os dados reais sem sofrer resets
           this.http.get<any>(`${this.apiUrl}/requests`).subscribe({
             next: (statsData: any) => {
               if (statsData && statsData.breakdown) {
@@ -168,7 +165,7 @@ export class AdminPannel implements OnInit {
               this.cdRef.detectChanges();
             },
             error: (err) => {
-              console.error('Erro ao carregar o breakdown de pedidos:', err);
+              console.error('Error loading request breakdown:', err);
               this.loading = false;
               this.cdRef.detectChanges();
             }
@@ -178,7 +175,7 @@ export class AdminPannel implements OnInit {
         error: () => {
           this.error = 'Error loading system overview data.';
           this.loading = false;
-          this.notify('Erro ao carregar overview.', 'error');
+          this.notify('Error loading overview.', 'error');
           this.cdRef.detectChanges();
         }
       });
@@ -193,7 +190,7 @@ export class AdminPannel implements OnInit {
 
       error: () => {
         console.error('Failed to load audit logs.');
-        this.notify('Erro ao carregar audit logs.', 'error');
+        this.notify('Error loading audit logs.', 'error');
       }
     });
   }
@@ -337,11 +334,11 @@ export class AdminPannel implements OnInit {
         this.recalculateAllLocalStats();
         this.filterUsers();
         this.loadAuditLogs();
-        this.notify('Utilizador bloqueado.');
+        this.notify('User blocked.');
       },
 
       error: () => {
-        this.notify('Erro ao bloquear utilizador.', 'error');
+        this.notify('Error blocking user.', 'error');
       }
     });
   }
@@ -353,11 +350,11 @@ export class AdminPannel implements OnInit {
         this.recalculateAllLocalStats();
         this.filterUsers();
         this.loadAuditLogs();
-        this.notify('Utilizador desbloqueado.');
+        this.notify('User unblocked.');
       },
 
       error: () => {
-        this.notify('Erro ao desbloquear utilizador.', 'error');
+        this.notify('Error unblocking user.', 'error');
       }
     });
   }
@@ -366,13 +363,13 @@ export class AdminPannel implements OnInit {
     this.http.patch(`${this.apiUrl}/vendors/${vendor.id}/approve`, {}).subscribe({
       next: () => {
         vendor.status = 'approved';
-        this.notify('Vendor aprovado com sucesso.');
+        this.notify('Vendor approved successfully.');
         this.loadOverview();
         this.loadAuditLogs();
       },
 
       error: () => {
-        this.notify('Erro ao aprovar vendor.', 'error');
+        this.notify('Error approving vendor.', 'error');
       }
     });
   }
@@ -381,13 +378,13 @@ export class AdminPannel implements OnInit {
     this.http.patch(`${this.apiUrl}/vendors/${vendor.id}/reject`, {}).subscribe({
       next: () => {
         vendor.status = 'rejected';
-        this.notify('Vendor rejeitado.');
+        this.notify('Vendor rejected.');
         this.loadOverview();
         this.loadAuditLogs();
       },
 
       error: () => {
-        this.notify('Erro ao rejeitar vendor.', 'error');
+        this.notify('Error rejecting vendor.', 'error');
       }
     });
   }
@@ -396,14 +393,14 @@ export class AdminPannel implements OnInit {
     this.http.patch(`${this.apiUrl}/events/${event.id}/approve`, {}).subscribe({
       next: () => {
         event.status = 'approved';
-        this.notify('Evento aprovado.');
+        this.notify('Event approved.');
         this.loadOverview();
         this.closeEventModal();
         this.loadAuditLogs();
       },
 
       error: () => {
-        this.notify('Erro ao aprovar evento.', 'error');
+        this.notify('Error approving event.', 'error');
       }
     });
   }
@@ -412,52 +409,52 @@ export class AdminPannel implements OnInit {
     this.http.patch(`${this.apiUrl}/events/${event.id}/reject`, {}).subscribe({
       next: () => {
         event.status = 'rejected';
-        this.notify('Evento rejeitado.');
+        this.notify('Event rejected.');
         this.loadOverview();
         this.closeEventModal();
         this.loadAuditLogs();
       },
 
       error: () => {
-        this.notify('Erro ao rejeitar evento.', 'error');
+        this.notify('Error rejecting event.', 'error');
       }
     });
   }
 
   approveEditRequest(edit: any) {
-    if (!confirm('Aprovar e publicar estas alterações em produção?')) {
+    if (!confirm('Are you sure you want to approve and publish these changes in production?')) {
       return;
     }
 
     this.http.patch(`${this.apiUrl}/events/edits/${edit.id}/approve`, {}).subscribe({
       next: () => {
-        this.notify('As alterações foram publicadas com sucesso!');
+        this.notify('The changes have been approved and published successfully!');
         this.loadOverview();
         this.loadAuditLogs();
       },
 
       error: (err) => {
-        console.error('Erro ao aprovar a edição:', err);
-        this.notify('Erro ao aprovar a alteração.', 'error');
+        console.error('Error approving the edit:', err);
+        this.notify('Error approving the change.', 'error');
       }
     });
   }
 
   rejectEditRequest(edit: any) {
-    if (!confirm('Tens a certeza que desejas rejeitar esta proposta de alteração?')) {
+    if (!confirm('Are you sure you want to reject this edit request?')) {
       return;
     }
 
     this.http.patch(`${this.apiUrl}/events/edits/${edit.id}/reject`, {}).subscribe({
       next: () => {
-        this.notify('Proposta de alteração rejeitada.');
+        this.notify('Edit request rejected.');
         this.loadOverview();
         this.loadAuditLogs();
       },
 
       error: (err) => {
-        console.error('Erro ao rejeitar a edição:', err);
-        this.notify('Erro ao rejeitar alteração.', 'error');
+        console.error('Error rejecting the edit:', err);
+        this.notify('Error rejecting the change.', 'error');
       }
     });
   }

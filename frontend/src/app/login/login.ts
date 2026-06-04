@@ -19,7 +19,7 @@ export class Login implements OnInit {
   isLoading: boolean = false;
   showPassword: boolean = false;
 
-  mode: string = 'user'; // user | admin | vendor
+  mode: string = 'user';
 
   constructor(
     private router: Router,
@@ -37,7 +37,7 @@ export class Login implements OnInit {
 
   onLogin() {
     if (!this.email || !this.password) {
-      this.toast.show('Preencha todos os campos!', 'error');
+      this.toast.show('Fill all fields!', 'error');
       return;
     }
 
@@ -48,36 +48,32 @@ export class Login implements OnInit {
       next: (res: any) => {
         const user = res.user;
 
-        // conta bloqueada
         if (!user.active) {
           this.isLoading = false;
           this.password = '';
 
           this.authService.logout();
-          this.toast.show('Conta bloqueada.', 'error');
+          this.toast.show('Account blocked.', 'error');
 
           return;
         }
 
-        // ADMIN PAGE
         if (this.mode === 'admin' && user.role !== 'admin') {
           this.isLoading = false;
           this.password = '';
-
           this.authService.logout();
-          this.toast.show('Acesso negado (admin only)', 'error');
+          this.toast.show('Access denied (admin only)', 'error');
 
           return;
         }
 
-        // VENDOR PAGE
         if (this.mode === 'vendor'){
           if(user.role !== 'vendor') {
             this.isLoading = false;
             this.password = '';
             
             this.authService.logout();
-            this.toast.show('Acesso negado (vendor only)', 'error');
+            this.toast.show('Access denied (vendor only)', 'error');
             return;
           }
 
@@ -86,39 +82,40 @@ export class Login implements OnInit {
             this.password = '';
 
             this.authService.logout();
-            this.toast.show('Conta pendente de aprovação.', 'error');
+            this.toast.show('Account pending approval.', 'error');
             return;
           }
         }
 
-
-
-        // USER PAGE
         if (this.mode === 'user' && user.role !== 'user') {
           this.isLoading = false;
           this.password = '';
 
           this.authService.logout();
-          this.toast.show('Acesso negado (user only)', 'error');
+          this.toast.show('Access denied (user only)', 'error');
 
           return;
         }
 
-        // LOGIN REAL SÓ AQUI
         this.authService.finalizeLogin(user, res.token);
-
         this.isLoading = false;
-
         this.redirectByRole(user);
       },
 
       error: (err) => {
         this.isLoading = false;
 
+        const msg = err.error?.message || '';
         if (err.status === 401) {
-          this.toast.show('Credenciais inválidas.', 'error');
+          if (msg === 'account_blocked') {
+            this.toast.show('Conta bloqueada. Contacta o suporte.', 'error');
+          } else if (msg === 'vendor_not_approved') {
+            this.toast.show('Conta de vendor ainda não aprovada pelo administrador.', 'error');
+          } else {
+            this.toast.show('Credenciais inválidas.', 'error');
+          }
         } else {
-          this.toast.show('Erro no login.', 'error');
+          this.toast.show('Erro ao iniciar sessão.', 'error');
         }
       }
 

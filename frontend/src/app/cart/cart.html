@@ -1,48 +1,44 @@
-<div class="page-shell">
-  <main class="cart-container" style="max-width: 800px; margin: 40px auto; padding: 20px; min-height: 70vh;">
-    
-    <header class="cart-header" style="margin-bottom: 30px;">
-      <a routerLink="/home" style="text-decoration: none; color: var(--text-secondary); font-weight: 500;">&larr; Voltar aos eventos</a>
-      <h1 style="margin-top: 20px; font-size: 2.2rem; font-weight: 700; color: var(--text-primary);">O Teu Carrinho</h1>
-    </header>
+<div class="cart-container">
+  
+  <header class="cart-header">
+    <a routerLink="/home">&larr; Back to Events</a>
+    <h1>Your Cart</h1>
+  </header>
 
-    <div *ngIf="cartService.cartItems().length === 0" style="text-align: center; padding: 60px 20px; background: var(--bg-light); border-radius: 12px; border: 1px dashed var(--border-color);">
-      <h2 style="font-size: 1.5rem; margin-bottom: 10px;">O teu carrinho está vazio.</h2>
-      <p style="color: var(--text-secondary); margin-bottom: 25px;">Navega pelos eventos disponíveis e adiciona os teus bilhetes!</p>
-      <a routerLink="/home" class="btn-primary-home-match" style="text-decoration: none; display: inline-block; padding: 12px 24px;">Explorar Eventos</a>
-    </div>
+  <div class="cart-empty-state" *ngIf="cartService.cartItems().length === 0">
+    <h2>Your cart is empty.</h2>
+    <p>Browse available events and add your tickets!</p>
+    <a routerLink="/home" class="btn-explore">Explore Events</a>
+  </div>
 
-    <div *ngIf="cartService.cartItems().length > 0">
-      <div style="background: white; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
-        
-        <div *ngFor="let item of cartService.cartItems()" style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--border-color);">
-          <div>
-            <h3 style="font-size: 1.15rem; font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">{{ item.eventName }}</h3>
-            <p style="color: var(--text-secondary); font-size: 0.9rem;">
-              {{ item.quantity }}x Bilhete{{ item.quantity > 1 ? 's' : '' }} &middot; {{ item.unitPrice.toFixed(2) }}€ cada
-            </p>
-          </div>
-          <div style="display: flex; align-items: center; gap: 24px;">
-            <span style="font-weight: 700; font-size: 1.2rem; color: var(--text-primary);">{{ item.totalPrice.toFixed(2) }}€</span>
-            <button (click)="removeItem(item.eventId)" style="background: none; border: none; color: var(--danger-color); cursor: pointer; font-size: 1.5rem; line-height: 1;">&times;</button>
-          </div>
+  <div *ngIf="cartService.cartItems().length > 0">
+    <div class="cart-items-list">
+      
+      <div class="cart-item-card" *ngFor="let item of cartService.cartItems()">
+        <div class="cart-item-info">
+          <h3>{{ item.eventName }}</h3>
+          <p>{{ item.quantity }}x Ticket{{ item.quantity > 1 ? 's' : '' }} &middot; {{ item.unitPrice.toFixed(2) }}€ each</p>
         </div>
-
+        <div class="cart-item-actions">
+          <span class="cart-item-price">{{ item.totalPrice.toFixed(2) }}€</span>
+          <button class="btn-remove-item" (click)="removeItem(item.eventId)">&times;</button>
+        </div>
       </div>
 
-      <div style="margin-top: 30px; background: var(--bg-light); padding: 24px; border-radius: 12px; display: flex; flex-direction: column; align-items: flex-end; gap: 16px; border: 1px solid var(--border-color);">
-        <div style="font-size: 1.2rem; font-weight: 500; color: var(--text-secondary);">
-          Total do Carrinho: <span style="color: var(--accent-color); font-size: 1.7rem; font-weight: 700; margin-left: 8px;">{{ cartService.cartTotal().toFixed(2) }}€</span>
-        </div>
-        
-        <button 
-          (click)="checkout()" 
-          [disabled]="isProcessing" 
-          class="btn-primary-home-match" 
-          style="width: 100%; max-width: 320px; padding: 14px; font-size: 1.1rem; text-align: center;">
-          {{ isProcessing ? 'A processar pagamento seguro...' : 'Finalizar e Pagar ⚡' }}
-        </button>
-      </div>
     </div>
-  </main>
+
+    <div class="cart-summary-card">
+      <div class="cart-total-label">
+        Cart Total: <span class="cart-total-amount">{{ cartService.cartTotal().toFixed(2) }}€</span>
+      </div>
+      
+      <button 
+        class="btn-checkout"
+        (click)="checkout()" 
+        [disabled]="isProcessing">
+        {{ isProcessing ? 'Processing...' : 'Checkout' }}
+      </button>
+    </div>
+  </div>
+
 </div>

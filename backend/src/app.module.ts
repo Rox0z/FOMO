@@ -1,6 +1,5 @@
 import { Global, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
 
 import { db } from './drizzle';
 import { UsersModule } from './users/users.module';
@@ -24,7 +23,7 @@ const drizzleProvider = {
   imports: [UsersModule, AuthModule, VendorsModule, EventsModule, AdminModule, 
             TicketsModule, OrdersModule, EventEditsModule, EmailsModule, ImagesModule],
   controllers: [AppController],
-  providers: [AppService, drizzleProvider],
+  providers: [drizzleProvider],
   exports: [drizzleProvider],
 })
   export class AppModule {}

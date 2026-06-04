@@ -9,7 +9,6 @@ export class LogsService {
     @Inject('DRIZZLE') private db: DrizzleDB,
   ) {}
 
-  // Procura todos os logs registados na base de dados
   async findAll() {
     return this.db
       .select()
@@ -17,7 +16,6 @@ export class LogsService {
       .orderBy(desc(auditLogs.createdAt));
   }
 
-  // Método utilitário para ser chamado quando quiseres guardar um log novo
   async createLog(action: string, adminName: string = 'Admin Principal') {
     return this.db
       .insert(auditLogs)

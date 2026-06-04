@@ -588,8 +588,8 @@
 }
 
 .stock-sold {
-  background: rgba(0, 0, 0, 0.76);
-  color: white;
+  background: rgba(255, 255, 255, 0.95);
+  color: #111827;
 }
 
 .card-content {
@@ -1308,4 +1308,27 @@ a:focus {
 @keyframes slideUp {
   from { transform: translateY(24px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
+}
+
+/* ==========================================
+   GRELHA DINÂMICA DE 3 COLUNAS (PESQUISA/OUTRAS ABAS)
+   ========================================== */
+.events-grid.grid-equal-3 {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 24px !important;
+}
+
+/* Garante o comportamento correto e responsivo em ecrãs de Tablets */
+@media (max-width: 992px) {
+  .events-grid.grid-equal-3 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Garante o comportamento correto e responsivo em ecrãs de Telemóvel */
+@media (max-width: 600px) {
+  .events-grid.grid-equal-3 {
+    grid-template-columns: 1fr !important;
+  }
 }

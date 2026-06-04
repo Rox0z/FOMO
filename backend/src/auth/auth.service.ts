@@ -15,11 +15,11 @@ export class AuthService {
 
   async register(dto: CreateUserDto) {
     if ((dto.userType as string) === 'admin') {
-      throw new ForbiddenException('Não é permitido registar como admin.');
+      throw new ForbiddenException('Admin registration is not allowed through this endpoint.');
     }
 
     if (dto.userType === 'vendor') {
-      const user = await this.usersService.create(dto, { role: 'vendor', active: false }); // 👈 só aqui
+      const user = await this.usersService.create(dto, { role: 'vendor', active: false }); 
 
       const vendorProfile = await this.vendorsService.createProfile({
         userId: user.id,
@@ -35,27 +35,36 @@ export class AuthService {
       };
     }
 
-    // Utilizador normal
-    const user = await this.usersService.create(dto); // 👈 só aqui
+    const user = await this.usersService.create(dto);
     const token = this.generateToken(user);
     return { user, token };
   }
 
   async login(loginDto: LoginDto) {
-    const user = await this.usersService.validateCredentials(
-      loginDto.email,
-      loginDto.password,
-    );
+    const user = await this.usersService.findByEmail(loginDto.email);
 
-    if (!user) return null;
+    if (!user || !user.password) {
+      return { error: 'invalid_credentials' };
+    }
 
-  
+    const validPassword = await this.usersService.checkPassword(loginDto.email, loginDto.password);
+    if (!validPassword) {
+      return { error: 'invalid_credentials' };
+    }
+
+    if (!user.active) {
+      return { error: 'account_blocked' };
+    }
+
     const { password, ...userWithoutPassword } = user;
 
     let isApproved = true;
     if (user.role === 'vendor') {
       const profile = await this.vendorsService.findByUserId(user.id);
-      isApproved = profile.status === 'approved';
+      isApproved = profile?.status === 'approved';
+      if (!isApproved) {
+        return { error: 'vendor_not_approved' };
+      }
     }
 
     const finalizedUser = { ...userWithoutPassword, approved: isApproved };

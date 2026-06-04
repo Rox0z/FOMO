@@ -1,5 +1,7 @@
-import { pgTable, serial, integer, varchar, text, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, serial, integer, varchar, text, timestamp, pgEnum } from 'drizzle-orm/pg-core';
 import { users } from './users';
+
+export const vendorStatusEnum = pgEnum('vendor_status', ['pending', 'approved', 'rejected']);
 
 export const vendorProfiles = pgTable('vendor_profiles', {
   id: serial('id').primaryKey(),
@@ -12,8 +14,7 @@ export const vendorProfiles = pgTable('vendor_profiles', {
   businessName: varchar('business_name', { length: 255 }).notNull(),
   businessDescription: text('business_description'),
 
-  status: varchar('status', { length: 20 }).notNull().default('pending'),
-  // pending | approved | rejected
+  status: vendorStatusEnum('status').notNull().default('pending'),
 
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),

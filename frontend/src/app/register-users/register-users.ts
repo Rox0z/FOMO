@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
-import { AuthService } from '../services/auth.service'; // Caminho correto para a pasta services
-import {ToastService} from '../services/toast.service'; // Importação do ToastService para notificações
+import { AuthService } from '../services/auth.service';
+import {ToastService} from '../services/toast.service'; 
 
 @Component({
   selector: 'app-register',
@@ -36,19 +36,18 @@ export class RegisterUsers {
   onSubmit() {
     this.errorMessage = '';
 
-    // Validação de campos vazios
     if (!this.name || !this.email || !this.phone || !this.password || !this.confirmPassword) {
-      this.toast.show('Preencha todos os campos!');
+      this.toast.show('Fill all fields!');
       return;
     }
 
     if (this.password !== this.confirmPassword) {
-      this.toast.show('As passwords não coincidem.');
+      this.toast.show('Passwords do not match.');
       return;
     }
 
     if (this.password.length < 8) {
-      this.toast.show('A password deve ter no mínimo 8 caracteres.');
+      this.toast.show('Password must have at least 8 characters.');
       return;
     }
 
@@ -63,13 +62,11 @@ export class RegisterUsers {
       userType: 'user',
     };
 
-    // Chamada ao serviço com correção dos tipos (: any)
     this.authService.register(registrationData).subscribe({
       next: (response: any) => {
         console.log('Registration successful:', response);
         this.isLoading = false;
         
-        // REDIRECIONAMENTO: Agora mandamos para a Home para ver o perfil logado
         this.router.navigate(['/home']);
       },
       error: (error: any) => {
@@ -77,11 +74,11 @@ export class RegisterUsers {
         console.error('Registration error:', error);
         
         if (error.status === 409) {
-          this.toast.show('Email já registado.');
+          this.toast.show('Email already registered.');
         } else if (error.error?.message) {
           this.toast.show(error.error.message);
         } else {
-          this.toast.show('Erro ao criar conta. Tenta novamente.');
+          this.toast.show('Error creating account. Please try again.');
         }
       }
     });

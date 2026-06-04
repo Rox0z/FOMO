@@ -1,6 +1,7 @@
 .tickets-page-wrapper {
   background: radial-gradient(circle at top left, #1a0b2e 0%, #050510 100%);
   font-family: 'Inter', sans-serif;
+  padding-top: 90px;
 }
 
 .ticket-card {
@@ -87,37 +88,4 @@
 
   .ticket-card::before { top: -12px; }
   .ticket-card::after { bottom: -12px; }
-}
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 5%;
-  background: white; /* A barra branca que querias */
-  border-bottom: 1px solid #e5e5e5;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  height: 64px;
-}
-
-.brand-logo {
-  height: 28px;
-  width: auto;
-  display: block;
-}
-
-.nav-back-link {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
-  color: #666666;
-  font-size: 14px;
-  font-weight: 600;
-  transition: color 0.2s ease;
-}
-
-.nav-back-link:hover {
-  color: #000000;
 }

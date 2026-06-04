@@ -83,10 +83,10 @@ export class VendorsService {
       .where(eq(vendorProfiles.userId, userId));
 
     if (!result || result.length === 0) {
-      throw new NotFoundException('Perfil de Vendor não encontrado.');
+      throw new NotFoundException('Vendor profile not found.');
     }
 
-    return result[0]; // Retorna o objeto completo com os dados combinados
+    return result[0];
   }
 
   async findOneProfile(profileId: number) {
@@ -104,10 +104,10 @@ export class VendorsService {
       })
       .from(vendorProfiles)
       .innerJoin(users, eq(vendorProfiles.userId, users.id))
-      .where(eq(vendorProfiles.id, profileId)); // 🎯 Filtra estritamente pelo ID do Perfil!
+      .where(eq(vendorProfiles.id, profileId));
 
     if (!result || result.length === 0) {
-      throw new NotFoundException(`Perfil de Vendor com o ID #${profileId} não foi encontrado.`);
+      throw new NotFoundException(`Profile not found.`);
     }
 
     return result[0];
@@ -120,15 +120,15 @@ export class VendorsService {
   const updated = await this.db
     .update(vendorProfiles)
     .set({
-      businessName: dto.businessName, // 🔒 Forçamos apenas os campos seguros
+      businessName: dto.businessName,
       businessDescription: dto.businessDescription,
-      updatedAt: new Date(), // Atualizamos a data de modificação
+      updatedAt: new Date(),
     })
-    .where(eq(vendorProfiles.userId, userId)) // 🎯 Sintaxe correta para update
+    .where(eq(vendorProfiles.userId, userId))
     .returning();
 
   if (updated.length === 0) {
-    throw new NotFoundException('Perfil de vendor não encontrado.');
+    throw new NotFoundException('Vendor profile not found.');
   }
 
   return updated[0];
@@ -166,27 +166,5 @@ export class VendorsService {
       rejected: Number(rejectedRes[0]?.count || 0),
       pending: Number(pendingRes[0]?.count || 0)
     };
-  }
-  // ---------------------------------------------------------
-  // SET STATUS (Focado estritamente na tabela de Vendors/Perfis)
-  // ---------------------------------------------------------
-  async setStatus(
-    vendorId: number, // 🎯 Recebe o ID do perfil enviado pelo curl/painel
-    status: 'approved' | 'pending' | 'rejected',
-  ): Promise<any> {
-    const updated = await this.db
-      .update(vendorProfiles)
-      .set({ 
-        status: status,
-        updatedAt: new Date()
-      })
-      .where(eq(vendorProfiles.id, vendorId))
-      .returning();
-
-    if (!updated.length) {
-      throw new NotFoundException(`Vendor profile with ID ${vendorId} not found`);
-    }
-
-    return updated[0]; // Retorna o perfil atualizado (que contém lá dentro a propriedade .userId)
   }
 }

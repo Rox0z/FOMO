@@ -1,31 +1,4 @@
 <div class="page-shell">
-  <nav class="navbar">
-    <div class="nav-brand">
-      <img src="/fomo-logo.svg" alt="FOMO logo" class="brand-logo" />
-    </div>
-
-    <ul class="nav-links">
-      <li><a href="#discover">Discover</a></li>
-      <li><a href="#events">Events</a></li>
-      <li><a href="#community">Community</a></li>
-    </ul>
-
-    <div class="nav-right">
-      <a [routerLink]="['/login']" [queryParams]="{ mode: 'user' }" class="btn-nav-outline nav-link-btn" *ngIf="!user">Sign in</a>
-      <a [routerLink]="['/login']" [queryParams]="{ mode: 'vendor' }" class="btn-nav-primary nav-link-btn" *ngIf="!user">Promoter</a>
-      
-      <div class="profile-dropdown" *ngIf="user" (click)="toggleMenu()">
-        <span class="user-display-name">{{ user.name || 'User' }}</span>
-      </div>
-    </div>
-
-    <ul class="dropdown-flat" *ngIf="isMenuOpen && user">
-      <li><a routerLink="/user/profile">O meu perfil</a></li>
-      <li><a routerLink="/user/my-tickets">Meus bilhetes</a></li>
-      <li class="divider"></li>
-      <li><button (click)="onLogout()">Sair</button></li>
-    </ul>
-  </nav> 
 
   <section class="hero" id="discover">
     <div class="hero-bg-gradient"></div>
@@ -48,8 +21,8 @@
       </p>
 
       <div class="hero-cta">
-        <button class="btn-primary" (click)="setVibe('All')">Explore events</button>
-        <a routerLink="/about" class="btn-secondary">How it works</a>
+        <button class="btn-primary" (click)="setVibe('Featured')">Explore events</button>
+        <a href="#events" class="btn-secondary">How it works</a>
       </div>
     </div>
   </section>
@@ -88,10 +61,10 @@
         <h2 class="section-title">Trending on FOMO</h2>
         <p class="section-subtitle">Fast-moving events, premium drops and nights you do not want to miss.</p>
       </div>
-      <a class="see-all" href="#events" (click)="activeVibe = 'All'; searchQuery = ''">Reset Filters</a>
+      <a class="see-all" href="#events" (click)="activeVibe = 'Featured'; searchQuery = ''">Reset Filters</a>
     </div>
 
-    <div class="events-grid" *ngIf="filteredEvents.length > 0; else noResults">
+    <div class="events-grid" [class.grid-equal-3]="!featuredEvent" *ngIf="filteredEvents.length > 0; else noResults">
       
       <div class="featured-wrap" *ngIf="featuredEvent as featured">
         <div class="featured-img" [routerLink]="['/event', featured.id]" style="cursor: pointer;">
@@ -116,7 +89,7 @@
               <span class="price">{{ +featured.ticketPrice === 0 ? 'Free' : ('€' + featured.ticketPrice) }}</span>
             </div>
             <button class="btn-buy" (click)="openReservationModal(featured, $event)" [disabled]="getStockLabel(featured) === 'Sold out'">
-              {{ getStockLabel(featured) === 'Sold out' ? 'Sold out' : 'Reserve now' }}
+              {{ getStockLabel(featured) === 'Sold out' ? 'Sold out' : 'Get ticket' }}
             </button>
           </div>
         </div>
@@ -194,10 +167,15 @@
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button class="btn-modal-cancel" (click)="closeReservationModal()" [disabled]="isSubmittingOrder">Cancel</button>
-        <button class="btn-modal-confirm" (click)="confirmReservation()" [disabled]="isSubmittingOrder" style="background: #7c3aed; color: white;">
-          {{ isSubmittingOrder ? 'Processing...' : 'Confirm Order ⚡' }}
+      <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; width: 100%;">
+        <button type="button" class="btn-modal-cancel" (click)="closeReservationModal()" style="margin-right: auto;">
+          Cancel
+        </button>
+        <button type="button" class="btn-modal-cart" (click)="addToCartOnly()" style="background: #efe9fe; color: #7c3aed; padding: 10px 16px; border-radius: 8px; border: 1px solid #ddd; font-weight: 600; cursor: pointer;">
+          Add to Cart 🛒
+        </button>
+        <button type="button" class="btn-modal-confirm" (click)="buyNow()" style="background: #7c3aed; color: white; padding: 10px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer;">
+          Buy Now ⚡
         </button>
       </div>
 

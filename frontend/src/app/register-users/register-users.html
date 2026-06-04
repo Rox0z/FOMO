@@ -10,7 +10,7 @@
     <div class="login-card">
 
       <!-- Logo -->
-      <a routerLink="/home" class="logo-wrap logo-link">
+      <a [routerLink]="['/home']" class="logo-wrap logo-link">
   <svg viewBox="0 0 251.53 51.27" xmlns="http://www.w3.org/2000/svg" class="fomo-logo">
           <path d="M251.53,19.2V0h-22.73v2.5h-1V0h-50.27v51.27h50.27v-2.5h1v2.5h22.73v-19.2c-3.56,0-6.44-2.88-6.44-6.43s2.88-6.44,6.44-6.44ZM213.65,36.62h-21.97V14.65h21.97v21.97ZM228.8,46.67h-1v-5.26h1v5.26ZM228.8,39.31h-1v-5.26h1v5.26ZM228.8,31.95h-1v-5.26h1v5.26ZM228.8,24.59h-1v-5.26h1v5.26ZM228.8,17.22h-1v-5.25h1v5.25ZM228.8,9.86h-1v-5.25h1v5.25Z"/>
           <path d="M125.26,0h-50.27v51.27h50.27V0ZM89.14,36.62V14.65h21.97v21.97h-21.97Z"/>
@@ -22,10 +22,10 @@
 
       <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
 
-        <!-- Nome -->
+        <!-- Name -->
         <div class="input-group">
           <input type="text" name="name" [(ngModel)]="name" required placeholder=" " />
-          <label>Nome</label>
+          <label>Name</label>
         </div>
 
         <!-- Email -->
@@ -34,7 +34,7 @@
           <label>Email</label>
         </div>
 
-        <!-- Telemóvel -->
+        <!-- Phone -->
         <div class="phone-group">
           <div class="phone-select-wrapper">
             <select name="countryCode" [(ngModel)]="countryCode" required>
@@ -46,7 +46,7 @@
           </div>
           <div class="phone-input-wrapper">
             <input type="tel" name="phone" [(ngModel)]="phone" required placeholder=" " />
-            <label>Telemóvel</label>
+            <label>Phone</label>
           </div>
         </div>
 
@@ -82,7 +82,7 @@
             required
             placeholder=" "
           />
-          <label>Confirmar Password</label>
+          <label>Confirm Password</label>
           <span class="toggle-password" (click)="toggleConfirmPassword()">
             <svg *ngIf="!showConfirmPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -101,7 +101,7 @@
 
         <!-- Botão -->
         <button type="submit" [disabled]="registerForm.invalid || isLoading">
-          <span *ngIf="!isLoading">Criar Conta</span>
+          <span *ngIf="!isLoading">Create Account</span>
           <span *ngIf="isLoading" class="btn-spinner">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
@@ -110,8 +110,8 @@
         </button>
 
         <p class="signup-text">
-          Já tens conta?
-          <a routerLink="/login-users" class="register-link">Entrar</a>
+          Already have an account?
+          <a [routerLink]="['/login']" [queryParams]="{ mode: 'user' }" class="register-link">Sign In</a>
         </p>
 
       </form>

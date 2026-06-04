@@ -24,9 +24,8 @@ export class AdminService {
   ) {}
 
   // OVERVIEW (LISTS)
-  // OVERVIEW (LISTS) - Resolvido no Backend com Left Joins Nativos
   async overview() {
-    // 1. Procuramos os eventos trazendo o nome da empresa e a contagem de bilhetes correspondente
+
     const eventsWithDetails = await this.db
       .select({
         id: events.id,
@@ -43,15 +42,13 @@ export class AdminService {
       .from(events)
       .leftJoin(vendorProfiles, eq(events.vendorId, vendorProfiles.id));
 
-    // 3. Cruzamos a contagem para cada um dos eventos da lista
     const eventsListParsed = eventsWithDetails.map(evt => {
       return {
         ...evt,
-        totalTicketsCount: evt.ticketsSold || 0 // Injeta a contagem real na raiz do objeto
+        totalTicketsCount: evt.ticketsSold || 0
       };
     });
 
-    // 4. Executamos a restante busca paralela do teu método original
     const [users, vendors, pendingEdits] = await Promise.all([
       this.usersService.findAll(),
       this.vendorsService.findAll(),
@@ -63,7 +60,7 @@ export class AdminService {
     return {
       users,
       vendors,
-      events: eventsListParsed || [], // Passamos a lista tratada
+      events: eventsListParsed || [], 
       eventEdits: pendingEdits
     };
   }
@@ -93,7 +90,7 @@ export class AdminService {
 
  async approveEvent(id: number, admin: any) {
     const updated = await this.db.update(events).set({ status: 'approved' }).where(eq(events.id, id)).returning();
-    if (!updated.length) throw new NotFoundException('Evento não encontrado');
+    if (!updated.length) throw new NotFoundException('Event not found');
 
     const adminIDentifier = admin?.name || admin?.email || `Undefined Admin`;
     await this.logsService.createLog(`Approved Event ID: ${id} ("${updated[0].name}")`, adminIDentifier);
@@ -108,7 +105,7 @@ export class AdminService {
 
   async rejectEvent(id: number, admin: any) {
     const updated = await this.db.update(events).set({ status: 'rejected' }).where(eq(events.id, id)).returning();
-    if (!updated.length) throw new NotFoundException('Evento não encontrado');
+    if (!updated.length) throw new NotFoundException('Event not found');
 
     const adminIDentifier = admin?.name || admin?.email || `Undefined Admin`;
     await this.logsService.createLog(`Rejected Event ID: ${id} ("${updated[0].name}")`, adminIDentifier);
@@ -122,7 +119,7 @@ export class AdminService {
   }
 
   // -------------------------------------------------------------------------
-  // GESTAO DE VENDORS (Aprova ou rejeita perfis de vendors e ativa/bloqueia login)
+  // Access Control (Altera o active de clientes ou logins de vendors)
   // -------------------------------------------------------------------------
   async approveVendor(id: number, admin: any) {
     const adminIDentifier = admin?.name || admin?.email || `Undefined Admin`;
@@ -135,10 +132,10 @@ export class AdminService {
         .returning();
 
       if (!updatedProfile) {
-        throw new NotFoundException('Perfil de Vendor não encontrado');
+        throw new NotFoundException('Vendor profile not found');
       }
 
-      // Sincronizacao automatica: ativa o login do utilizador na tabela users
+
       await tx
         .update(users)
         .set({ active: true })
@@ -147,12 +144,12 @@ export class AdminService {
       return updatedProfile;
     });
 
-    const nomeEmpresa = profile?.businessName || `ID: ${id}`;
-    await this.logsService.createLog(`Approved the vendor profile "${nomeEmpresa}" and activated user login`, adminIDentifier);
+    const businessName = profile?.businessName || `ID: ${id}`;
+    await this.logsService.createLog(`Approved the vendor profile "${businessName}" and activated user login`, adminIDentifier);
 
     const vendorUser = await this.usersService.findOne(profile.userId);
     if (vendorUser?.email) {
-      this.emailsService.sendVendorStatusNotification(vendorUser.email, vendorUser.name, nomeEmpresa, 'approved');
+      this.emailsService.sendVendorStatusNotification(vendorUser.email, vendorUser.name, businessName, 'approved');
     }
     return profile;
   }
@@ -168,10 +165,9 @@ export class AdminService {
         .returning();
 
       if (!updatedProfile) {
-        throw new NotFoundException('Perfil de Vendor não encontrado');
+        throw new NotFoundException('Vendor profile not found');
       }
 
-      // Sincronizacao automatica: desativa o login do utilizador na tabela users
       await tx
         .update(users)
         .set({ active: false })
@@ -180,31 +176,31 @@ export class AdminService {
       return updatedProfile;
     });
 
-    const nomeEmpresa = profile?.businessName || `ID: ${id}`;
-    await this.logsService.createLog(`Rejected the vendor profile "${nomeEmpresa}" and blocked user login`, adminIDentifier);
+    const businessName = profile?.businessName || `ID: ${id}`;
+    await this.logsService.createLog(`Rejected the vendor profile "${businessName}" and blocked user login`, adminIDentifier);
 
     const vendorUser = await this.usersService.findOne(profile.userId);
     if (vendorUser?.email) {
-      this.emailsService.sendVendorStatusNotification(vendorUser.email, vendorUser.name, nomeEmpresa, 'rejected');
+      this.emailsService.sendVendorStatusNotification(vendorUser.email, vendorUser.name, businessName, 'rejected');
     }
     return profile;
   }
   // -------------------------------------------------------------------------
-  // CONTROLO DE ACESSOS (Altera o active de clientes ou logins de vendors)
+  // Access Control (Altera o active de clientes ou logins de vendors)
   // -------------------------------------------------------------------------
   async banUser(id: number, admin: any) {
     const user = await this.usersService.setActive(id, false);
     const adminIDentifier = admin?.name || admin?.email || `Undefined Admin`;
-    const nomeUtilizador = user?.name || user?.email || `ID: ${id}`;
-    await this.logsService.createLog(`Blocked the access of the user "${nomeUtilizador}"`, adminIDentifier);
+    const userName = user?.name || user?.email || `ID: ${id}`;
+    await this.logsService.createLog(`Blocked the access of the user "${userName}"`, adminIDentifier);
     return user;
   }
 
   async unbanUser(id: number, admin: any) {
     const user = await this.usersService.setActive(id, true);
     const adminIDentifier = admin?.name || admin?.email || `Undefined Admin`;
-    const nomeUtilizador = user?.name || user?.email || `ID: ${id}`;
-    await this.logsService.createLog(`Restored the access of the user "${nomeUtilizador}"`, adminIDentifier);
+    const userName = user?.name || user?.email || `ID: ${id}`;
+    await this.logsService.createLog(`Restored the access of the user "${userName}"`, adminIDentifier);
     return user;
   }
 

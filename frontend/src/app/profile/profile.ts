@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { AuthService } from '../services/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { ToastService } from '../services/toast.service';
+
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -11,6 +12,7 @@ import { ToastService } from '../services/toast.service';
   templateUrl: './profile.html',
   styleUrls: ['./profile.css']
 })
+
 export class ProfileComponent implements OnInit {
   user: any = null;
   isLoading = true;
@@ -18,7 +20,6 @@ export class ProfileComponent implements OnInit {
   profileForm!: FormGroup;
 
 
-  // --- LÓGICA DO DROPDOWN CUSTOMIZADO ---
   isDropdownOpen = false;
   countryOptions = [
     { value: 'PT', label: 'Portugal (+351)' },
@@ -60,13 +61,13 @@ export class ProfileComponent implements OnInit {
 
   toggleEdit(): void {
     this.isEditing = !this.isEditing;
-    this.isDropdownOpen = false; // Fecha o dropdown se cancelar a edição
+    this.isDropdownOpen = false;
     if (!this.isEditing) this.initForm();
   }
 
-  // --- MÉTODOS DO DROPDOWN ---
+
   toggleDropdown(event: Event): void {
-    event.stopPropagation(); // Evita que o HostListener feche instantaneamente
+    event.stopPropagation();
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
@@ -76,17 +77,14 @@ export class ProfileComponent implements OnInit {
   }
 
   getSelectedCountryLabel(): string {
-    if (!this.profileForm) return 'Selecione...';
+    if (!this.profileForm) return 'Select...';
     const code = this.profileForm.get('countryCode')?.value;
     const country = this.countryOptions.find(c => c.value === code);
-    return country ? country.label : 'Selecione...';
+    return country ? country.label : 'Select...';
   }
 
-  // Se clicar em qualquer outro lado da página, fecha o dropdown!
  @HostListener('document:click', ['$event'])
   closeDropdown(event: Event): void {
-    // Se o utilizador clicou no botão de guardar, não fazemos nada aqui,
-    // deixamos a função saveProfile tratar de tudo.
     const target = event.target as HTMLElement;
     if (target.closest('.btn-save')) return; 
 
@@ -94,11 +92,10 @@ export class ProfileComponent implements OnInit {
   }
 
   saveProfile(): void {
-    // Forçamos o fecho do dropdown imediatamente no início da função
     this.isDropdownOpen = false;
 
     if (this.profileForm.invalid) {
-      this.showToast('Verifique os campos.', 'error');
+      this.showToast('Invalid form data.', 'error');
       return;
     }
 
@@ -107,11 +104,11 @@ export class ProfileComponent implements OnInit {
     this.authService.updateProfile(updatedData).subscribe({
       next: (res) => {
         this.isEditing = false;
-        this.showToast('Perfil atualizado!', 'success');
+        this.showToast('Profile updated!', 'success');
         this.user = { ...this.user, ...updatedData };
       },
       error: (err) => {
-        this.showToast('Erro ao guardar.', 'error');
+        this.showToast('Error saving profile.', 'error');
       }
     });
   }

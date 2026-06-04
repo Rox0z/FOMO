@@ -31,7 +31,7 @@ export class RegisterVendors {
     private router: Router,
     private authService: AuthService,
     private toast: ToastService,
-    private cdr: ChangeDetectorRef // Força o Angular a renderizar o Modal imediatamente
+    private cdr: ChangeDetectorRef 
   ) {}
 
   goHome() { 
@@ -48,7 +48,6 @@ export class RegisterVendors {
   }
 
   onSubmit() {
-    // Validate all fields
     if (!this.name || !this.email || !this.phone || !this.password || !this.confirmPassword) {
       this.toast.show('Please fill in all required fields.');
       return;
