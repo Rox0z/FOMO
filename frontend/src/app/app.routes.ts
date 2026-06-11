@@ -12,9 +12,10 @@ import { Tickets } from './tickets/tickets';
 import { EventDetailComponent } from './event-details/event-details';
 import { PaymentComponent } from './payment/payment';
 import { CartComponent } from './cart/cart';
+import { LoggedInGuard } from './services/logged-in.guards';
 
 export const routes: Routes = [
-  { path: 'login', component: Login },
+  { path: 'login', component: Login, canActivate: [LoggedInGuard] },
   { path: 'register-vendors', component: RegisterVendors},
   { path: 'register-users', component: RegisterUsers},
   { path: 'home', component: HomeComponent },

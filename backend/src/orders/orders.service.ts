@@ -63,10 +63,6 @@ export class OrdersService {
           where: and(eq(tickets.userId, userId), eq(tickets.eventId, item.eventId)),
         });
 
-        if (existingTicket) {
-          throw new BadRequestException(`User already has tickets for event "${event.name}".`);
-        }
-
         if (event.ticketsSold + item.quantity > event.maxCapacity) {
           throw new BadRequestException(
             `Insufficient capacity for event "${event.name}". Available: ${event.maxCapacity - event.ticketsSold}, requested: ${item.quantity}.`,
