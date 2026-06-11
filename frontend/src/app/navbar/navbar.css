@@ -88,6 +88,16 @@
   border-color: #1a1a1a;
 }
 
+.admin-login-btn {
+  color: #7c3aed;
+  border-color: rgba(124, 58, 237, 0.35);
+}
+
+.admin-login-btn:hover {
+  border-color: #7c3aed;
+  background: rgba(124, 58, 237, 0.08);
+}
+
 .btn-nav-primary {
   color: #ffffff;
   background: #7c3aed; /* O teu --accent-color */

@@ -62,6 +62,7 @@ http://localhost:3000
 | `/user/my-tickets` | Buyer tickets | Authenticated buyer |
 | `/vendor-dashboard` | Vendor dashboard | Authenticated vendor |
 | `/admin-dashboard` | Admin dashboard | Authenticated admin |
+| `/admin-pannel` | Legacy admin URL, redirects to `/admin-dashboard` | Authenticated admin |
 
 ## Frontend Structure
 

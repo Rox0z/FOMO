@@ -1,5 +1,9 @@
 /* vendors-dashboard.css */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
 
 :host {
   display: block;
@@ -21,13 +25,14 @@
 /* WRAPPER PRINCIPAL */
 .admin-wrapper {
   min-height: 100vh;
-  width: 100vw;
+  width: 100%;
+  max-width: 100vw;
   display: flex;
   position: relative;
   overflow-x: hidden;
   background: var(--bg-primary);
   color: var(--text-main);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
 }
 
 /* INTERFACE AMBIENTE (ORBS DE LUZ DO ADMIN) */
@@ -218,16 +223,32 @@
 
 /* ÁREA DE CONTEÚDO PRINCIPAL */
 .main-content {
-  flex: 1;
-  padding: 3.5rem 4rem;
+  flex: 0 0 calc(100% - var(--sidebar-width));
+  width: calc(100% - var(--sidebar-width));
+  min-width: 0;
+  padding: 3.5rem clamp(1.5rem, 4vw, 4rem);
   margin-left: var(--sidebar-width);
   z-index: 10;
   overflow-y: auto;
+  overflow-x: hidden;
   transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .sidebar-collapsed .main-content {
   margin-left: var(--sidebar-collapsed-width);
+  flex-basis: calc(100% - var(--sidebar-collapsed-width));
+  width: calc(100% - var(--sidebar-collapsed-width));
+}
+
+.tab-container {
+  width: 100%;
+  max-width: 1180px;
+  min-width: 0;
+}
+
+.content-narrow,
+.max-w-xl {
+  max-width: 760px;
 }
 
 /* GLASSMORPHISM - PAINÉIS */
@@ -236,7 +257,7 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
-  border-radius: 24px;
+  border-radius: 18px;
   transition: border-color 0.2s;
 }
 .card-glass:hover {
@@ -248,17 +269,20 @@
   margin-bottom: 2.5rem;
 }
 .page-title {
-  font-size: 2.25rem;
+  font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   background: linear-gradient(180deg, #ffffff 30%, #a1a1aa 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  overflow-wrap: anywhere;
 }
 .page-subtitle {
   color: var(--text-muted);
   margin-top: 0.5rem;
   font-size: 1.05rem;
+  line-height: 1.55;
+  max-width: 620px;
 }
 
 /* SEÇÃO DE MÉTRICAS */
@@ -379,12 +403,17 @@
 .badge-danger { background: rgba(239, 68, 68, 0.08); color: #f87171; border-color: rgba(239, 68, 68, 0.15); }
 
 /* LAYOUT DE FORMULÁRIOS INTERNOS */
-.form-container { padding: 2.25rem; }
+.form-container {
+  width: 100%;
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+}
 .custom-form-layout { display: flex; flex-direction: column; gap: 1.5rem; }
-.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-row-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+.form-group { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .form-label { font-size: 0.88rem; font-weight: 600; color: #e4e4e7; letter-spacing: -0.01em; }
 .form-input {
+  width: 100%;
+  min-width: 0;
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--glass-border);
   border-radius: 12px;
@@ -399,6 +428,42 @@
   background: rgba(0, 0, 0, 0.4);
 }
 .text-area-fixed { resize: none; }
+
+.profile-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.profile-meta-card {
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.profile-meta-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.profile-meta-value {
+  display: block;
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.soft-divider {
+  border: 0;
+  border-top: 1px solid var(--glass-border);
+  margin: 1.5rem 0;
+}
 
 /* FIX DE ESPAÇAMENTO DO CABEÇALHO DE EDIÇÃO */
 .form-header {
@@ -493,3 +558,35 @@
 /* ANIMAÇÃO FADE IN */
 .animate-fade-in { animation: fadeIn 0.35s ease forwards; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed;
+    width: var(--sidebar-collapsed-width);
+  }
+
+  .brand-text,
+  .nav-text {
+    display: none;
+  }
+
+  .sidebar-brand,
+  .sidebar-nav button,
+  .btn-logout {
+    justify-content: center;
+  }
+
+  .main-content,
+  .sidebar-collapsed .main-content {
+    margin-left: var(--sidebar-collapsed-width);
+    flex-basis: calc(100% - var(--sidebar-collapsed-width));
+    width: calc(100% - var(--sidebar-collapsed-width));
+    padding: 2rem 1rem;
+  }
+
+  .metrics-grid,
+  .form-row-2,
+  .profile-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -11,6 +11,7 @@ const HIDDEN_NAVBAR_ROUTES = [
   '/register-vendors',
   '/vendor-dashboard',
   '/admin-dashboard',
+  '/admin-pannel',
   '/payment', 
 ];
 

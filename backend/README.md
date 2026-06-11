@@ -49,6 +49,13 @@ Required for local core functionality:
 - `DATABASE_URL`
 - `JWT_SECRET`
 
+When the backend runs inside Docker Compose, use the database service name from
+the root `docker-compose.yml` instead of `localhost`:
+
+```env
+DATABASE_URL="postgresql://fomo:1234@postgres-db:5432/fomo"
+```
+
 Optional integrations:
 
 - `IMGBB_API_KEY`
