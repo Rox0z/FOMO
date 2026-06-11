@@ -130,10 +130,7 @@ export class VendorsDashboard implements OnInit {
     formData.append('name', eventData.name);
     formData.append('description', eventData.description);
     formData.append('location', eventData.location);
-    const combinedDate = eventData.date && eventData.time
-      ? `${eventData.date}T${eventData.time}:00`
-      : `${eventData.date}T00:00:00`;
-    formData.append('date', combinedDate);
+    formData.append('date', eventData.date);
     formData.append('time', eventData.time);
     formData.append('price', String(eventData.price));
     formData.append('maxCapacity', String(eventData.maxCapacity));
@@ -163,10 +160,7 @@ export class VendorsDashboard implements OnInit {
     formData.append('name', updatedData.name);
     formData.append('description', updatedData.description);
     formData.append('location', updatedData.location);
-    const combinedDate = updatedData.date && updatedData.time
-      ? `${updatedData.date}T${updatedData.time}:00`
-      : `${updatedData.date}T00:00:00`;
-    formData.append('date', combinedDate);
+    formData.append('date', updatedData.date);
     formData.append('time', updatedData.time);
     formData.append('price', String(updatedData.price));
     formData.append('maxCapacity', String(updatedData.maxCapacity));

@@ -17,10 +17,9 @@ export class LoggedInGuard implements CanActivate {
       map(user => {
         if (!user) return true;
 
-        // redirect inteligente
         switch (user.role) {
           case 'admin':
-            this.router.navigate(['/admin-pannel']);
+            this.router.navigate(['/admin-dashboard']);
             break;
 
           case 'vendor':
