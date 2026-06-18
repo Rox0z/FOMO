@@ -290,8 +290,8 @@
 
     <div *ngIf="activeTab === 'create'" class="tab-container max-w-xl animate-fade-in">
       <div class="page-header">
-        <h1 class="page-title">New Commercial Release</h1>
-        <p class="page-subtitle">Register your event into the FOMO global sales infrastructure.</p>
+        <h1 class="page-title">Create Event</h1>
+        <p class="page-subtitle">Submit a new FOMO event for admin approval.</p>
       </div>
       
       <div class="card-glass form-container">
@@ -345,42 +345,42 @@
           </div>
 
           <button type="submit" [disabled]="!createForm.valid" class="btn-primary btn-block">
-            Publish and Request Activation
+            Submit for Approval
           </button>
         </form>
       </div>
     </div>
 
-    <div *ngIf="activeTab === 'profile'" class="tab-container max-w-xl animate-fade-in">
+    <div *ngIf="activeTab === 'profile'" class="tab-container content-narrow animate-fade-in">
       <div class="page-header">
         <h1 class="page-title">Profile Metadata</h1>
         <p class="page-subtitle">Manage your company's visual and corporate metadata assets.</p>
       </div>
       
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <div class="card-glass p-4 rounded-xl bg-white/[0.02]">
-          <span class="text-[10px] text-gray-400 font-bold uppercase block mb-1">Contact Phone</span>
-          <span class="text-sm font-medium text-white">{{ vendorData?.phone || 'Not defined' }}</span>
+      <div class="profile-meta-grid">
+        <div class="card-glass profile-meta-card">
+          <span class="profile-meta-label">Contact Phone</span>
+          <span class="profile-meta-value">{{ vendorData?.phone || 'Not defined' }}</span>
         </div>
-        <div class="card-glass p-4 rounded-xl bg-white/[0.02]">
-          <span class="text-[10px] text-gray-400 font-bold uppercase block mb-1">Corporate Email Address</span>
-          <span class="text-sm font-medium text-white">{{ vendorData?.email || 'N/A' }}</span>
+        <div class="card-glass profile-meta-card">
+          <span class="profile-meta-label">Corporate Email Address</span>
+          <span class="profile-meta-value">{{ vendorData?.email || 'N/A' }}</span>
         </div>
-        <div class="card-glass p-4 rounded-xl bg-white/[0.02]">
-          <span class="text-[10px] text-gray-400 font-bold uppercase block mb-1">Registration Date</span>
-          <span class="text-sm font-medium text-white">
+        <div class="card-glass profile-meta-card">
+          <span class="profile-meta-label">Registration Date</span>
+          <span class="profile-meta-value">
             {{ vendorData?.createdAt ? (vendorData.createdAt | date:'dd/MM/yyyy HH:mm') : 'N/A' }}
           </span>
         </div>
-        <div class="card-glass p-4 rounded-xl bg-white/[0.02]">
-          <span class="text-[10px] text-gray-400 font-bold uppercase block mb-1">Last Meta Record Update</span>
-          <span class="text-sm font-medium text-white">
+        <div class="card-glass profile-meta-card">
+          <span class="profile-meta-label">Last Meta Record Update</span>
+          <span class="profile-meta-value">
             {{ vendorData?.updatedAt ? (vendorData.updatedAt | date:'dd/MM/yyyy HH:mm') : 'N/A' }}
           </span>
         </div>
       </div>
 
-      <hr class="border-white/5 my-5">
+      <hr class="soft-divider">
 
       <div class="card-glass form-container">
         <form #profileForm="ngForm" (ngSubmit)="updateProfile(profileForm.value)" class="custom-form-layout">

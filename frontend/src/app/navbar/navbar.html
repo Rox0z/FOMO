@@ -5,6 +5,7 @@
 
   <div class="nav-right">
     <a [routerLink]="['/login']" [queryParams]="{ mode: 'user' }" class="btn-nav-outline nav-link-btn" *ngIf="!user">Sign in</a>
+    <a [routerLink]="['/login']" [queryParams]="{ mode: 'admin' }" class="btn-nav-outline nav-link-btn admin-login-btn" *ngIf="!user">Admin Login</a>
     <a [routerLink]="['/login']" [queryParams]="{ mode: 'vendor' }" class="btn-nav-primary nav-link-btn" *ngIf="!user">Promoter</a>
 
     <a routerLink="/cart" class="nav-cart-btn" title="View Cart" *ngIf="user">

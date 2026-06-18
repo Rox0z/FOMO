@@ -29,6 +29,7 @@ export const routes: Routes = [
   },
   { path: 'vendor-dashboard', component: VendorsDashboard, canActivate: [AuthGuard, RoleGuard], data: { roles: ['vendor'] },},
   { path: 'admin-dashboard', component: AdminDashboard, canActivate: [AuthGuard, RoleGuard], data: { roles: ['admin'] },},
+  { path: 'admin-pannel', redirectTo: 'admin-dashboard', pathMatch: 'full' },
   { path: 'payment', component: PaymentComponent, canActivate: [AuthGuard, RoleGuard], data: { roles: ['user'] },},
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' }
